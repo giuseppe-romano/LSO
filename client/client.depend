@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1576845363 source:/home/peppe/UNINA/LSO/client/main.c
+	<stdio.h>
+	<stdlib.h>
+
