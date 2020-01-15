@@ -1,6 +1,8 @@
 #ifndef GAME_HEADERFILE_INCLUDED
 #define GAME_HEADERFILE_INCLUDED
 
+#include "draw.h"
+
 #define ERR_CELL_BUSY 1
 #define ERR_PLAYER_NOT_FOUND 2
 #define ERR_INVALID_DIRECTION 3
@@ -13,23 +15,6 @@
 #define MOVE_DOWN 12
 #define MOVE_LEFT 13
 
-typedef struct cell {
-    int x;
-    int y;
-    char symbol;
-    char *color;
-} Cell;
-
-typedef struct game {
-    int rows;
-    int cols;
-
-    Cell *bombCells;
-    int numBombs;
-
-    Cell *playerCells;
-    int numPlayers;
-} Game;
 
 Game* generateNewGame();
 

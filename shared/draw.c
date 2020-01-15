@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../../include/draw.h"
+#include "draw.h"
 
 void drawCell(Cell *cell) {
     printf("|");
@@ -11,7 +11,7 @@ void drawCell(Cell *cell) {
     }
     else {
         printf("%s", cell->color);
-        printf(" %c ", cell->symbol);
+        printf(" %s ", cell->symbol);
     }
     printf("\033[0m");
 }
@@ -50,7 +50,10 @@ void drawMineField(Game *game) {
         }
         printf("\n\t\t\t");
         for(j = 0; j < game->cols; j++) {
-            Cell *cell = getCellAt(game->bombCells, game->numBombs, j, i);
+            Cell *cell = NULL;
+            if(game->bombCells) {
+                cell = getCellAt(game->bombCells, game->numBombs, j, i);
+            }
             if(cell == NULL) {
                 cell = getCellAt(game->playerCells, game->numPlayers, j, i);
             }

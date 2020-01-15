@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1578503015 source:/home/peppe/UNINA/LSO/server/src/draw/draw.c
+1579089711 source:/home/peppe/UNINA/LSO/server/src/draw/draw.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
@@ -8,16 +8,17 @@
 1578416028 /home/peppe/UNINA/LSO/server/include/draw.h
 	"game.h"
 
-1578588687 /home/peppe/UNINA/LSO/server/include/game.h
+1579100865 /home/peppe/UNINA/LSO/server/include/game.h
+	"draw.h"
 
-1578562374 source:/home/peppe/UNINA/LSO/server/src/game/game.c
+1579102070 source:/home/peppe/UNINA/LSO/server/src/game/game.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
 	<string.h>
 	"../../include/game.h"
 
-1578591872 source:/home/peppe/UNINA/LSO/server/src/main.c
+1579105178 source:/home/peppe/UNINA/LSO/server/src/main.c
 	<stdio.h>
 	<stdlib.h>
 	<sys/socket.h>
@@ -27,17 +28,28 @@
 	<fcntl.h>
 	<unistd.h>
 	<pthread.h>
-	"../include/draw.h"
+	"draw.h"
+	"serial.h"
 	"../include/game.h"
 	"../include/protocol.h"
 
-1578589383 /home/peppe/UNINA/LSO/server/include/protocol.h
+1579104120 /home/peppe/UNINA/LSO/server/include/protocol.h
 	"game.h"
 
-1578591823 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
+1579098040 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<sys/socket.h>
 	"../../include/protocol.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/include/draw.h
+	"serial.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/include/serial.h
+
+1579098631 /home/peppe/UNINA/LSO/shared/draw.h
+	"serial.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/serial.h
 

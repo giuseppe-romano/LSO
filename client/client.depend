@@ -9,3 +9,25 @@
 	<fcntl.h>
 	<unistd.h>
 
+1579104900 source:/home/peppe/UNINA/LSO/client/src/main.c
+	<stdio.h>
+	<sys/socket.h>
+	<netinet/in.h>
+	<string.h>
+	<arpa/inet.h>
+	<stdlib.h>
+	<fcntl.h>
+	<unistd.h>
+	"draw.h"
+	"serial.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/include/draw.h
+	"serial.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/include/serial.h
+
+1579098631 /home/peppe/UNINA/LSO/shared/draw.h
+	"serial.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/serial.h
+

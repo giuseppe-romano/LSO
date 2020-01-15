@@ -1,0 +1,18 @@
+# depslib dependency file v1.0
+1579099168 source:/home/peppe/UNINA/LSO/shared/draw/draw.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	"../include/draw.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/include/draw.h
+	"serial.h"
+
+1579098631 /home/peppe/UNINA/LSO/shared/include/serial.h
+
+1579099348 source:/home/peppe/UNINA/LSO/shared/serial/serial.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"../include/serial.h"
+

@@ -8,7 +8,8 @@
 #include <unistd.h> // for close
 #include <pthread.h>
 
-#include "../include/draw.h"
+#include "draw.h"
+#include "serial.h"
 #include "../include/game.h"
 #include "../include/protocol.h"
 
@@ -24,10 +25,28 @@ void * socketThread(void *arg)
     char client_message[2000];
     char buffer[1024];
 
+    Game *game = generateNewGame();
+    int j;
+    int err;
+    for(j = 0; j < 20; j++)
+    {
+        Cell tmp;
+        tmp.x = 1;
+        tmp.y = j;
+        tmp.symbol = "A";
+        tmp.color = "\033[1;32m";
+        if((err = addPlayer(game, tmp)) != 0)
+        {
+            printf("addPlayer error %d \n", err);
+        }
+    }
+
+    int counter = 0;
+
     int newSocket = *((int *)arg);
+    int clients[1] = {newSocket};
     while(1)
     {
-
 
         recv(newSocket, client_message, 2000, 0);
         printf("Data received: %s\n", client_message);
@@ -44,23 +63,33 @@ void * socketThread(void *arg)
         sleep(1);
         //send(newSocket,buffer,13,0);
 
-        Game *game = generateNewGame();
-        int err;
-        int j;
-        for(j = 0; j < 40; j++)
+        Cell cell = game->playerCells[counter];
+        if((err = movePlayer(game, cell, MOVE_RIGHT)) != 0)
         {
-            Cell tmp;
-            tmp.x = game->cols - 1;
-            tmp.y = j;
-            tmp.symbol = 'G';
-            tmp.color = "\033[1;32m";
-            if((err = addPlayer(game, tmp)) != 0)
-            {
-                printf("Location busy %d \n", err);
-            }
+            printf("movePlayer error %d \n", err);
         }
-        int clients[1] = {newSocket};
-        sendNewGame(clients, game);
+
+        counter++;
+        if(counter >= 20) {
+            counter = 0;
+        }
+
+/*
+        for(j = 0; j < game->numPlayers; j++)
+        {
+            Cell cell = game->playerCells[j];
+            if((err = movePlayer(game, cell, MOVE_RIGHT)) != 0)
+            {
+                printf("movePlayer error %d \n", err);
+            }
+
+            sendNewGame(clients, game);
+            sleep(1);
+        }
+*/
+sleep(1);
+        sendNewGame(clients, 1, game);
+        sleep(1);
     }
     printf("Exit socketThread \n");
     close(newSocket);
@@ -70,8 +99,33 @@ void * socketThread(void *arg)
 int main()
 {
     Game *game = generateNewGame();
+
+    int err;
+  Cell tmp;
+  tmp.x = game->cols - 1;
+  tmp.y = 12;
+  tmp.symbol = "G";
+  tmp.color = "RED";
+  if((err = addPlayer(game, tmp)) != 0) {
+      printf("Location busy %d \n", err);
+  }
+
+  tmp.x = game->cols - 5;
+  tmp.y = 23;
+  tmp.symbol = "H";
+  tmp.color = "GREEN";
+  if((err = addPlayer(game, tmp)) != 0) {
+      printf("Location busy %d \n", err);
+  }
+
     char* s = serializeGame(game);
+    printf("serializeGame 1 %s\n", s);
     deserializeGame(s);
+    s = serializeGame(game);
+    printf("serializeGame 2 %s\n", s);
+    deserializeGame(s);
+    s = serializeGame(game);
+    printf("serializeGame 3 %s\n", s);
 
 
     int serverSocket, newSocket;
@@ -97,8 +151,8 @@ int main()
     else
         printf("Error\n");
 
-    char buffer[1024];
-    char message[1000];
+  //  char buffer[1024];
+    //char message[1000];
     pthread_t tid[60];
     int i = 0;
     while(1)

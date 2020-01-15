@@ -6,6 +6,10 @@
 #include <stdlib.h>
 #include <fcntl.h> // for open
 #include <unistd.h> // for close
+
+#include "draw.h"
+#include "serial.h"
+
 //#include <pthread.h>
 /*
 void * clientThread(void *arg)
@@ -82,7 +86,13 @@ int main(){
            printf("Receive failed\n");
         }
         //Print the received message
-        printf("Data received: %s\n",buffer);
+        printf("Data received: %s\n", buffer);
+
+        Game *game = deserializeGame(buffer);
+    //    char *s = serializeGame(game);
+
+        drawScreen(game);
+        sleep(1);
     }
     close(clientSocket);
  //   pthread_exit(NULL);

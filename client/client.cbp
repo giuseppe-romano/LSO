@@ -13,10 +13,10 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="../shared" />
 				</Compiler>
 				<Linker>
-					<Add library="socket" />
-					<Add library="nsl" />
+					<Add library="../shared/bin/Debug/libshared.a" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -35,7 +35,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.c">
+		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>

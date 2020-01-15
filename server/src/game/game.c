@@ -25,7 +25,7 @@ void deployRandomBombs(Game *game) {
         int x = rand() % game->cols;
         b->x = x == 0 ? x + 1 : ((x == game->cols - 1) ? x - 1 : x);
         b->y = rand() % game->rows;
-        b->symbol = 'X';
+        b->symbol = "X";
         b->color = "\033[1;31m";
 
         game->bombCells[j] = *b;
@@ -113,7 +113,7 @@ int movePlayer(Game* game, Cell player, int direction) {
 
     switch(direction) {
         case MOVE_UP :
-            if(game->playerCells[index].y <= 0) {
+            if(game->playerCells[index].y < 0) {
                 return ERR_POSITION_OUT_OF_BOUND;
             }
             game->playerCells[index].y--;
@@ -131,7 +131,7 @@ int movePlayer(Game* game, Cell player, int direction) {
             game->playerCells[index].y++;
             break;
         case MOVE_LEFT :
-            if(game->playerCells[index].x <= 0) {
+            if(game->playerCells[index].x < 0) {
                 return ERR_POSITION_OUT_OF_BOUND;
             }
             game->playerCells[index].x--;
