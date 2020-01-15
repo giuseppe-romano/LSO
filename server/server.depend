@@ -1,6 +1,43 @@
 # depslib dependency file v1.0
-1576845272 source:/home/peppe/UNINA/LSO/server/main.c
+1578503015 source:/home/peppe/UNINA/LSO/server/src/draw/draw.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
+	"../../include/draw.h"
+
+1578416028 /home/peppe/UNINA/LSO/server/include/draw.h
+	"game.h"
+
+1578588687 /home/peppe/UNINA/LSO/server/include/game.h
+
+1578562374 source:/home/peppe/UNINA/LSO/server/src/game/game.c
+	<stdio.h>
+	<stdlib.h>
+	<time.h>
+	<string.h>
+	"../../include/game.h"
+
+1578591872 source:/home/peppe/UNINA/LSO/server/src/main.c
+	<stdio.h>
+	<stdlib.h>
+	<sys/socket.h>
+	<netinet/in.h>
+	<string.h>
+	<arpa/inet.h>
+	<fcntl.h>
+	<unistd.h>
+	<pthread.h>
+	"../include/draw.h"
+	"../include/game.h"
+	"../include/protocol.h"
+
+1578589383 /home/peppe/UNINA/LSO/server/include/protocol.h
+	"game.h"
+
+1578591823 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<sys/socket.h>
+	"../../include/protocol.h"
 

@@ -1,5 +1,11 @@
 # depslib dependency file v1.0
-1576845363 source:/home/peppe/UNINA/LSO/client/main.c
+1578581728 source:/home/peppe/UNINA/LSO/client/main.c
 	<stdio.h>
+	<sys/socket.h>
+	<netinet/in.h>
+	<string.h>
+	<arpa/inet.h>
 	<stdlib.h>
+	<fcntl.h>
+	<unistd.h>
 

@@ -14,6 +14,11 @@
 				<Compiler>
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add library="pthread" />
+					<Add library="socket" />
+					<Add library="nsl" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/server" prefix_auto="1" extension_auto="1" />
@@ -31,7 +36,15 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="main.c">
+		<Unit filename="include/draw.h" />
+		<Unit filename="include/game.h" />
+		<Unit filename="src/draw/draw.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/game/game.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>
