@@ -17,24 +17,25 @@
 #define PORT 8080
 #define SA struct sockaddr
 
-pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 /* S E R V E R */
 
 void * socketThread(void *arg)
 {
     char client_message[2000];
-    char buffer[1024];
+ //   char buffer[1024];
 
     Game *game = generateNewGame();
     int j;
     int err;
-    for(j = 0; j < 20; j++)
+    for(j = 0; j < 2; j++)
     {
         Cell tmp;
         tmp.x = 1;
         tmp.y = j;
         tmp.symbol = "A";
         tmp.color = "\033[1;32m";
+        tmp.user = "romagiu";
         if((err = addPlayer(game, tmp)) != 0)
         {
             printf("addPlayer error %d \n", err);
@@ -45,22 +46,25 @@ void * socketThread(void *arg)
 
     int newSocket = *((int *)arg);
     int clients[1] = {newSocket};
+
+    recv(newSocket, client_message, 2000, 0);
+    printf("Data received: %s\n", client_message);
+
+    // Send message to the client socket
+    //  pthread_mutex_lock(&lock);
+ /*   char *message = malloc(sizeof(client_message)+20);
+    strcpy(message,"Hello Client : ");
+    strcat(message,client_message);
+    strcat(message,"\n");
+    strcpy(buffer,message);
+    free(message);
+ //   pthread_mutex_unlock(&lock);
+    sleep(1);*/
+
+
     while(1)
     {
 
-        recv(newSocket, client_message, 2000, 0);
-        printf("Data received: %s\n", client_message);
-
-        // Send message to the client socket
-        //  pthread_mutex_lock(&lock);
-        char *message = malloc(sizeof(client_message)+20);
-        strcpy(message,"Hello Client : ");
-        strcat(message,client_message);
-        strcat(message,"\n");
-        strcpy(buffer,message);
-        free(message);
-        pthread_mutex_unlock(&lock);
-        sleep(1);
         //send(newSocket,buffer,13,0);
 
         Cell cell = game->playerCells[counter];
@@ -70,7 +74,7 @@ void * socketThread(void *arg)
         }
 
         counter++;
-        if(counter >= 20) {
+        if(counter >= 2) {
             counter = 0;
         }
 
@@ -87,9 +91,10 @@ void * socketThread(void *arg)
             sleep(1);
         }
 */
-sleep(1);
+
+        sleep(2);
         sendNewGame(clients, 1, game);
-        sleep(1);
+     //   sleep(1);
     }
     printf("Exit socketThread \n");
     close(newSocket);
@@ -106,6 +111,7 @@ int main()
   tmp.y = 12;
   tmp.symbol = "G";
   tmp.color = "RED";
+  tmp.user = "romagiu";
   if((err = addPlayer(game, tmp)) != 0) {
       printf("Location busy %d \n", err);
   }
@@ -114,6 +120,7 @@ int main()
   tmp.y = 23;
   tmp.symbol = "H";
   tmp.color = "GREEN";
+  tmp.user = "gigino";
   if((err = addPlayer(game, tmp)) != 0) {
       printf("Location busy %d \n", err);
   }
@@ -146,7 +153,7 @@ int main()
     //Bind the address struct to the socket
     bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
     //Listen on the socket, with 40 max connection requests queued
-    if(listen(serverSocket,50)==0)
+    if(listen(serverSocket, 50)==0)
         printf("Listening\n");
     else
         printf("Error\n");

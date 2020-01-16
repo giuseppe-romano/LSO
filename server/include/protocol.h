@@ -5,6 +5,6 @@
 
 void sendNewGame(int clientSockets[], int numClients, Game *game);
 
-int sendPlayerHitBomb(int socket, Cell *player);
+void sendPlayerHitBomb(int clientSockets[], int numClients, char *userHitBomb);
 
 #endif

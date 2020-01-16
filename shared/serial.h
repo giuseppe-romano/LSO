@@ -6,6 +6,7 @@ typedef struct cell {
     int y;
     char *symbol;
     char *color;
+    char *user;
 } Cell;
 
 typedef struct game {

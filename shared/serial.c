@@ -10,6 +10,7 @@
 #define X_TOKEN "x="
 #define Y_TOKEN "y="
 #define SYMBOL_TOKEN "symbol="
+#define USER_TOKEN "user="
 #define COLOR_TOKEN "color="
 
 int strStartWith(char *string, char *prefix)
@@ -71,6 +72,9 @@ Cell* getCellValue(char *string, char *prefix)
         else if(strStartWith(token, SYMBOL_TOKEN)) {
             cell->symbol = getStringValue(token, SYMBOL_TOKEN);
         }
+        else if(strStartWith(token, USER_TOKEN)) {
+            cell->user = getStringValue(token, USER_TOKEN);
+        }
         else if(strStartWith(token, COLOR_TOKEN)) {
             cell->color = getStringValue(token, COLOR_TOKEN);
         }
@@ -107,7 +111,12 @@ char* serializeGame(Game *game)
     for( j = 0 ; j < game->numPlayers; j++ ) {
         strcat(message, PLAYER_CELL_TOKEN);
 
-        sprintf(buffer, "{x=%d,y=%d,symbol=%s,color=%s,}", game->playerCells[j].x, game->playerCells[j].y, game->playerCells[j].symbol, game->playerCells[j].color);
+        sprintf(buffer, "{x=%d,y=%d,symbol=%s,color=%s,user=%s,}",
+            game->playerCells[j].x,
+            game->playerCells[j].y,
+            game->playerCells[j].symbol,
+            game->playerCells[j].color,
+            game->playerCells[j].user);
         strcat(message, buffer);
 
         if(j < game->numPlayers - 1) {

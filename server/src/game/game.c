@@ -119,13 +119,13 @@ int movePlayer(Game* game, Cell player, int direction) {
             game->playerCells[index].y--;
             break;
         case MOVE_RIGHT :
-            if(game->playerCells[index].x >= game->cols - 1) {
+            if(game->playerCells[index].x > game->cols - 1) {
                 return ERR_POSITION_OUT_OF_BOUND;
             }
             game->playerCells[index].x++;
             break;
         case MOVE_DOWN :
-            if(game->playerCells[index].y >= game->rows - 1) {
+            if(game->playerCells[index].y > game->rows - 1) {
                 return ERR_POSITION_OUT_OF_BOUND;
             }
             game->playerCells[index].y++;
@@ -140,10 +140,14 @@ int movePlayer(Game* game, Cell player, int direction) {
             return ERR_INVALID_DIRECTION;
    }
 
-   //Now checks if the player hits the bomb
-   if(hasBombAt(game, game->playerCells[index].x, game->playerCells[index].y)) {
+    //Now checks if the player hits the bomb
+    if(hasBombAt(game, game->playerCells[index].x, game->playerCells[index].y)) {
        return ERR_PLAYER_HIT_BOMB;
-   }
+    }
+    //In this case the user won the game
+    else if(game->playerCells[index].x == game->cols - 1) {
+        return ERR_USER_WIN_GAME;
+    }
 
    return 0;
 }

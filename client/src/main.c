@@ -73,25 +73,27 @@ int main(){
 
     while(1)
     {
-    connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
-    strcpy(message,"Hello Server");
+        connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+        strcpy(message,"Hello Server");
+
         if( send(clientSocket , message , strlen(message) , 0) < 0)
         {
             printf("Send failed\n");
         }
-
+        memset(buffer, '\0', 1024);
         //Read the message from the server into the buffer
         if(recv(clientSocket, buffer, 1024, 0) < 0)
         {
            printf("Receive failed\n");
         }
         //Print the received message
-        printf("Data received: %s\n", buffer);
+        printf("Data received: %s\n\n", buffer);
 
         Game *game = deserializeGame(buffer);
-    //    char *s = serializeGame(game);
+        char *s = serializeGame(game);
+        printf("Deserialized game: %s\n\n\n", s);
 
-        drawScreen(game);
+    //    drawScreen(game);
         sleep(1);
     }
     close(clientSocket);
