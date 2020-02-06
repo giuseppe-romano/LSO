@@ -70,22 +70,24 @@ int main(){
     //Connect the socket to the server using the address
     addr_size = sizeof(serverAddr);
 
-
+printf("In thread 2\n");
     while(1)
     {
         connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
         strcpy(message,"Hello Server");
-
+printf("In thread 3\n");
         if( send(clientSocket , message , strlen(message) , 0) < 0)
         {
             printf("Send failed\n");
         }
         memset(buffer, '\0', 1024);
+        printf("In thread 4\n");
         //Read the message from the server into the buffer
         if(recv(clientSocket, buffer, 1024, 0) < 0)
         {
            printf("Receive failed\n");
         }
+        printf("In thread 5\n");
         //Print the received message
         printf("Data received: %s\n\n", buffer);
 
@@ -93,10 +95,12 @@ int main(){
         char *s = serializeGame(game);
         printf("Deserialized game: %s\n\n\n", s);
 
-    //    drawScreen(game);
+        drawScreen(game);
         sleep(1);
     }
     close(clientSocket);
  //   pthread_exit(NULL);
+ printf("morto");
+
   return 0;
 }

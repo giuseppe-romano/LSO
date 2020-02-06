@@ -94,23 +94,55 @@ void * socketThread(void *arg)
 
         sleep(2);
         sendNewGame(clients, 1, game);
-     //   sleep(1);
+            drawScreen(game);
+
+        sleep(1);
     }
     printf("Exit socketThread \n");
     close(newSocket);
     pthread_exit(NULL);
 }
 
+int showMainMenu()
+{
+   int choice;
+
+   printf( "MAIN MENU\n");
+   printf( "\t1 - Start a New Game\n");
+   printf( "\t2 - List connected players\n");
+   printf( "\t9 - Exit program\n");
+
+   scanf("%d", &choice);
+
+   switch(choice)
+   {
+        case 1:
+            printf("uno");
+            break;
+
+        case 2:
+            printf("due");
+            break;
+
+        case 9:
+            exit(EXIT_SUCCESS);
+            break;
+   }
+
+
+   return choice;
+}
+
 int main()
 {
-    Game *game = generateNewGame();
-
+ //   Game *game = generateNewGame();
+/*
     int err;
   Cell tmp;
   tmp.x = game->cols - 1;
   tmp.y = 12;
   tmp.symbol = "G";
-  tmp.color = "RED";
+  tmp.color = "\033[1;32m";
   tmp.user = "romagiu";
   if((err = addPlayer(game, tmp)) != 0) {
       printf("Location busy %d \n", err);
@@ -119,12 +151,12 @@ int main()
   tmp.x = game->cols - 5;
   tmp.y = 23;
   tmp.symbol = "H";
-  tmp.color = "GREEN";
+  tmp.color = "\033[1;32m";
   tmp.user = "gigino";
   if((err = addPlayer(game, tmp)) != 0) {
       printf("Location busy %d \n", err);
-  }
-
+  }*/
+/*
     char* s = serializeGame(game);
     printf("serializeGame 1 %s\n", s);
     deserializeGame(s);
@@ -133,6 +165,8 @@ int main()
     deserializeGame(s);
     s = serializeGame(game);
     printf("serializeGame 3 %s\n", s);
+*/
+
 
 
     int serverSocket, newSocket;
