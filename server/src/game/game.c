@@ -7,6 +7,8 @@
 #define NUM_ROWS 20
 #define NUM_COLS 30
 
+Game *currentGame = NULL;
+
 void deployRandomBombs(Game *game) {
 
     /* Intializes random number generator */
@@ -45,7 +47,17 @@ Game* generateNewGame() {
 
     deployRandomBombs(game);
 
+    if(currentGame != NULL)
+    {
+        free(currentGame);
+    }
+
+    currentGame = game;
     return game;
+}
+
+Game* getCurrentGame() {
+    return currentGame;
 }
 
 int indexOfPlayer(Game* game, Cell player) {

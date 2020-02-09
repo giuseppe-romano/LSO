@@ -20,6 +20,7 @@ protocol.o:
 	$(CC) -Wall -g -I../shared -c src/protocol/protocol.c -o build/protocol.o
 
 server: shared.so protocol.o game.o
-	$(CC) -Lbuild/ -Wall -g -I../shared -c src/main.c -lshared -o build/server.o
-	g++  -o server build/server.o build/libshared.so
+	$(CC) -Lbuild/ -Wall -g -I../shared -Iinclude -lshared -lpthread -o build/server.o -c src/main.c
+	g++  -o server build/server.o build/libshared.so build/game.o build/protocol.o  -lpthread
+	
 	

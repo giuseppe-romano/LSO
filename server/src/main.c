@@ -8,165 +8,27 @@
 #include <unistd.h> // for close
 #include <pthread.h>
 
-#include "draw.h"
+//#include "draw.h"
 #include "serial.h"
 #include "../include/game.h"
 #include "../include/protocol.h"
+#include "../include/menu.h"
+#include "../include/player.h"
 
 #define MAX 80
 #define PORT 8080
 #define SA struct sockaddr
 
+
 //pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 /* S E R V E R */
 
-void * socketThread(void *arg)
-{
-    char client_message[2000];
- //   char buffer[1024];
-
-    Game *game = generateNewGame();
-    int j;
-    int err;
-    for(j = 0; j < 2; j++)
-    {
-        Cell tmp;
-        tmp.x = 1;
-        tmp.y = j;
-        tmp.symbol = "A";
-        tmp.color = "\033[1;32m";
-        tmp.user = "romagiu";
-        if((err = addPlayer(game, tmp)) != 0)
-        {
-            printf("addPlayer error %d \n", err);
-        }
-    }
-
-    int counter = 0;
-
-    int newSocket = *((int *)arg);
-    int clients[1] = {newSocket};
-
-    recv(newSocket, client_message, 2000, 0);
-    printf("Data received: %s\n", client_message);
-
-    // Send message to the client socket
-    //  pthread_mutex_lock(&lock);
- /*   char *message = malloc(sizeof(client_message)+20);
-    strcpy(message,"Hello Client : ");
-    strcat(message,client_message);
-    strcat(message,"\n");
-    strcpy(buffer,message);
-    free(message);
- //   pthread_mutex_unlock(&lock);
-    sleep(1);*/
-
-
-    while(1)
-    {
-
-        //send(newSocket,buffer,13,0);
-
-        Cell cell = game->playerCells[counter];
-        if((err = movePlayer(game, cell, MOVE_RIGHT)) != 0)
-        {
-            printf("movePlayer error %d \n", err);
-        }
-
-        counter++;
-        if(counter >= 2) {
-            counter = 0;
-        }
-
-/*
-        for(j = 0; j < game->numPlayers; j++)
-        {
-            Cell cell = game->playerCells[j];
-            if((err = movePlayer(game, cell, MOVE_RIGHT)) != 0)
-            {
-                printf("movePlayer error %d \n", err);
-            }
-
-            sendNewGame(clients, game);
-            sleep(1);
-        }
-*/
-
-        sleep(2);
-        sendNewGame(clients, 1, game);
-            drawScreen(game);
-
-        sleep(1);
-    }
-    printf("Exit socketThread \n");
-    close(newSocket);
-    pthread_exit(NULL);
-}
-
-int showMainMenu()
-{
-   int choice;
-
-   printf( "MAIN MENU\n");
-   printf( "\t1 - Start a New Game\n");
-   printf( "\t2 - List connected players\n");
-   printf( "\t9 - Exit program\n");
-
-   scanf("%d", &choice);
-
-   switch(choice)
-   {
-        case 1:
-            printf("uno");
-            break;
-
-        case 2:
-            printf("due");
-            break;
-
-        case 9:
-            exit(EXIT_SUCCESS);
-            break;
-   }
-
-
-   return choice;
-}
 
 int main()
 {
- //   Game *game = generateNewGame();
-/*
-    int err;
-  Cell tmp;
-  tmp.x = game->cols - 1;
-  tmp.y = 12;
-  tmp.symbol = "G";
-  tmp.color = "\033[1;32m";
-  tmp.user = "romagiu";
-  if((err = addPlayer(game, tmp)) != 0) {
-      printf("Location busy %d \n", err);
-  }
-
-  tmp.x = game->cols - 5;
-  tmp.y = 23;
-  tmp.symbol = "H";
-  tmp.color = "\033[1;32m";
-  tmp.user = "gigino";
-  if((err = addPlayer(game, tmp)) != 0) {
-      printf("Location busy %d \n", err);
-  }*/
-/*
-    char* s = serializeGame(game);
-    printf("serializeGame 1 %s\n", s);
-    deserializeGame(s);
-    s = serializeGame(game);
-    printf("serializeGame 2 %s\n", s);
-    deserializeGame(s);
-    s = serializeGame(game);
-    printf("serializeGame 3 %s\n", s);
-*/
-
+    //Creates a thread responsible for the menu console.
+    pthread_t menu_thread_id;
+    pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
 
 
     int serverSocket, newSocket;
@@ -204,7 +66,7 @@ int main()
 
         //for each client request creates a thread and assign the client request to it to process
         //so the main thread can entertain next request
-        if( pthread_create(&tid[i], NULL, socketThread, &newSocket) != 0 )
+        if( pthread_create(&tid[i], NULL, playerThreadFunc, &newSocket) != 0 )
             printf("Failed to create thread\n");
         if( i >= 50)
         {
@@ -217,75 +79,8 @@ int main()
         }
     }
 
-    // After chatting close the socket
+    printf("After chatting close the socket");
     close(serverSocket);
 
-
-
-    /*   int numPlayers = 1;
-       Cell playerCells[numPlayers];
-
-       int j;
-       for(j = 0; j < numPlayers; j++) {
-           Cell tmp;
-           tmp.x = j + 1;
-           tmp.y = j + 1;
-           tmp.symbol = 'G';
-           tmp.color = "\033[1;32m";
-
-           playerCells[j] = tmp;
-       }
-    */
-    /*  Game *game = generateNewGame();
-
-
-      int err;
-      int j;
-      for(j = 0; j < 40; j++) {
-          Cell tmp;
-          tmp.x = game->cols - 1;
-          tmp.y = j;
-          tmp.symbol = 'G';
-          tmp.color = "\033[1;32m";
-          if((err = addPlayer(game, tmp)) != 0) {
-              printf("Location busy %d \n", err);
-          }
-    sleep(1);
-          drawScreen(game);
-          sleep(1);
-      }*/
-    /*
-        for(j = 0; j < game->cols; j++) {
-            Cell tmp;
-            tmp.x = j;
-            tmp.y = 5;
-            tmp.symbol = 'G';
-            tmp.color = "\033[1;32m";
-
-
-
-            err = movePlayer(game, tmp, MOVE_RIGHT);
-            if(err == ERR_PLAYER_HIT_BOMB) {
-                printf("Player hit bomb %d \n", err);
-            }
-            sleep(1);
-            drawScreen(game);
-        }
-    */
-    /*   Cell tmp;
-           tmp.x = game->cols - 1;
-           tmp.y = 5;
-           tmp.symbol = 'G';
-           tmp.color = "\033[1;32m";
-
-
-
-           err = movePlayer(game, tmp, MOVE_RIGHT);
-           if(err == ERR_POSITION_OUT_OF_BOUND) {
-               printf("Player ERR_POSITION_OUT_OF_BOUND %d \n", err);
-           }
-           sleep(3);
-           drawScreen(game);
-    */
     return 0;
 }

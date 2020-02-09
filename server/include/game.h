@@ -19,6 +19,8 @@
 
 Game* generateNewGame();
 
+Game* getCurrentGame();
+
 int addPlayer(Game* game, Cell player);
 
 int removePlayer(Game* game, Cell player);

@@ -5,6 +5,7 @@
 		<Option title="server" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
+		<Option virtualFolders="src/protocol/;" />
 		<Build>
 			<Target title="Debug">
 				<Option output="bin/Debug/server" prefix_auto="1" extension_auto="1" />
@@ -40,12 +41,17 @@
 			<Add library="../shared/bin/Debug/libshared.a" />
 		</Linker>
 		<Unit filename="include/game.h" />
+		<Unit filename="include/menu.h" />
 		<Unit filename="include/protocol.h" />
 		<Unit filename="src/game/game.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/menu/menu.c">
+			<Option compilerVar="CC" />
+			<Option virtualFolder="src/protocol/" />
 		</Unit>
 		<Unit filename="src/protocol/protocol.c">
 			<Option compilerVar="CC" />

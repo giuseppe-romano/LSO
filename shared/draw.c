@@ -3,7 +3,9 @@
 #include <time.h>
 #include "draw.h"
 
-void drawCell(Cell *cell) {
+
+void drawCell(Cell *cell, int x, int y) {
+    gotoxy(x, y);
     printf("|");
 
     if(cell == NULL) {
@@ -12,8 +14,8 @@ void drawCell(Cell *cell) {
     else {
         printf("%s", cell->color);
         printf(" %s ", cell->symbol);
+        printf("\033[0m");
     }
-    printf("\033[0m");
 }
 
 Cell* getCellAt(Cell cells[], int numCells, int x, int y) {
@@ -31,11 +33,8 @@ Cell* getCellAt(Cell cells[], int numCells, int x, int y) {
 void drawTitle() {
     system("setterm -bold on");
 
-    printf("\n");
-    printf("\t\t\t");
-    printf("Il campo minato");
-    printf("\t\t\t");
-    printf("\n");
+    gotoxy(91, 2);
+    printf("M I N E F I E L D   G A M E   -   S E R V E R   C O N S O L E");
 
     system("setterm -bold off");
 }
@@ -43,12 +42,16 @@ void drawTitle() {
 void drawMineField(Game *game) {
     int i, j;
 
+    int yOffset = 5;
+    int xOffset = 60;
     for(i = 0; i < game->rows; i++) {
-        printf("\t\t\t");
+        gotoxy(xOffset, yOffset);
         for(j = 0; j < game->cols; j++) {
             printf("----");
         }
-        printf("\n\t\t\t");
+
+        yOffset += 2;
+        gotoxy(xOffset, yOffset);
         for(j = 0; j < game->cols; j++) {
             Cell *cell = NULL;
             if(game->bombCells) {
@@ -58,11 +61,12 @@ void drawMineField(Game *game) {
                 cell = getCellAt(game->playerCells, game->numPlayers, j, i);
             }
 
-            drawCell(cell);
+            drawCell(cell, xOffset + (j * 4), yOffset -1);
         }
-        printf("|\n");
+        printf("|");
     }
-    printf("\t\t\t");
+    gotoxy(xOffset, yOffset);
+
     for(j = 0; j < game->cols; j++) {
         printf("----");
     }
@@ -71,8 +75,7 @@ void drawMineField(Game *game) {
 }
 
 void drawScreen(Game *game) {
-    system("@cls||clear");
-
     drawTitle();
     drawMineField(game);
 }
+
