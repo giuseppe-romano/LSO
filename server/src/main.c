@@ -26,6 +26,7 @@
 
 int main()
 {
+    system("@cls||clear");
     //Creates a thread responsible for the menu console.
     pthread_t menu_thread_id;
     pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);

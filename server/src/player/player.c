@@ -7,15 +7,50 @@
 #include <fcntl.h> // for open
 #include <unistd.h> // for close
 #include <pthread.h>
+#include "serial.h"
 #include "../../include/game.h"
 #include "../../include/protocol.h"
 
+int clientSockets[100];
+int numSockets = 0;
+
+void addClientSocket(int clientSocket)
+{
+    clientSockets[numSockets++] = clientSocket;
+}
+
+void removeClientSocket(int clientSocket)
+{
+    int j;
+    int counter = 0;
+    int n = numSockets;
+    for( j = 0 ; j < n; j++ ) {
+        if(clientSockets[j] != clientSocket) {
+            clientSockets[counter++] = clientSockets[j];
+        }
+        else {
+            numSockets--;
+        }
+    }
+}
+
+void notifyNewGame(Game *game)
+{
+    int j;
+    for( j = 0 ; j < numSockets; j++ ) {
+        sendNewGame(clientSockets[j], game);
+    }
+}
+
 void *playerThreadFunc(void *vargp)
 {
+    int clientSocket = *((int *)vargp);
+
+    addClientSocket(clientSocket);
     char client_message[2000];
  //   char buffer[1024];
-
-    Game *game = generateNewGame();
+/*
+    Game *game = getCurrentGame();
     int j;
     int err;
     for(j = 0; j < 2; j++)
@@ -34,12 +69,10 @@ void *playerThreadFunc(void *vargp)
 
     int counter = 0;
 
-    int newSocket = *((int *)vargp);
-    int clients[1] = {newSocket};
 
-    recv(newSocket, client_message, 2000, 0);
+    recv(clientSocket, client_message, 2000, 0);
     printf("Data received: %s\n", client_message);
-
+*/
     // Send message to the client socket
     //  pthread_mutex_lock(&lock);
  /*   char *message = malloc(sizeof(client_message)+20);
@@ -54,9 +87,11 @@ void *playerThreadFunc(void *vargp)
 
     while(1)
     {
+        recv(clientSocket, client_message, 2000, 0);
+        printf("Data received: %s\n", client_message);
 
         //send(newSocket,buffer,13,0);
-
+/*
         Cell cell = game->playerCells[counter];
         if((err = movePlayer(game, cell, MOVE_RIGHT)) != 0)
         {
@@ -64,31 +99,16 @@ void *playerThreadFunc(void *vargp)
         }
 
         counter++;
-        if(counter >= 2) {
+        if(counter >= 5) {
             counter = 0;
         }
 
-/*
-        for(j = 0; j < game->numPlayers; j++)
-        {
-            Cell cell = game->playerCells[j];
-            if((err = movePlayer(game, cell, MOVE_RIGHT)) != 0)
-            {
-                printf("movePlayer error %d \n", err);
-            }
-
-            sendNewGame(clients, game);
-            sleep(1);
-        }
-*/
-
+        sendNewGame(clientSocket, game);
         sleep(2);
-        sendNewGame(clients, 1, game);
-            drawScreen(game);
-
-        sleep(1);
+        */
     }
-    printf("Exit socketThread \n");
-    close(newSocket);
+
+    removeClientSocket(clientSocket);
+    close(clientSocket);
     pthread_exit(NULL);
 }

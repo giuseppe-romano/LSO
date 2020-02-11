@@ -3,27 +3,19 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include "serial.h"
 
+#include "../../include/game.h"
 #include "../../include/protocol.h"
 
-void sendNewGame(int clientSockets[], int numClients, Game *game)
+void sendNewGame(int clientSocket, Game *game)
 {
     char *message = serializeGame(game);
-
-    printf("Sending game %s\n", message);
-
-    int j;
-    for( j = 0 ; j < numClients; j++ ) {
-        if( write(clientSockets[j], message, strlen(message)) < 0)
-        {
-            printf("Send failed\n");
-        }
-    }
-
+    write(clientSocket, message, strlen(message));
     free(message);
 }
 
-void sendPlayerHitBomb(int clientSockets[], int numClients, char *userHitBomb)
+void sendPlayerHitBomb(int clientSocket, char *userHitBomb)
 {
-
+    write(clientSocket, userHitBomb, strlen(userHitBomb));
 }

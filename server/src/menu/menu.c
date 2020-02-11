@@ -4,6 +4,7 @@
 #include "../../include/menu.h"
 #include "draw.h"
 #include "../../include/game.h"
+#include "../../include/player.h"
 
 void showListPlayersMenu()
 {
@@ -54,8 +55,8 @@ void showListPlayersMenu()
         switch(choice)
         {
             case 1: {
-                Game *game = generateNewGame();
-                drawScreen(game);
+                //Game *game = generateNewGame();
+                //drawScreen(game);
 
                 break;
             }
@@ -123,7 +124,8 @@ void showMainMenu()
         {
             case 1: {
                 Game *game = generateNewGame();
-                drawScreen(game);
+                notifyNewGame(game);
+                drawMineField(game);
                 break;
                 }
 
@@ -143,6 +145,7 @@ void showMainMenu()
 
 void *menuThreadFunc(void *vargp)
 {
+  //  drawServerTitle();
     showMainMenu();
     exit(1);
 }

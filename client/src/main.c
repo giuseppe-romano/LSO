@@ -51,6 +51,9 @@ void * clientThread(void *arg)
 */
 
 int main(){
+    system("@cls||clear");
+    drawClientTitle();
+
   printf("In thread\n");
   char message[1000];
   char buffer[1024];
@@ -70,16 +73,17 @@ int main(){
     //Connect the socket to the server using the address
     addr_size = sizeof(serverAddr);
 
-printf("In thread 2\n");
+    connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+printf("Connected to the server\n");
     while(1)
     {
-        connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+      /*
         strcpy(message,"Hello Server");
 printf("In thread 3\n");
         if( send(clientSocket , message , strlen(message) , 0) < 0)
         {
             printf("Send failed\n");
-        }
+        }*/
         memset(buffer, '\0', 1024);
         printf("In thread 4\n");
         //Read the message from the server into the buffer
@@ -95,7 +99,7 @@ printf("In thread 3\n");
         char *s = serializeGame(game);
         printf("Deserialized game: %s\n\n\n", s);
 
-        drawScreen(game);
+        drawMineField(game);
         sleep(1);
     }
     close(clientSocket);

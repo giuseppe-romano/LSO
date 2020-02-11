@@ -30,11 +30,20 @@ Cell* getCellAt(Cell cells[], int numCells, int x, int y) {
     return res;
 }
 
-void drawTitle() {
+void drawServerTitle() {
     system("setterm -bold on");
 
     gotoxy(91, 2);
     printf("M I N E F I E L D   G A M E   -   S E R V E R   C O N S O L E");
+
+    system("setterm -bold off");
+}
+
+void drawClientTitle() {
+    system("setterm -bold on");
+
+    gotoxy(91, 2);
+    printf("M I N E F I E L D   G A M E   -   C L I E N T   C O N S O L E");
 
     system("setterm -bold off");
 }
@@ -72,10 +81,5 @@ void drawMineField(Game *game) {
     }
 
     printf("\n");
-}
-
-void drawScreen(Game *game) {
-    drawTitle();
-    drawMineField(game);
 }
 

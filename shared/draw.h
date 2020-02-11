@@ -9,6 +9,8 @@
 #include "serial.h"
 #define gotoxy(x,y) printf("\033[%d;%dH", (y), (x))
 
-void drawScreen(Game *game);
+void drawServerTitle();
+void drawClientTitle();
+void drawMineField(Game *game);
 
 #endif

@@ -3,8 +3,8 @@
 
 #include "game.h"
 
-void sendNewGame(int clientSockets[], int numClients, Game *game);
+void sendNewGame(int clientSocket, Game *game);
 
-void sendPlayerHitBomb(int clientSockets[], int numClients, char *userHitBomb);
+void sendPlayerHitBomb(int clientSocket, char *userHitBomb);
 
 #endif

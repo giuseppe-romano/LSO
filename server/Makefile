@@ -10,17 +10,24 @@ draw.o:
 serial.o: 
 	$(CC) -Wall -g  -c ../shared/serial.c -o build/serial.o
 	
-shared.so: build-dir draw.o serial.o
-	$(CC) -shared -o build/libshared.so build/draw.o build/serial.o
+shared.a: build-dir draw.o serial.o
+	ar -cvq build/libshared.a build/draw.o build/serial.o
 	
 game.o: 
 	$(CC) -Wall -g -I../shared -c src/game/game.c -o build/game.o
 	
 protocol.o: 
-	$(CC) -Wall -g -I../shared -c src/protocol/protocol.c -o build/protocol.o
+	$(CC) -Lbuild/ -Wall -g -I../shared -lshared -c src/protocol/protocol.c -o build/protocol.o
 
-server: shared.so protocol.o game.o
-	$(CC) -Lbuild/ -Wall -g -I../shared -Iinclude -lshared -lpthread -o build/server.o -c src/main.c
-	g++  -o server build/server.o build/libshared.so build/game.o build/protocol.o  -lpthread
+menu.o: 
+	$(CC) -Lbuild/ -Wall -g -I../shared -lshared -c src/menu/menu.c -o build/menu.o
+	
+player.o: 
+	$(CC) -Lbuild/ -Wall -g -I../shared -lshared -c src/player/player.c -o build/player.o	
+	
+server: shared.a protocol.o game.o menu.o player.o
+	$(CC) -Lbuild/ -Wall -g -I../shared -lpthread -lshared -o build/server.o -c src/main.c
+	g++ -o server build/server.o build/game.o build/protocol.o build/menu.o build/player.o -lpthread build/libshared.a
+
 	
 	
