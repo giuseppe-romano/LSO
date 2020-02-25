@@ -6,103 +6,72 @@
 #include <stdlib.h>
 #include <fcntl.h> // for open
 #include <unistd.h> // for close
+#include <pthread.h>
 
 #include "draw.h"
 #include "serial.h"
-
-//#include <pthread.h>
-/*
-void * clientThread(void *arg)
-{
-  printf("In thread\n");
-  char message[1000];
-  char buffer[1024];
-  int clientSocket;
-  struct sockaddr_in serverAddr;
-  socklen_t addr_size;
-  // Create the socket.
-  clientSocket = socket(PF_INET, SOCK_STREAM, 0);
-  //Configure settings of the server address
- // Address family is Internet
-  serverAddr.sin_family = AF_INET;
-  //Set port number, using htons function
-  serverAddr.sin_port = htons(7799);
- //Set IP address to localhost
-  serverAddr.sin_addr.s_addr = inet_addr("localhost");
-  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
-    //Connect the socket to the server using the address
-    addr_size = sizeof serverAddr;
-    connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
-    strcpy(message,"Hello");
-   if( send(clientSocket , message , strlen(message) , 0) < 0)
-    {
-            printf("Send failed\n");
-    }
-    //Read the message from the server into the buffer
-    if(recv(clientSocket, buffer, 1024, 0) < 0)
-    {
-       printf("Receive failed\n");
-    }
-    //Print the received message
-    printf("Data received: %s\n",buffer);
-    close(clientSocket);
-    pthread_exit(NULL);
-}
-*/
+#include "logging.h"
+#include "../include/menu.h"
 
 int main(){
     system("@cls||clear");
-    drawClientTitle();
+    initLogFile("client.log");
 
-  printf("In thread\n");
-  char message[1000];
-  char buffer[1024];
-  int clientSocket;
-  struct sockaddr_in serverAddr;
-  socklen_t addr_size;
-  // Create the socket.
-  clientSocket = socket(PF_INET, SOCK_STREAM, 0);
-  //Configure settings of the server address
- // Address family is Internet
-  serverAddr.sin_family = AF_INET;
-  //Set port number, using htons function
-  serverAddr.sin_port = htons(7799);
- //Set IP address to localhost
-  serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-  memset(serverAddr.sin_zero, '\0', sizeof(serverAddr.sin_zero));
+    //Creates a thread responsible for the menu console.
+    pthread_t menu_thread_id;
+    pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
+/*
+    char message[1000];
+    char buffer[1024];
+    int clientSocket;
+    struct sockaddr_in serverAddr;
+    socklen_t addr_size;
+    // Create the socket.
+    clientSocket = socket(PF_INET, SOCK_STREAM, 0);
+    //Configure settings of the server address
+    // Address family is Internet
+    serverAddr.sin_family = AF_INET;
+    //Set port number, using htons function
+    serverAddr.sin_port = htons(7799);
+    //Set IP address to localhost
+    serverAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    memset(serverAddr.sin_zero, '\0', sizeof(serverAddr.sin_zero));
     //Connect the socket to the server using the address
     addr_size = sizeof(serverAddr);
 
     connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
-printf("Connected to the server\n");
+    info("Connected to the server!");
+
+    strcpy(message, "Hello Server");
+    info("Sending Hello server!");
+    if( send(clientSocket , message , strlen(message) , 0) < 0)
+    {
+        error("Send failed");
+    }
+
     while(1)
     {
-      /*
-        strcpy(message,"Hello Server");
-printf("In thread 3\n");
-        if( send(clientSocket , message , strlen(message) , 0) < 0)
-        {
-            printf("Send failed\n");
-        }*/
         memset(buffer, '\0', 1024);
-        printf("In thread 4\n");
         //Read the message from the server into the buffer
         if(recv(clientSocket, buffer, 1024, 0) < 0)
         {
-           printf("Receive failed\n");
+           error("Receive failed");
         }
-        printf("In thread 5\n");
-        //Print the received message
-        printf("Data received: %s\n\n", buffer);
+
+        char str[2000];
+        sprintf(str, "Data received: %s", buffer);
+        info(str);
 
         Game *game = deserializeGame(buffer);
         char *s = serializeGame(game);
-        printf("Deserialized game: %s\n\n\n", s);
+        sprintf(str, "Deserialized game: %s", s);
+        info(str);
 
         drawMineField(game);
-        sleep(1);
     }
     close(clientSocket);
+    */
+    pthread_join(menu_thread_id,NULL);
  //   pthread_exit(NULL);
  printf("morto");
 

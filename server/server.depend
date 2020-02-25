@@ -18,7 +18,7 @@
 	<string.h>
 	"../../include/game.h"
 
-1581459833 source:/home/peppe/UNINA/LSO/server/src/main.c
+1581809515 source:/home/peppe/UNINA/LSO/server/src/main.c
 	<stdio.h>
 	<stdlib.h>
 	<sys/socket.h>
@@ -28,7 +28,9 @@
 	<fcntl.h>
 	<unistd.h>
 	<pthread.h>
+	"draw.h"
 	"serial.h"
+	"logging.h"
 	"../include/game.h"
 	"../include/protocol.h"
 	"../include/menu.h"
@@ -64,13 +66,14 @@
 
 1581289195 /home/peppe/UNINA/LSO/server/include/menu.h
 
-1581457096 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
+1581462338 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	"../../include/menu.h"
 	"draw.h"
 	"../../include/game.h"
+	"../../include/player.h"
 
 1581461291 /home/peppe/UNINA/LSO/server/include/player.h
 
@@ -87,4 +90,6 @@
 	"serial.h"
 	"../../include/game.h"
 	"../../include/protocol.h"
+
+1581806979 /home/peppe/UNINA/LSO/shared/logging.h
 

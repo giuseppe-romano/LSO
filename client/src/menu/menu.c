@@ -3,10 +3,18 @@
 #include <string.h>
 #include "../../include/menu.h"
 #include "draw.h"
-#include "../../include/game.h"
-#include "../../include/player.h"
 
-void showListPlayersMenu()
+void clearMenu()
+{
+    int i;
+    for(i = 1; i <= 30; i++)
+    {
+        gotoxy(1, i);
+        printf("%-59s", " ");
+    }
+}
+
+void showSignUpMenu()
 {
     int choice;
     int exit = 0;
@@ -20,7 +28,7 @@ void showListPlayersMenu()
         gotoxy(1, 3);
         printf("%-59s", " ");
         gotoxy(1, 4);
-        printf("%-59s", "LIST PLAYERS MENU");
+        printf("%-59s", "SIGN IN");
         gotoxy(1, 6);
         printf("%-59s", "    1 - List registered players");
         gotoxy(1, 8);
@@ -61,10 +69,6 @@ void showListPlayersMenu()
                 break;
             }
 
-            case 2:
-                showListPlayersMenu();
-                break;
-
             case 9:
                 exit = 1;
                 break;
@@ -73,6 +77,52 @@ void showListPlayersMenu()
                 invalid = 1;
         }
     } while(!exit);
+}
+
+void showSignInMenu()
+{
+    clearMenu();
+
+    gotoxy(1, 1);
+    printf("%-59s", " ");
+    gotoxy(1, 2);
+    printf("%-59s", " ");
+    gotoxy(1, 3);
+    printf("%-59s", " ");
+    gotoxy(1, 4);
+    printf("%-59s", "SIGN IN");
+    gotoxy(1, 6);
+    printf("%-59s", "    username:");
+
+    gotoxy(14, 6);
+
+    char username[256];
+    if(scanf("%s", &username) != 1)
+    {
+        while(getchar() != '\n');
+    }
+
+    clearMenu();
+
+    gotoxy(1, 1);
+    printf("%-59s", " ");
+    gotoxy(1, 2);
+    printf("%-59s", " ");
+    gotoxy(1, 3);
+    printf("%-59s", " ");
+    gotoxy(1, 4);
+    printf("%-59s", "SIGN IN");
+    gotoxy(1, 6);
+    printf("%-59s", "    password:");
+
+    gotoxy(14, 6);
+    char password[256];
+    if(scanf("%s", &password) != 1)
+    {
+        while(getchar() != '\n');
+    }
+    printf("user is %s", username);
+    printf("pwd is %s", password);
 }
 
 void showMainMenu()
@@ -91,9 +141,9 @@ void showMainMenu()
         gotoxy(1, 4);
         printf("%-59s", "MAIN MENU");
         gotoxy(1, 6);
-        printf("%-59s", "    1 - Start/Resume Game");
+        printf("%-59s", "    1 - Sign up");
         gotoxy(1, 8);
-        printf("%-59s", "    2 - List connected players");
+        printf("%-59s", "    2 - Sign in");
         gotoxy(1, 10);
         printf("%-59s", "    9 - Exit");
 
@@ -123,15 +173,14 @@ void showMainMenu()
         switch(choice)
         {
             case 1: {
-                Game *game = generateNewGame();
-                notifyNewGame(game);
-                drawMineField(game);
+                showSignUpMenu();
                 break;
                 }
 
-            case 2:
-                showListPlayersMenu();
+            case 2: {
+                showSignInMenu();
                 break;
+                }
 
             case 9:
                 exit = 1;
@@ -145,7 +194,7 @@ void showMainMenu()
 
 void *menuThreadFunc(void *vargp)
 {
-    drawServerTitle();
+    drawClientTitle();
     showMainMenu();
     exit(1);
 }

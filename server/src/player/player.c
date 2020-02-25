@@ -8,6 +8,7 @@
 #include <unistd.h> // for close
 #include <pthread.h>
 #include "serial.h"
+#include "logging.h"
 #include "../../include/game.h"
 #include "../../include/protocol.h"
 
@@ -87,8 +88,13 @@ void *playerThreadFunc(void *vargp)
 
     while(1)
     {
-        recv(clientSocket, client_message, 2000, 0);
-        printf("Data received: %s\n", client_message);
+        if(recv(clientSocket, client_message, 2000, 0) < 0)
+        {
+           error("Receive failed");
+        }
+        char str[2100];
+        sprintf(str, "Data received from client: %s", client_message);
+        info(str);
 
         //send(newSocket,buffer,13,0);
 /*
