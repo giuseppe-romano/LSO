@@ -2,16 +2,24 @@
 #include <stdlib.h>
 #include <string.h>
 #include "serial.h"
+#include "logging.h"
 
 #define ROWS_TOKEN "rows="
 #define COLS_TOKEN "cols="
 #define NUM_PLAYERS_TOKEN "numPlayers="
-#define PLAYER_CELL_TOKEN "playerCell="
+#define PLAYER_TOKEN "player="
 #define X_TOKEN "x="
 #define Y_TOKEN "y="
 #define SYMBOL_TOKEN "symbol="
 #define USER_TOKEN "user="
 #define COLOR_TOKEN "color="
+#define DIRECTION_TOKEN "direction="
+#define PWD_TOKEN "password="
+
+#define NEW_GAME_ACTION "GAME<"
+#define MOVE_PLAYER_ACTION "MOVE_PLAYER<"
+#define LOGIN_ACTION "LOGIN<"
+#define REGISTER_ACTION "REGISTER<"
 
 int strStartWith(char *string, char *prefix)
 {
@@ -27,6 +35,30 @@ int strIndexOf(char *string, char delim)
     char *pos = strchr (string, delim);
     int index = pos ? pos - string : -1;
     return index;
+}
+
+char *substring(char *string, int position, int length)
+{
+   char *pointer;
+   int c;
+
+   pointer = malloc(length+1);
+
+   if (pointer == NULL)
+   {
+      printf("Unable to allocate memory.\n");
+      exit(1);
+   }
+
+   for (c = 0 ; c < length ; c++)
+   {
+      *(pointer+c) = *(string+position-1);
+      string++;
+   }
+
+   *(pointer+c) = '\0';
+
+   return pointer;
 }
 
 char* getStringValue(char *string, char *prefix)
@@ -91,7 +123,8 @@ char* serializeGame(Game *game)
     char str[10];
 
     char *message = malloc(2000);
-    strcpy(message, ROWS_TOKEN);
+    strcpy(message, NEW_GAME_ACTION);
+    strcat(message, ROWS_TOKEN);
     sprintf(str, "%d", game->rows);
     strcat(message, str);
     strcat(message, "|");
@@ -109,7 +142,7 @@ char* serializeGame(Game *game)
     char buffer[100];
     int j;
     for( j = 0 ; j < game->numPlayers; j++ ) {
-        strcat(message, PLAYER_CELL_TOKEN);
+        strcat(message, PLAYER_TOKEN);
 
         sprintf(buffer, "{x=%d,y=%d,symbol=%s,color=%s,user=%s,}",
             game->playerCells[j].x,
@@ -123,6 +156,7 @@ char* serializeGame(Game *game)
             strcat(message, "|");
         }
     }
+    strcat(message, ">");
 
     return message;
 }
@@ -131,8 +165,10 @@ Game* deserializeGame(char *string)
 {
     Game *game = (Game*) malloc(sizeof(Game));
 
+    char *data = substring(string, strlen(NEW_GAME_ACTION) + 1, strlen(string) - strlen(NEW_GAME_ACTION) - 1);
+
     Cell *player;
-    char *tokens = strtok(string, "|");
+    char *tokens = strtok(data, "|");
 
     int playerCounter = 0;
     while( tokens != NULL ) {
@@ -148,8 +184,8 @@ Game* deserializeGame(char *string)
         else if(strStartWith(tokens, NUM_PLAYERS_TOKEN)) {
             game->numPlayers = getIntValue(tokens, NUM_PLAYERS_TOKEN);
         }
-        else if(strStartWith(tokens, PLAYER_CELL_TOKEN)) {
-            player = getCellValue(tokens, PLAYER_CELL_TOKEN);
+        else if(strStartWith(tokens, PLAYER_TOKEN)) {
+            player = getCellValue(tokens, PLAYER_TOKEN);
 
             game->playerCells[playerCounter++] = *player;
         }
@@ -159,3 +195,152 @@ Game* deserializeGame(char *string)
    return game;
 }
 
+char* serializeMovePlayerAction(Cell *player, char *direction)
+{
+    char logging[2000];
+    sprintf(logging, "Serializing move player action with direction '%s'...", direction);
+    info(logging);
+    char buffer[200];
+
+    char *message = malloc(2000);
+    strcpy(message, MOVE_PLAYER_ACTION);
+    strcat(message, PLAYER_TOKEN);
+
+    sprintf(buffer, "{x=%d,y=%d,symbol=%s,color=%s,user=%s,}",
+        player->x,
+        player->y,
+        player->symbol,
+        player->color,
+        player->user);
+    strcat(message, buffer);
+
+    strcat(message, "|");
+    strcat(message, DIRECTION_TOKEN);
+    strcat(message, direction);
+    strcat(message, ">");
+
+
+    sprintf(logging, "Move action serialized %s", message);
+    info(logging);
+
+    return message;
+}
+
+MovePlayerAction* deserializeMovePlayerAction(char *string)
+{
+    if(!strStartWith(string, MOVE_PLAYER_ACTION)) {
+        return NULL;
+    }
+
+    MovePlayerAction *action = (MovePlayerAction*) malloc(sizeof(MovePlayerAction));
+
+    char *data = substring(string, strlen(MOVE_PLAYER_ACTION) + 1, strlen(string) - strlen(MOVE_PLAYER_ACTION) - 1);
+    char *tokens = strtok(data, "|");
+
+    while( tokens != NULL ) {
+        if(strStartWith(tokens, PLAYER_TOKEN)) {
+            action->player = getCellValue(tokens, PLAYER_TOKEN);
+        }
+        else if(strStartWith(tokens, DIRECTION_TOKEN)) {
+            action->direction = getStringValue(tokens, DIRECTION_TOKEN);
+        }
+
+        tokens = strtok(NULL, "|");
+    }
+
+   return action;
+}
+
+char* serializeLoginAction(char *username, char *password)
+{
+    char logging[2000];
+    sprintf(logging, "Serializing login action with username '%s'...", username);
+    info(logging);
+
+    char *message = malloc(2000);
+    strcpy(message, LOGIN_ACTION);
+    strcat(message, USER_TOKEN);
+    strcat(message, username);
+    strcat(message, "|");
+    strcat(message, PWD_TOKEN);
+    strcat(message, password);
+    strcat(message, ">");
+
+
+    sprintf(logging, "Login action serialized %s", message);
+    info(logging);
+
+    return message;
+}
+
+AuthenticationAction* deserializeLoginAction(char *string)
+{
+    if(!strStartWith(string, LOGIN_ACTION)) {
+        return NULL;
+    }
+
+    AuthenticationAction *action = (AuthenticationAction*) malloc(sizeof(AuthenticationAction));
+
+    char *data = substring(string, strlen(LOGIN_ACTION) + 1, strlen(string) - strlen(LOGIN_ACTION) - 1);
+    char *tokens = strtok(data, "|");
+
+    while( tokens != NULL ) {
+        if(strStartWith(tokens, USER_TOKEN)) {
+            action->username = getStringValue(tokens, USER_TOKEN);
+        }
+        else if(strStartWith(tokens, PWD_TOKEN)) {
+            action->password = getStringValue(tokens, PWD_TOKEN);
+        }
+
+        tokens = strtok(NULL, "|");
+    }
+
+   return action;
+}
+
+char* serializeRegisterAction(char *username, char *password)
+{
+    char logging[2000];
+    sprintf(logging, "Serializing register action with username '%s'...", username);
+    info(logging);
+
+    char *message = malloc(2000);
+    strcpy(message, REGISTER_ACTION);
+    strcat(message, USER_TOKEN);
+    strcat(message, username);
+    strcat(message, "|");
+    strcat(message, PWD_TOKEN);
+    strcat(message, password);
+    strcat(message, ">");
+
+
+    sprintf(logging, "Register action serialized %s", message);
+    info(logging);
+
+    return message;
+}
+
+AuthenticationAction* deserializeRegisterAction(char *string)
+{
+    if(!strStartWith(string, REGISTER_ACTION)) {
+        return NULL;
+    }
+
+    AuthenticationAction *action = (AuthenticationAction*) malloc(sizeof(AuthenticationAction));
+
+    char *data = substring(string, strlen(REGISTER_ACTION) + 1, strlen(string) - strlen(REGISTER_ACTION) - 1);
+    char *tokens = strtok(data, "|");
+
+    while( tokens != NULL ) {
+        if(strStartWith(tokens, USER_TOKEN)) {
+            action->username = getStringValue(tokens, USER_TOKEN);
+        }
+        else if(strStartWith(tokens, PWD_TOKEN)) {
+            action->password = getStringValue(tokens, PWD_TOKEN);
+        }
+
+        tokens = strtok(NULL, "|");
+    }
+
+   return action;
+}

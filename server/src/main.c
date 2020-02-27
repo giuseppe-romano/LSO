@@ -54,7 +54,7 @@ int main()
     //Listen on the socket, with 40 max connection requests queued
 
     if(listen(serverSocket, 50)==0)
-        info("Server started. Listening...");
+        info("\n\nServer started. Listening...");
     else
         error("Server Error");
 

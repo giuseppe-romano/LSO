@@ -12,6 +12,7 @@
 #include "serial.h"
 #include "logging.h"
 #include "../include/menu.h"
+#include "../include/protocol.h"
 
 int main(){
     system("@cls||clear");
@@ -20,14 +21,14 @@ int main(){
     //Creates a thread responsible for the menu console.
     pthread_t menu_thread_id;
     pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
-/*
+
     char message[1000];
     char buffer[1024];
-    int clientSocket;
+    int serverSocket;
     struct sockaddr_in serverAddr;
     socklen_t addr_size;
     // Create the socket.
-    clientSocket = socket(PF_INET, SOCK_STREAM, 0);
+    serverSocket = socket(PF_INET, SOCK_STREAM, 0);
     //Configure settings of the server address
     // Address family is Internet
     serverAddr.sin_family = AF_INET;
@@ -39,41 +40,40 @@ int main(){
     //Connect the socket to the server using the address
     addr_size = sizeof(serverAddr);
 
-    connect(clientSocket, (struct sockaddr *) &serverAddr, addr_size);
+    connect(serverSocket, (struct sockaddr *) &serverAddr, addr_size);
     info("Connected to the server!");
 
-    strcpy(message, "Hello Server");
-    info("Sending Hello server!");
-    if( send(clientSocket , message , strlen(message) , 0) < 0)
-    {
-        error("Send failed");
-    }
+    setServerSocket(serverSocket);
 
-    while(1)
+    int serverConnected = 1;
+    while(serverConnected)
     {
         memset(buffer, '\0', 1024);
         //Read the message from the server into the buffer
-        if(recv(clientSocket, buffer, 1024, 0) < 0)
+        if(recv(serverSocket, buffer, 1024, 0) <= 0)
         {
-           error("Receive failed");
+            warn("Connection closed. The server cut off!");
+            serverConnected = 0;
+        }
+        else
+        {
+
+            char str[2000];
+            sprintf(str, "Data received: %s", buffer);
+            info(str);
+
+            Game *game = deserializeGame(buffer);
+            char *s = serializeGame(game);
+            sprintf(str, "Deserialized game: %s", s);
+            info(str);
+
+            drawMineField(game);
         }
 
-        char str[2000];
-        sprintf(str, "Data received: %s", buffer);
-        info(str);
-
-        Game *game = deserializeGame(buffer);
-        char *s = serializeGame(game);
-        sprintf(str, "Deserialized game: %s", s);
-        info(str);
-
-        drawMineField(game);
     }
-    close(clientSocket);
-    */
-    pthread_join(menu_thread_id,NULL);
- //   pthread_exit(NULL);
- printf("morto");
+    close(serverSocket);
 
-  return 0;
+    pthread_join(menu_thread_id,NULL);
+
+    return 0;
 }

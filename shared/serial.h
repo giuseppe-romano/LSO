@@ -20,8 +20,25 @@ typedef struct game {
     int numPlayers;
 } Game;
 
-char* serializeGame(Game *game);
+typedef struct movePlayerAction {
+    Cell *player;
+    char *direction;
+} MovePlayerAction;
 
+typedef struct authenticationAction {
+    char *username;
+    char *password;
+} AuthenticationAction;
+
+char* serializeGame(Game *game);
 Game* deserializeGame(char *string);
 
+char* serializeMovePlayerAction(Cell *player, char *direction);
+MovePlayerAction* deserializeMovePlayerAction(char *string);
+
+char* serializeLoginAction(char *username, char *password);
+AuthenticationAction* deserializeLoginAction(char *string);
+
+char* serializeRegisterAction(char *username, char *password);
+AuthenticationAction* deserializeRegisterAction(char *string);
 #endif

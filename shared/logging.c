@@ -3,8 +3,14 @@
 #include <time.h>
 
 FILE *file = NULL;
-void initLogFile(char* filename)
+char* filename = "activity.log";
+void initLogFile(char* _filename)
 {
+    if(_filename)
+    {
+        filename = _filename;
+    }
+
     if (file == NULL) {
         file = fopen(filename, "a+"); // a+ (create + append)
     }
@@ -20,6 +26,7 @@ char* timestamp()
 
 void _log(char* message, char* level)
 {
+    initLogFile(NULL);
     fprintf (file, "[%s][%s] - %s\n", timestamp(), level, message);
     fflush(file);
 }

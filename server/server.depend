@@ -8,17 +8,17 @@
 1578416028 /home/peppe/UNINA/LSO/server/include/draw.h
 	"game.h"
 
-1581290751 /home/peppe/UNINA/LSO/server/include/game.h
+1582718469 /home/peppe/UNINA/LSO/server/include/game.h
 	"draw.h"
 
-1581290745 source:/home/peppe/UNINA/LSO/server/src/game/game.c
+1582718469 source:/home/peppe/UNINA/LSO/server/src/game/game.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
 	<string.h>
 	"../../include/game.h"
 
-1581809515 source:/home/peppe/UNINA/LSO/server/src/main.c
+1582734804 source:/home/peppe/UNINA/LSO/server/src/main.c
 	<stdio.h>
 	<stdlib.h>
 	<sys/socket.h>
@@ -36,10 +36,10 @@
 	"../include/menu.h"
 	"../include/player.h"
 
-1581459529 /home/peppe/UNINA/LSO/server/include/protocol.h
+1582718469 /home/peppe/UNINA/LSO/server/include/protocol.h
 	"game.h"
 
-1581459697 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
+1582718469 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -54,7 +54,7 @@
 
 1579098631 /home/peppe/UNINA/LSO/shared/include/serial.h
 
-1581461722 /home/peppe/UNINA/LSO/shared/draw.h
+1582718469 /home/peppe/UNINA/LSO/shared/draw.h
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -62,11 +62,11 @@
 	<unistd.h>
 	"serial.h"
 
-1580671454 /home/peppe/UNINA/LSO/shared/serial.h
+1582734700 /home/peppe/UNINA/LSO/shared/serial.h
 
-1581289195 /home/peppe/UNINA/LSO/server/include/menu.h
+1582718469 /home/peppe/UNINA/LSO/server/include/menu.h
 
-1581462338 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
+1582718469 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -75,9 +75,9 @@
 	"../../include/game.h"
 	"../../include/player.h"
 
-1581461291 /home/peppe/UNINA/LSO/server/include/player.h
+1582718469 /home/peppe/UNINA/LSO/server/include/player.h
 
-1581461068 source:/home/peppe/UNINA/LSO/server/src/player/player.c
+1582718469 source:/home/peppe/UNINA/LSO/server/src/player/player.c
 	<stdio.h>
 	<stdlib.h>
 	<sys/socket.h>
@@ -88,8 +88,9 @@
 	<unistd.h>
 	<pthread.h>
 	"serial.h"
+	"logging.h"
 	"../../include/game.h"
 	"../../include/protocol.h"
 
-1581806979 /home/peppe/UNINA/LSO/shared/logging.h
+1582718469 /home/peppe/UNINA/LSO/shared/logging.h
 

@@ -4,7 +4,7 @@
 void *menuThreadFunc(void *vargp);
 
 void showMainMenu();
-void showSignUpMenu();
-void showSignInMenu();
+void showRegisterMenu();
+void showLoginMenu();
 
 #endif

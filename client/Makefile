@@ -1,9 +1,9 @@
 CC=gcc
 CFLAGS=-I.
 
-client: shared.a menu.o
+client: shared.a menu.o protocol.o
 	$(CC) -Lbuild/ -Wall -g -I../shared -lpthread -lshared -o build/client.o -c src/main.c
-	g++ -o client build/client.o -lpthread build/menu.o build/libshared.a
+	g++ -o client build/client.o -lpthread build/menu.o build/protocol.o build/libshared.a
 	
 clean:
 	rm -rf build
@@ -25,6 +25,9 @@ shared.a: create-dir draw.o serial.o logging.o
 	
 menu.o: 
 	$(CC) -Lbuild/ -Wall -g -I../shared -lshared -c src/menu/menu.c -o build/menu.o
+	
+protocol.o: 
+	$(CC) -Lbuild/ -Wall -g -I../shared -lshared -c src/protocol/protocol.c -o build/protocol.o
 
 
 	
