@@ -21,10 +21,12 @@ Game* generateNewGame();
 
 Game* getCurrentGame();
 
-int addPlayer(Game* game, Cell player);
+int indexOfPlayer(Game* game, Cell *player);
 
-int removePlayer(Game* game, Cell player);
+int addPlayer(Game* game, Cell *player);
 
-int movePlayer(Game* game, Cell player, int direction);
+int removePlayer(Game* game, Cell *player);
+
+int movePlayer(Game* game, Cell *player, int direction);
 
 #endif

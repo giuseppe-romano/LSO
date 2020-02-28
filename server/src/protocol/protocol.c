@@ -15,7 +15,23 @@ void sendNewGame(int clientSocket, Game *game)
     free(message);
 }
 
-void sendPlayerHitBomb(int clientSocket, char *userHitBomb)
+void sendMovePlayerResponse(int clientSocket, Cell *player, int status)
 {
-    write(clientSocket, userHitBomb, strlen(userHitBomb));
+    char *response = serializeMovePlayerResponse(player, status);
+    write(clientSocket, response, strlen(response));
+    free(response);
+}
+
+void sendRegisterResponse(int clientSocket, int status, char *message)
+{
+    char *response = serializeRegisterResponse(status, message);
+    write(clientSocket, response, strlen(response));
+    free(response);
+}
+
+void sendLoginResponse(int clientSocket, int status, char *message)
+{
+    char *response = serializeLoginResponse(status, message);
+    write(clientSocket, response, strlen(response));
+    free(response);
 }

@@ -20,25 +20,44 @@ typedef struct game {
     int numPlayers;
 } Game;
 
-typedef struct movePlayerAction {
-    Cell *player;
-    char *direction;
-} MovePlayerAction;
-
-typedef struct authenticationAction {
+typedef struct authenticationRequest {
     char *username;
     char *password;
-} AuthenticationAction;
+} AuthenticationRequest;
+
+typedef struct authenticationResponse {
+    int status;
+    char *message;
+} AuthenticationResponse;
+
+typedef struct movePlayerRequest {
+    Cell *player;
+    int direction;
+} MovePlayerRequest;
+
+typedef struct movePlayerResponse {
+    Cell *player;
+    int status;
+} MovePlayerResponse;
 
 char* serializeGame(Game *game);
 Game* deserializeGame(char *string);
 
-char* serializeMovePlayerAction(Cell *player, char *direction);
-MovePlayerAction* deserializeMovePlayerAction(char *string);
+char* serializeMovePlayerRequest(Cell *player, char *direction);
+MovePlayerRequest* deserializeMovePlayerRequest(char *string);
 
-char* serializeLoginAction(char *username, char *password);
-AuthenticationAction* deserializeLoginAction(char *string);
+char* serializeLoginRequest(char *username, char *password);
+AuthenticationRequest* deserializeLoginRequest(char *string);
 
-char* serializeRegisterAction(char *username, char *password);
-AuthenticationAction* deserializeRegisterAction(char *string);
+char* serializeRegisterRequest(char *username, char *password);
+AuthenticationRequest* deserializeRegisterRequest(char *string);
+
+char* serializeRegisterResponse(int status, char *message);
+AuthenticationResponse* deserializeRegisterResponse(char *string);
+
+char* serializeLoginResponse(int status, char *message);
+AuthenticationResponse* deserializeLoginResponse(char *string);
+
+char* serializeMovePlayerResponse(Cell *player, int status);
+MovePlayerResponse* deserializeMovePlayerResponse(char *string);
 #endif

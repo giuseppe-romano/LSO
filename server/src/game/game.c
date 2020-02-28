@@ -60,11 +60,11 @@ Game* getCurrentGame() {
     return currentGame;
 }
 
-int indexOfPlayer(Game* game, Cell player) {
+int indexOfPlayer(Game* game, Cell *player) {
     int index = -1;
     int j;
     for(j = 0; j < game->numPlayers; j++) {
-        if(game->playerCells[j].x == player.x && game->playerCells[j].y == player.y) {
+        if(game->playerCells[j].x == player->x && game->playerCells[j].y == player->y) {
             index = j;
         }
     }
@@ -81,7 +81,7 @@ int hasBombAt(Game* game, int x, int y) {
     return 0;
 }
 
-int addPlayer(Game* game, Cell player) {
+int addPlayer(Game* game, Cell *player) {
     //First checks if the maximum number of player has been reached
     if(game->numPlayers == game->rows) {
         return ERR_MAX_NUMBER_OF_PLAYER_REACHED;
@@ -89,18 +89,18 @@ int addPlayer(Game* game, Cell player) {
 
     int j;
     for(j = 0; j < game->numPlayers; j++) {
-        if(game->playerCells[j].x == player.x && game->playerCells[j].y == player.y) {
+        if(game->playerCells[j].x == player->x && game->playerCells[j].y == player->y) {
             return ERR_CELL_BUSY;
         }
     }
 
-    game->playerCells[game->numPlayers] = player;
+    game->playerCells[game->numPlayers] = *player;
     game->numPlayers++;
 
     return 0;
 }
 
-int removePlayer(Game* game, Cell player) {
+int removePlayer(Game* game, Cell *player) {
     int j;
     int index = indexOfPlayer(game, player);
     if(index == -1) {
@@ -117,7 +117,7 @@ int removePlayer(Game* game, Cell player) {
     return 0;
 }
 
-int movePlayer(Game* game, Cell player, int direction) {
+int movePlayer(Game* game, Cell *player, int direction) {
     int index = indexOfPlayer(game, player);
     if(index == -1) {
         return ERR_PLAYER_NOT_FOUND;

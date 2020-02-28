@@ -22,8 +22,7 @@ int main(){
     pthread_t menu_thread_id;
     pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
 
-    char message[1000];
-    char buffer[1024];
+    char server_message[2000];
     int serverSocket;
     struct sockaddr_in serverAddr;
     socklen_t addr_size;
@@ -48,26 +47,61 @@ int main(){
     int serverConnected = 1;
     while(serverConnected)
     {
-        memset(buffer, '\0', 1024);
+        memset(server_message, '\0', 2000);
         //Read the message from the server into the buffer
-        if(recv(serverSocket, buffer, 1024, 0) <= 0)
+        if(recv(serverSocket, server_message, 2000, 0) <= 0)
         {
             warn("Connection closed. The server cut off!");
             serverConnected = 0;
         }
         else
         {
+            AuthenticationResponse *authenticationResponse = NULL;
+            MovePlayerResponse *movePlayerResponse = NULL;
+            Game *game = NULL;
 
-            char str[2000];
-            sprintf(str, "Data received: %s", buffer);
-            info(str);
+            char *message = strtok(server_message, "\n");
 
-            Game *game = deserializeGame(buffer);
-            char *s = serializeGame(game);
-            sprintf(str, "Deserialized game: %s", s);
-            info(str);
+            while( message != NULL ) {
 
-            drawMineField(game);
+                //The server sent a register response
+                if((authenticationResponse = deserializeRegisterResponse(server_message)) != NULL)
+                {
+                    char str[2100];
+                    sprintf(str, "RegisterResponse: %s", server_message);
+                    info(str);
+
+                    setUserLoggedIn(authenticationResponse->status);
+                }
+                //The server sent a login response
+                else if((authenticationResponse = deserializeLoginResponse(server_message)) != NULL)
+                {
+                    char str[2100];
+                    sprintf(str, "LoginResponse: %s", server_message);
+                    info(str);
+
+                    setUserLoggedIn(authenticationResponse->status);
+                }
+                //The server sent a move player response
+                else if((movePlayerResponse = deserializeMovePlayerResponse(server_message)) != NULL)
+                {
+                    char str[2100];
+                    sprintf(str, "MovePlayerResponse: %s", server_message);
+                    info(str);
+                }
+                //The server sent a new game
+                else if((game = deserializeGame(server_message)) != NULL)
+                {
+                    char str[2100];
+                    sprintf(str, "Game: %s", server_message);
+                    info(str);
+
+                    drawMineField(game);
+                }
+
+                message = strtok(NULL, "|");
+            }
+
         }
 
     }

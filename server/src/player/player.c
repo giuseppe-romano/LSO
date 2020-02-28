@@ -61,26 +61,55 @@ void *playerThreadFunc(void *vargp)
         }
         else
         {
-            AuthenticationAction *authenticationAction = NULL;
-            MovePlayerAction *movePlayerAction = NULL;
-            if((authenticationAction = deserializeRegisterAction(client_message)) != NULL)
+            AuthenticationRequest *authenticationRequest = NULL;
+            MovePlayerRequest *movePlayerRequest = NULL;
+
+            //The client sent a register request
+            if((authenticationRequest = deserializeRegisterRequest(client_message)) != NULL)
             {
-                authenticationAction->username
+                //Do the registration
                 char str[2100];
                 sprintf(str, "RegisterAction: %s", client_message);
                 info(str);
+
+                sendRegisterResponse(clientSocket, 0, "OK");
+
+                Game *game = getCurrentGame();
+                if(game != NULL)
+                {
+                    Cell *player = (Cell*) malloc(sizeof(Cell));
+                    player->user = authenticationRequest->username;
+                    player->x = 0;
+                    player->y = 12;
+                    player->symbol = "G";
+                    player->color = "[0;32m";
+
+                    addPlayer(game, player);
+                    sendNewGame(clientSocket, game);
+                }
+
             }
-            else if((authenticationAction = deserializeLoginAction(client_message)) != NULL)
+            //The client sent a login request
+            else if((authenticationRequest = deserializeLoginRequest(client_message)) != NULL)
             {
                 char str[2100];
                 sprintf(str, "LoginAction: %s", client_message);
                 info(str);
+
+                sendLoginResponse(clientSocket, 0, "OK");
             }
-            else if((movePlayerAction = deserializeMovePlayerAction(client_message)) != NULL)
+            //The client sent a move request
+            else if((movePlayerRequest = deserializeMovePlayerRequest(client_message)) != NULL)
             {
                 char str[2100];
                 sprintf(str, "MovePlayerAction: %s", client_message);
                 info(str);
+
+                Game *game = getCurrentGame();
+                int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
+                int index = indexOfPlayer(game, movePlayerRequest->player);
+
+                sendMovePlayerResponse(clientSocket, &(game->playerCells[index]), status);
             }
         }
     }

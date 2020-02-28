@@ -5,6 +5,10 @@
 
 void sendNewGame(int clientSocket, Game *game);
 
-void sendPlayerHitBomb(int clientSocket, char *userHitBomb);
+void sendMovePlayerResponse(int clientSocket, Cell *player, int status);
+
+void sendRegisterResponse(int clientSocket, int status, char *message);
+
+void sendLoginResponse(int clientSocket, int status, char *message);
 
 #endif

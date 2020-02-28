@@ -3,8 +3,11 @@
 
 void *menuThreadFunc(void *vargp);
 
+void setUserLoggedIn(int status);
+
 void showMainMenu();
 void showRegisterMenu();
 void showLoginMenu();
+void showGameMenu();
 
 #endif

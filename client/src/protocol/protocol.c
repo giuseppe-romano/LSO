@@ -13,16 +13,16 @@ void setServerSocket(int _socket)
     serverSocket = _socket;
 }
 
-void sendRegisterAction(char *username, char *password)
+void sendRegisterRequest(char *username, char *password)
 {
-    char *message = serializeRegisterAction(username, password);
+    char *message = serializeRegisterRequest(username, password);
     write(serverSocket, message, strlen(message));
     free(message);
 }
 
-void sendLoginAction(char *username, char *password)
+void sendLoginRequest(char *username, char *password)
 {
-    char *message = serializeLoginAction(username, password);
+    char *message = serializeLoginRequest(username, password);
     write(serverSocket, message, strlen(message));
     free(message);
 }

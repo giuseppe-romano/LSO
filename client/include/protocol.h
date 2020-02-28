@@ -3,7 +3,7 @@
 
 void setServerSocket(int _socket);
 
-void sendRegisterAction(char *username, char *password);
-void sendLoginAction(char *username, char *password);
+void sendRegisterRequest(char *username, char *password);
+void sendLoginRequest(char *username, char *password);
 
 #endif
