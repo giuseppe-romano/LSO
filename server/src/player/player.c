@@ -35,11 +35,19 @@ void removeClientSocket(int clientSocket)
     }
 }
 
-void notifyNewGame(Game *game)
+void broadcastNewGame(Game *game)
 {
     int j;
     for( j = 0 ; j < numSockets; j++ ) {
-        sendNewGame(clientSockets[j], game);
+        sendGame(clientSockets[j], game);
+    }
+}
+
+void broadcastPlayerMoved(Cell *player, int status)
+{
+    int j;
+    for( j = 0 ; j < numSockets; j++ ) {
+        sendMovePlayerResponse(clientSockets[j], player, status);
     }
 }
 
@@ -63,40 +71,59 @@ void *playerThreadFunc(void *vargp)
         {
             AuthenticationRequest *authenticationRequest = NULL;
             MovePlayerRequest *movePlayerRequest = NULL;
+            char logMessage[2100];
 
             //The client sent a register request
             if((authenticationRequest = deserializeRegisterRequest(client_message)) != NULL)
             {
-                //Do the registration
-                char str[2100];
-                sprintf(str, "RegisterAction: %s", client_message);
-                info(str);
+                sprintf(logMessage, "RegisterAction: %s", client_message);
+                info(logMessage);
 
+                //Do the registration here...
                 sendRegisterResponse(clientSocket, 0, "OK");
 
-                Game *game = getCurrentGame();
-                if(game != NULL)
+                if(1)
                 {
-                    Cell *player = (Cell*) malloc(sizeof(Cell));
-                    player->user = authenticationRequest->username;
-                    player->x = 0;
-                    player->y = 12;
-                    player->symbol = "G";
-                    player->color = "[0;32m";
+                    Game *game = getCurrentGame();
+                    if(game != NULL)
+                    {
+                        Cell *player = (Cell*) malloc(sizeof(Cell));
+                        player->user = authenticationRequest->username;
+                        player->x = 0;
+                        player->y = 12;
+                        player->symbol = "G";
+                        player->color = "\x1B[35m";
 
-                    addPlayer(game, player);
-                    sendNewGame(clientSocket, game);
+                        addPlayer(game, player);
+                        sendGame(clientSocket, game);
+                    }
                 }
-
             }
             //The client sent a login request
             else if((authenticationRequest = deserializeLoginRequest(client_message)) != NULL)
             {
-                char str[2100];
-                sprintf(str, "LoginAction: %s", client_message);
-                info(str);
+
+                sprintf(logMessage, "LoginAction: %s", client_message);
+                info(logMessage);
 
                 sendLoginResponse(clientSocket, 0, "OK");
+
+                if(1)
+                {
+                    Game *game = getCurrentGame();
+                    if(game != NULL)
+                    {
+                        Cell *player = (Cell*) malloc(sizeof(Cell));
+                        player->user = authenticationRequest->username;
+                        player->x = 0;
+                        player->y = 12;
+                        player->symbol = "G";
+                        player->color = "\x1B[35m";
+
+                        addPlayer(game, player);
+                        sendGame(clientSocket, game);
+                    }
+                }
             }
             //The client sent a move request
             else if((movePlayerRequest = deserializeMovePlayerRequest(client_message)) != NULL)
@@ -109,7 +136,7 @@ void *playerThreadFunc(void *vargp)
                 int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
                 int index = indexOfPlayer(game, movePlayerRequest->player);
 
-                sendMovePlayerResponse(clientSocket, &(game->playerCells[index]), status);
+                broadcastPlayerMoved(&(game->playerCells[index]), status);
             }
         }
     }

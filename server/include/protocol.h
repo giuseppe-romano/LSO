@@ -3,7 +3,7 @@
 
 #include "game.h"
 
-void sendNewGame(int clientSocket, Game *game);
+void sendGame(int clientSocket, Game *game);
 
 void sendMovePlayerResponse(int clientSocket, Cell *player, int status);
 

@@ -28,7 +28,7 @@ void deployRandomBombs(Game *game) {
         b->x = x == 0 ? x + 1 : ((x == game->cols - 1) ? x - 1 : x);
         b->y = rand() % game->rows;
         b->symbol = "X";
-        b->color = "\033[1;31m";
+        b->color = "\x1B[31m";
 
         game->bombCells[j] = *b;
     }

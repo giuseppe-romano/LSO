@@ -8,7 +8,7 @@
 #include "../../include/game.h"
 #include "../../include/protocol.h"
 
-void sendNewGame(int clientSocket, Game *game)
+void sendGame(int clientSocket, Game *game)
 {
     char *message = serializeGame(game);
     write(clientSocket, message, strlen(message));

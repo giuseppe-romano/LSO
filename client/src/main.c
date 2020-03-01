@@ -60,46 +60,45 @@ int main(){
             MovePlayerResponse *movePlayerResponse = NULL;
             Game *game = NULL;
 
-            char *message = strtok(server_message, "\n");
+            char logMessage[2100];
+            sprintf(logMessage, "Message from server: '%s'", server_message);
+            info(logMessage);
 
-            while( message != NULL ) {
-
+            //The server message can contain multiple messages, so it will be splitted
+            char *buffer = strdup(server_message);
+            char *message;
+            while ((message = strsep(&buffer, "\n")) != NULL)
+            {
                 //The server sent a register response
-                if((authenticationResponse = deserializeRegisterResponse(server_message)) != NULL)
+                if((authenticationResponse = deserializeRegisterResponse(message)) != NULL)
                 {
-                    char str[2100];
-                    sprintf(str, "RegisterResponse: %s", server_message);
-                    info(str);
+                    sprintf(logMessage, "RegisterResponse: %s", message);
+                    info(logMessage);
 
                     setUserLoggedIn(authenticationResponse->status);
                 }
                 //The server sent a login response
-                else if((authenticationResponse = deserializeLoginResponse(server_message)) != NULL)
+                else if((authenticationResponse = deserializeLoginResponse(message)) != NULL)
                 {
-                    char str[2100];
-                    sprintf(str, "LoginResponse: %s", server_message);
-                    info(str);
+                    sprintf(logMessage, "LoginResponse: %s", message);
+                    info(logMessage);
 
                     setUserLoggedIn(authenticationResponse->status);
                 }
                 //The server sent a move player response
-                else if((movePlayerResponse = deserializeMovePlayerResponse(server_message)) != NULL)
+                else if((movePlayerResponse = deserializeMovePlayerResponse(message)) != NULL)
                 {
-                    char str[2100];
-                    sprintf(str, "MovePlayerResponse: %s", server_message);
-                    info(str);
+                    sprintf(logMessage, "MovePlayerResponse: %s", message);
+                    info(logMessage);
                 }
                 //The server sent a new game
-                else if((game = deserializeGame(server_message)) != NULL)
+                else if((game = deserializeGame(message)) != NULL)
                 {
-                    char str[2100];
-                    sprintf(str, "Game: %s", server_message);
-                    info(str);
+                    sprintf(logMessage, "Game: %s", message);
+                    info(logMessage);
 
                     drawMineField(game);
                 }
-
-                message = strtok(NULL, "|");
             }
 
         }
