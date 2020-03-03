@@ -75,7 +75,7 @@ int main(){
                     sprintf(logMessage, "RegisterResponse: %s", message);
                     info(logMessage);
 
-                    setUserLoggedIn(authenticationResponse->status);
+                    setRegisterResponseReceived(authenticationResponse->status, authenticationResponse->message);
                 }
                 //The server sent a login response
                 else if((authenticationResponse = deserializeLoginResponse(message)) != NULL)
@@ -83,7 +83,7 @@ int main(){
                     sprintf(logMessage, "LoginResponse: %s", message);
                     info(logMessage);
 
-                    setUserLoggedIn(authenticationResponse->status);
+                    setLoginResponseReceived(authenticationResponse->status, authenticationResponse->message);
                 }
                 //The server sent a move player response
                 else if((movePlayerResponse = deserializeMovePlayerResponse(message)) != NULL)

@@ -5,8 +5,16 @@
 #include "../../include/protocol.h"
 #include "draw.h"
 
-int loggedIn = 0;
-int refresh = 0;
+int registerResponseReceived = 0;
+int registerResponseStatus;
+char *registerResponseMessage;
+
+int loginResponseReceived = 0;
+int loginResponseStatus;
+char *loginResponseMessage;
+
+int notificationStatus;
+char *notificationMessage;
 
 void clearMenu()
 {
@@ -16,6 +24,23 @@ void clearMenu()
         gotoxy(1, i);
         printf("%-59s", " ");
     }
+}
+
+void printNotificationMessage()
+{
+    if(notificationMessage)
+    {
+        gotoxy(1, 20);
+        printf(GRN);
+        if(notificationStatus != 0)
+        {
+            printf(RED);
+        }
+        printf("%-59s", notificationMessage);
+        printf(RESET);
+    }
+    notificationStatus = 0;
+    notificationMessage = NULL;
 }
 
 void showRegisterMenu()
@@ -32,8 +57,7 @@ void showRegisterMenu()
     printf("%-59s", "REGISTER");
     gotoxy(1, 6);
     printf("%-59s", "    username:");
-
-    gotoxy(14, 6);
+    gotoxy(15, 6);
 
     char username[256];
     if(scanf("%s", username) != 1)
@@ -41,29 +65,42 @@ void showRegisterMenu()
         while(getchar() != '\n');
     }
 
-    clearMenu();
-
-    gotoxy(1, 1);
-    printf("%-59s", " ");
-    gotoxy(1, 2);
-    printf("%-59s", " ");
-    gotoxy(1, 3);
-    printf("%-59s", " ");
-    gotoxy(1, 4);
-    printf("%-59s", "REGISTER");
-    gotoxy(1, 6);
+    gotoxy(1, 7);
     printf("%-59s", "    password:");
+    gotoxy(15, 7);
 
-    gotoxy(14, 6);
     char password[256];
     if(scanf("%s", password) != 1)
     {
         while(getchar() != '\n');
     }
 
-    sendRegisterRequest(username, password);
-    while(refresh == 0);
-    refresh = 0;
+    gotoxy(1, 8);
+    printf("%-59s", "    color:");
+    gotoxy(15, 8);
+
+    char color[256];
+    if(scanf("%s", color) != 1)
+    {
+        while(getchar() != '\n');
+    }
+
+    gotoxy(1, 9);
+    printf("%-59s", "    symbol:");
+    gotoxy(15, 9);
+
+    char symbol[256];
+    if(scanf("%s", symbol) != 1)
+    {
+        while(getchar() != '\n');
+    }
+
+    sendRegisterRequest(username, password, color, symbol);
+    while(registerResponseReceived == 0);
+    registerResponseReceived = 0;
+
+    notificationMessage = registerResponseMessage;
+    notificationStatus = registerResponseStatus;
 }
 
 void showLoginMenu()
@@ -81,7 +118,7 @@ void showLoginMenu()
     gotoxy(1, 6);
     printf("%-59s", "    username:");
 
-    gotoxy(14, 6);
+    gotoxy(15, 6);
 
     char username[256];
     if(scanf("%s", username) != 1)
@@ -89,29 +126,21 @@ void showLoginMenu()
         while(getchar() != '\n');
     }
 
-    clearMenu();
-
-    gotoxy(1, 1);
-    printf("%-59s", " ");
-    gotoxy(1, 2);
-    printf("%-59s", " ");
-    gotoxy(1, 3);
-    printf("%-59s", " ");
-    gotoxy(1, 4);
-    printf("%-59s", "LOGIN");
-    gotoxy(1, 6);
+    gotoxy(1, 7);
     printf("%-59s", "    password:");
+    gotoxy(15, 7);
 
-    gotoxy(14, 6);
     char password[256];
     if(scanf("%s", password) != 1)
     {
         while(getchar() != '\n');
     }
-
     sendLoginRequest(username, password);
-    while(refresh == 0);
-    refresh = 0;
+    while(loginResponseReceived == 0);
+    loginResponseReceived = 0;
+
+    notificationMessage = loginResponseMessage;
+    notificationStatus = loginResponseStatus;
 }
 
 void showGameMenu()
@@ -137,6 +166,7 @@ void showMainMenu()
     int invalid = 0;
     do
     {
+        clearMenu();
         gotoxy(1, 1);
         printf("%-59s", " ");
         gotoxy(1, 2);
@@ -146,7 +176,7 @@ void showMainMenu()
         gotoxy(1, 4);
         printf("%-59s", "MAIN MENU");
 
-        if(loggedIn == 0)
+        if(loginResponseStatus == 0)
         {
             gotoxy(1, 6);
             printf("%-59s", "    1 - Register");
@@ -166,20 +196,22 @@ void showMainMenu()
             printf("%-59s", "    4 - Move Left");
 
             gotoxy(1, 11);
-            printf("%-59s", "    9 - Exit");
+            printf("%-59s", "    9 - Logout");
         }
 
         gotoxy(1, 13);
         if(invalid)
         {
-            printf("\033[31m");
+            printf(RED);
             printf("%-59s", "Invalid option!!");
-            printf("\033[0m");
+            printf(RESET);
         }
         else
         {
             printf("%-59s", " ");
         }
+
+        printNotificationMessage();
 
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
@@ -214,10 +246,18 @@ void showMainMenu()
     } while(!exit);
 }
 
-void setUserLoggedIn(int status)
+void setRegisterResponseReceived(int status, char *message)
 {
-    loggedIn = (status == 0) ? 1 : 0;
-    refresh = 1;
+    registerResponseStatus = status;
+    registerResponseMessage = message;
+    registerResponseReceived = 1;
+}
+
+void setLoginResponseReceived(int status, char *message)
+{
+    loginResponseStatus = status;
+    loginResponseMessage = message;
+    loginResponseReceived = 1;
 }
 
 void *menuThreadFunc(void *vargp)

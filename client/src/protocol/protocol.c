@@ -13,9 +13,9 @@ void setServerSocket(int _socket)
     serverSocket = _socket;
 }
 
-void sendRegisterRequest(char *username, char *password)
+void sendRegisterRequest(char *username, char *password, char *color, char *symbol)
 {
-    char *message = serializeRegisterRequest(username, password);
+    char *message = serializeRegisterRequest(username, password, color, symbol);
     write(serverSocket, message, strlen(message));
     free(message);
 }

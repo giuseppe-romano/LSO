@@ -20,11 +20,7 @@
 #define PORT 8080
 #define SA struct sockaddr
 
-
-//pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 /* S E R V E R */
-
-
 int main()
 {
     system("@cls||clear");
@@ -32,7 +28,6 @@ int main()
     //Creates a thread responsible for the menu console.
     pthread_t menu_thread_id;
     pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
-
 
     int serverSocket, newSocket;
     struct sockaddr_in serverAddr;
@@ -58,8 +53,9 @@ int main()
     else
         error("Server Error");
 
-  //  char buffer[1024];
-    //char message[1000];
+    //Loads the list of registered players (stored into a dedicated file)
+    loadRegisteredPlayers("registered-players.db");
+
     pthread_t tid[60];
     int i = 0;
     while(1)

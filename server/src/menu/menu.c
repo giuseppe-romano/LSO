@@ -124,7 +124,8 @@ void showMainMenu()
         {
             case 1: {
                 Game *game = generateNewGame();
-                notifyNewGame(game);
+                broadcastNewGame(game);
+
                 drawMineField(game);
                 break;
                 }

@@ -3,7 +3,8 @@
 
 void *menuThreadFunc(void *vargp);
 
-void setUserLoggedIn(int status);
+void setRegisterResponseReceived(int status, char *message);
+void setLoginResponseReceived(int status, char *message);
 
 void showMainMenu();
 void showRegisterMenu();

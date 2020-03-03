@@ -204,6 +204,57 @@ Game* deserializeGame(char *string)
    return game;
 }
 
+char* serializePlayer(Player *player)
+{
+    char logging[2000];
+    info("Serializing player...");
+
+    char *message = malloc(2000);
+    strcpy(message, USER_TOKEN);
+    strcat(message, player->username);
+    strcat(message, "|");
+    strcat(message, PWD_TOKEN);
+    strcat(message, player->password);
+    strcat(message, "|");
+    strcat(message, SYMBOL_TOKEN);
+    strcat(message, player->symbol);
+    strcat(message, "|");
+    strcat(message, COLOR_TOKEN);
+    strcat(message, player->color);
+
+    sprintf(logging, "Player serialized %s", message);
+    info(logging);
+
+    return message;
+}
+
+Player* deserializePlayer(char *string)
+{
+    Player *player = (Player*) malloc(sizeof(Player));
+
+    char *tokens = strtok(string, "|");
+
+    while( tokens != NULL ) {
+        if(strStartWith(tokens, USER_TOKEN)) {
+            player->username = getStringValue(tokens, USER_TOKEN);
+        }
+        else if(strStartWith(tokens, PWD_TOKEN)) {
+            player->password = getStringValue(tokens, PWD_TOKEN);
+        }
+        else if(strStartWith(tokens, SYMBOL_TOKEN)) {
+            player->symbol = getStringValue(tokens, SYMBOL_TOKEN);
+        }
+        else if(strStartWith(tokens, COLOR_TOKEN)) {
+            player->color = getStringValue(tokens, COLOR_TOKEN);
+        }
+
+        tokens = strtok(NULL, "|");
+    }
+    player->next = NULL;
+
+    return player;
+}
+
 char* serializeMovePlayerRequest(Cell *player, char *direction)
 {
     char logging[2000];
@@ -307,7 +358,7 @@ AuthenticationRequest* deserializeLoginRequest(char *string)
    return action;
 }
 
-char* serializeRegisterRequest(char *username, char *password)
+char* serializeRegisterRequest(char *username, char *password, char *color, char *symbol)
 {
     char logging[2000];
     sprintf(logging, "Serializing register request with username '%s'...", username);
@@ -320,6 +371,12 @@ char* serializeRegisterRequest(char *username, char *password)
     strcat(message, "|");
     strcat(message, PWD_TOKEN);
     strcat(message, password);
+    strcat(message, "|");
+    strcat(message, COLOR_TOKEN);
+    strcat(message, color);
+    strcat(message, "|");
+    strcat(message, SYMBOL_TOKEN);
+    strcat(message, symbol);
     strcat(message, ">\n");
 
 
@@ -346,6 +403,12 @@ AuthenticationRequest* deserializeRegisterRequest(char *string)
         }
         else if(strStartWith(tokens, PWD_TOKEN)) {
             action->password = getStringValue(tokens, PWD_TOKEN);
+        }
+        else if(strStartWith(tokens, COLOR_TOKEN)) {
+            action->color = getStringValue(tokens, COLOR_TOKEN);
+        }
+        else if(strStartWith(tokens, SYMBOL_TOKEN)) {
+            action->symbol = getStringValue(tokens, SYMBOL_TOKEN);
         }
 
         tokens = strtok(NULL, "|");
