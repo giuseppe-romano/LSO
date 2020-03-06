@@ -5,6 +5,9 @@
 
 void sendGame(int clientSocket, Game *game);
 
+void sendAddedCell(int clientSocket, Cell *player);
+void sendRemovedCell(int clientSocket, Cell *player);
+
 void sendMovePlayerResponse(int clientSocket, Cell *player, int status);
 
 void sendRegisterResponse(int clientSocket, int status, char *message);

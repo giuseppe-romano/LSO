@@ -54,11 +54,14 @@ typedef struct movePlayerResponse {
 char* serializeGame(Game *game);
 Game* deserializeGame(char *string);
 
+char* serializeAddedCell(Cell *cell);
+Cell* deserializeAddedCell(char *string);
+
+char* serializeRemovedCell(Cell *cell);
+Cell* deserializeRemovedCell(char *string);
+
 char* serializePlayer(Player *player);
 Player* deserializePlayer(char *string);
-
-char* serializeMovePlayerRequest(Cell *player, char *direction);
-MovePlayerRequest* deserializeMovePlayerRequest(char *string);
 
 char* serializeLoginRequest(char *username, char *password);
 AuthenticationRequest* deserializeLoginRequest(char *string);
@@ -72,6 +75,12 @@ AuthenticationResponse* deserializeRegisterResponse(char *string);
 char* serializeLoginResponse(int status, char *message);
 AuthenticationResponse* deserializeLoginResponse(char *string);
 
+char* serializeMovePlayerRequest(Cell *player, int direction);
+MovePlayerRequest* deserializeMovePlayerRequest(char *string);
+
 char* serializeMovePlayerResponse(Cell *player, int status);
 MovePlayerResponse* deserializeMovePlayerResponse(char *string);
+
+char* serializeLogoutRequest(char *username);
+AuthenticationRequest* deserializeLogoutRequest(char *string);
 #endif

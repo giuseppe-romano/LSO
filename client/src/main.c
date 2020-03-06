@@ -15,12 +15,9 @@
 #include "../include/protocol.h"
 
 int main(){
-    system("@cls||clear");
     initLogFile("client.log");
 
-    //Creates a thread responsible for the menu console.
     pthread_t menu_thread_id;
-    pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
 
     char server_message[2000];
     int serverSocket;
@@ -39,74 +36,129 @@ int main(){
     //Connect the socket to the server using the address
     addr_size = sizeof(serverAddr);
 
-    connect(serverSocket, (struct sockaddr *) &serverAddr, addr_size);
-    info("Connected to the server!");
-
-    setServerSocket(serverSocket);
-
-    int serverConnected = 1;
-    while(serverConnected)
+    int serverConnected = connect(serverSocket, (struct sockaddr *) &serverAddr, addr_size);
+    if(serverConnected != 0)
     {
-        memset(server_message, '\0', 2000);
-        //Read the message from the server into the buffer
-        if(recv(serverSocket, server_message, 2000, 0) <= 0)
-        {
-            warn("Connection closed. The server cut off!");
-            serverConnected = 0;
-        }
-        else
-        {
-            AuthenticationResponse *authenticationResponse = NULL;
-            MovePlayerResponse *movePlayerResponse = NULL;
-            Game *game = NULL;
+        error("Unable to connect to the server");
+        printf("Unable to connect to the server\n");
+    }
+    else {
+        system("@cls||clear");
+        info("Connected to the server!");
 
-            char logMessage[2100];
-            sprintf(logMessage, "Message from server: '%s'", server_message);
-            info(logMessage);
+        //Creates a thread responsible for the menu console.
+        pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
 
-            //The server message can contain multiple messages, so it will be splitted
-            char *buffer = strdup(server_message);
-            char *message;
-            while ((message = strsep(&buffer, "\n")) != NULL)
+        setServerSocket(serverSocket);
+
+        Game *currentGame = NULL;
+        int serverAlive = 1;
+        while(serverAlive)
+        {
+            memset(server_message, '\0', 2000);
+            //Read the message from the server into the buffer
+            if(recv(serverSocket, server_message, 2000, 0) <= 0)
             {
-                //The server sent a register response
-                if((authenticationResponse = deserializeRegisterResponse(message)) != NULL)
-                {
-                    sprintf(logMessage, "RegisterResponse: %s", message);
-                    info(logMessage);
+                warn("Connection closed. The server cut off!");
+                printf("Connection closed. The server cut off!\n");
+                serverAlive = 0;
+            }
+            else
+            {
+                AuthenticationResponse *authenticationResponse = NULL;
+                MovePlayerResponse *movePlayerResponse = NULL;
+                Game *game = NULL;
+                Cell *cell = NULL;
 
-                    setRegisterResponseReceived(authenticationResponse->status, authenticationResponse->message);
-                }
-                //The server sent a login response
-                else if((authenticationResponse = deserializeLoginResponse(message)) != NULL)
-                {
-                    sprintf(logMessage, "LoginResponse: %s", message);
-                    info(logMessage);
+                char logMessage[2100];
+                sprintf(logMessage, "Message from server: '%s'", server_message);
+                info(logMessage);
 
-                    setLoginResponseReceived(authenticationResponse->status, authenticationResponse->message);
-                }
-                //The server sent a move player response
-                else if((movePlayerResponse = deserializeMovePlayerResponse(message)) != NULL)
+                //The server message can contain multiple messages, so it will be splitted
+                char *buffer = strdup(server_message);
+                char *message;
+                while ((message = strsep(&buffer, "\n")) != NULL)
                 {
-                    sprintf(logMessage, "MovePlayerResponse: %s", message);
-                    info(logMessage);
-                }
-                //The server sent a new game
-                else if((game = deserializeGame(message)) != NULL)
-                {
-                    sprintf(logMessage, "Game: %s", message);
-                    info(logMessage);
+                    //The server sent a register response
+                    if((authenticationResponse = deserializeRegisterResponse(message)) != NULL)
+                    {
+                        sprintf(logMessage, "RegisterResponse: %s", message);
+                        info(logMessage);
 
-                    drawMineField(game);
+                        setRegisterResponseReceived(authenticationResponse->status, authenticationResponse->message);
+                    }
+                    //The server sent a login response
+                    else if((authenticationResponse = deserializeLoginResponse(message)) != NULL)
+                    {
+                        sprintf(logMessage, "LoginResponse: %s", message);
+                        info(logMessage);
+
+                        setLoginResponseReceived(authenticationResponse->status, authenticationResponse->message);
+                    }
+                    //The server sent a move player response
+                    else if((movePlayerResponse = deserializeMovePlayerResponse(message)) != NULL)
+                    {
+                        sprintf(logMessage, "MovePlayerResponse: %s", message);
+                        info(logMessage);
+                    }
+                    //The server sent a new game
+                    else if((game = deserializeGame(message)) != NULL)
+                    {
+                        sprintf(logMessage, "Game: %s", message);
+                        info(logMessage);
+
+                        currentGame = game;
+                        drawMineField(game);
+                    }
+                    //The server sent an added player
+                    else if((cell = deserializeAddedCell(message)) != NULL)
+                    {
+                        sprintf(logMessage, "Added Player: %s", message);
+                        info(logMessage);
+
+                        if(currentGame)
+                        {
+                            currentGame->playerCells[currentGame->numPlayers] = *cell;
+                            currentGame->numPlayers++;
+                        }
+                        drawMineField(currentGame);
+
+                        setCurrentPlayerCell(cell);
+                    }
+                    //The server sent a removed player
+                    else if((cell = deserializeRemovedCell(message)) != NULL)
+                    {
+                        sprintf(logMessage, "Removed Player: %s", message);
+                        info(logMessage);
+
+                        if(currentGame)
+                        {
+                            int index = -1;
+                            int j;
+                            for(j = 0; j < currentGame->numPlayers; j++) {
+                                if(strcmp(currentGame->playerCells[j].user, cell->user) == 0) {
+                                    index = j;
+                                }
+                            }
+
+                            int shiftFrom = index + 1;
+                            for(j = shiftFrom; j < currentGame->numPlayers; j++) {
+                                currentGame->playerCells[j - 1] = currentGame->playerCells[j];
+                            }
+
+                            currentGame->numPlayers--;
+                        }
+                        drawMineField(currentGame);
+                    }
                 }
+
             }
 
         }
-
+        close(serverSocket);
     }
-    close(serverSocket);
 
-    pthread_join(menu_thread_id,NULL);
+    pthread_cancel(menu_thread_id);
 
     return 0;
 }

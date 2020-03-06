@@ -19,7 +19,10 @@
 #define MESSAGE_TOKEN "message="
 
 #define NEW_GAME_ACTION "GAME<"
+#define ADDED_CELL_ACTION "ADDED_CELL<"
+#define REMOVED_CELL_ACTION "REMOVED_CELL<"
 #define LOGIN_REQUEST "LOGIN<"
+#define LOGOUT_REQUEST "LOGOUT<"
 #define REGISTER_REQUEST "REGISTER<"
 #define REGISTER_RESPONSE "REGISTER_RESPONSE<"
 #define LOGIN_RESPONSE "LOGIN_RESPONSE<"
@@ -174,7 +177,13 @@ Game* deserializeGame(char *string)
 
     Game *game = (Game*) malloc(sizeof(Game));
 
-    char *data = substring(string, strlen(NEW_GAME_ACTION) + 1, strlen(string) - strlen(NEW_GAME_ACTION) - 1);
+    char logging[2000];
+    sprintf(logging, "Deserializing game '%s'...", string);
+    info(logging);
+
+    char *data = substring(string, strlen(NEW_GAME_ACTION) + 1, strlen(string) - strlen(NEW_GAME_ACTION) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing game body '%s'...", data);
+    info(logging);
 
     Cell *player;
     char *tokens = strtok(data, "|");
@@ -202,6 +211,122 @@ Game* deserializeGame(char *string)
     }
 
    return game;
+}
+
+char* serializeAddedCell(Cell *cell)
+{
+    char *message = malloc(2000);
+    strcpy(message, ADDED_CELL_ACTION);
+
+    char buffer[500];
+    sprintf(buffer, "%s%s|%s%d|%s%d|%s%s|%s%s",
+            USER_TOKEN, cell->user,
+            X_TOKEN, cell->x,
+            Y_TOKEN, cell->y,
+            SYMBOL_TOKEN, cell->symbol,
+            COLOR_TOKEN, cell->color);
+    strcat(message, buffer);
+    strcat(message, ">\n");
+
+    return message;
+}
+
+Cell* deserializeAddedCell(char *string)
+{
+    if(!strStartWith(string, ADDED_CELL_ACTION)) {
+        return NULL;
+    }
+
+    char logging[2000];
+    sprintf(logging, "Deserializing added cell '%s'...", string);
+    info(logging);
+
+    Cell *cell = (Cell*) malloc(sizeof(Cell));
+
+    char *data = substring(string, strlen(ADDED_CELL_ACTION) + 1, strlen(string) - strlen(ADDED_CELL_ACTION) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing added cell body '%s'...", data);
+    info(logging);
+
+    char *tokens = strtok(data, "|");
+
+    while( tokens != NULL ) {
+        if(strStartWith(tokens, USER_TOKEN)) {
+            cell->user = getStringValue(tokens, USER_TOKEN);
+        }
+        else if(strStartWith(tokens, X_TOKEN)) {
+            cell->x = getIntValue(tokens, X_TOKEN);
+        }
+        else if(strStartWith(tokens, Y_TOKEN)) {
+            cell->y = getIntValue(tokens, Y_TOKEN);
+        }
+        else if(strStartWith(tokens, SYMBOL_TOKEN)) {
+            cell->symbol = getStringValue(tokens, SYMBOL_TOKEN);
+        }
+        else if(strStartWith(tokens, COLOR_TOKEN)) {
+            cell->color = getStringValue(tokens, COLOR_TOKEN);
+        }
+        tokens = strtok(NULL, "|");
+    }
+
+   return cell;
+}
+
+char* serializeRemovedCell(Cell *cell)
+{
+    char *message = malloc(2000);
+    strcpy(message, REMOVED_CELL_ACTION);
+
+    char buffer[500];
+    sprintf(buffer, "%s%s|%s%d|%s%d|%s%s|%s%s",
+            USER_TOKEN, cell->user,
+            X_TOKEN, cell->x,
+            Y_TOKEN, cell->y,
+            SYMBOL_TOKEN, cell->symbol,
+            COLOR_TOKEN, cell->color);
+    strcat(message, buffer);
+    strcat(message, ">\n");
+
+    return message;
+}
+
+Cell* deserializeRemovedCell(char *string)
+{
+    if(!strStartWith(string, REMOVED_CELL_ACTION)) {
+        return NULL;
+    }
+
+    char logging[2000];
+    sprintf(logging, "Deserializing removed cell '%s'...", string);
+    info(logging);
+
+    Cell *cell = (Cell*) malloc(sizeof(Cell));
+
+    char *data = substring(string, strlen(REMOVED_CELL_ACTION) + 1, strlen(string) - strlen(REMOVED_CELL_ACTION) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing removed cell body '%s'...", data);
+    info(logging);
+
+    char *tokens = strtok(data, "|");
+
+    while( tokens != NULL ) {
+        if(strStartWith(tokens, USER_TOKEN)) {
+            cell->user = getStringValue(tokens, USER_TOKEN);
+        }
+        else if(strStartWith(tokens, X_TOKEN)) {
+            cell->x = getIntValue(tokens, X_TOKEN);
+        }
+        else if(strStartWith(tokens, Y_TOKEN)) {
+            cell->y = getIntValue(tokens, Y_TOKEN);
+        }
+        else if(strStartWith(tokens, SYMBOL_TOKEN)) {
+            cell->symbol = getStringValue(tokens, SYMBOL_TOKEN);
+        }
+        else if(strStartWith(tokens, COLOR_TOKEN)) {
+            cell->color = getStringValue(tokens, COLOR_TOKEN);
+        }
+        tokens = strtok(NULL, "|");
+    }
+
+   return cell;
 }
 
 char* serializePlayer(Player *player)
@@ -255,10 +380,10 @@ Player* deserializePlayer(char *string)
     return player;
 }
 
-char* serializeMovePlayerRequest(Cell *player, char *direction)
+char* serializeMovePlayerRequest(Cell *player, int direction)
 {
     char logging[2000];
-    sprintf(logging, "Serializing move player request with direction '%s'...", direction);
+    sprintf(logging, "Serializing move player request with direction '%d'...", direction);
     info(logging);
     char buffer[200];
 
@@ -276,7 +401,8 @@ char* serializeMovePlayerRequest(Cell *player, char *direction)
 
     strcat(message, "|");
     strcat(message, DIRECTION_TOKEN);
-    strcat(message, direction);
+    sprintf(buffer, "%d", direction);
+    strcat(message, buffer);
     strcat(message, ">\n");
 
 
@@ -292,9 +418,16 @@ MovePlayerRequest* deserializeMovePlayerRequest(char *string)
         return NULL;
     }
 
+    char logging[2000];
+    sprintf(logging, "Deserializing move player request '%s'...", string);
+    info(logging);
+
     MovePlayerRequest *action = (MovePlayerRequest*) malloc(sizeof(MovePlayerRequest));
 
-    char *data = substring(string, strlen(MOVE_PLAYER_REQUEST) + 1, strlen(string) - strlen(MOVE_PLAYER_REQUEST) - 1);
+    char *data = substring(string, strlen(MOVE_PLAYER_REQUEST) + 1, strlen(string) - strlen(MOVE_PLAYER_REQUEST) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing move player request body '%s'...", data);
+    info(logging);
+
     char *tokens = strtok(data, "|");
 
     while( tokens != NULL ) {
@@ -339,9 +472,16 @@ AuthenticationRequest* deserializeLoginRequest(char *string)
         return NULL;
     }
 
+    char logging[2000];
+    sprintf(logging, "Deserializing login request '%s'...", string);
+    info(logging);
+
     AuthenticationRequest *action = (AuthenticationRequest*) malloc(sizeof(AuthenticationRequest));
 
-    char *data = substring(string, strlen(LOGIN_REQUEST) + 1, strlen(string) - strlen(LOGIN_REQUEST) - 1);
+    char *data = substring(string, strlen(LOGIN_REQUEST) + 1, strlen(string) - strlen(LOGIN_REQUEST) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing login request body '%s'...", data);
+    info(logging);
+
     char *tokens = strtok(data, "|");
 
     while( tokens != NULL ) {
@@ -355,7 +495,57 @@ AuthenticationRequest* deserializeLoginRequest(char *string)
         tokens = strtok(NULL, "|");
     }
 
-   return action;
+    info("Login request deserialized!");
+    return action;
+}
+
+char* serializeLogoutRequest(char *username)
+{
+    char logging[2000];
+    sprintf(logging, "Serializing logout request with username '%s'...", username);
+    info(logging);
+
+    char *message = malloc(2000);
+    strcpy(message, LOGOUT_REQUEST);
+    strcat(message, USER_TOKEN);
+    strcat(message, username);
+    strcat(message, ">\n");
+
+
+    sprintf(logging, "Logout request serialized %s", message);
+    info(logging);
+
+    return message;
+}
+
+AuthenticationRequest* deserializeLogoutRequest(char *string)
+{
+    if(!strStartWith(string, LOGOUT_REQUEST)) {
+        return NULL;
+    }
+
+    char logging[2000];
+    sprintf(logging, "Deserializing logout request '%s'...", string);
+    info(logging);
+
+    AuthenticationRequest *action = (AuthenticationRequest*) malloc(sizeof(AuthenticationRequest));
+
+    char *data = substring(string, strlen(LOGOUT_REQUEST) + 1, strlen(string) - strlen(LOGOUT_REQUEST) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing logout request body '%s'...", data);
+    info(logging);
+
+    char *tokens = strtok(data, "|");
+
+    while( tokens != NULL ) {
+        if(strStartWith(tokens, USER_TOKEN)) {
+            action->username = getStringValue(tokens, USER_TOKEN);
+        }
+
+        tokens = strtok(NULL, "|");
+    }
+
+    info("Logout request deserialized!");
+    return action;
 }
 
 char* serializeRegisterRequest(char *username, char *password, char *color, char *symbol)
@@ -391,10 +581,16 @@ AuthenticationRequest* deserializeRegisterRequest(char *string)
     if(!strStartWith(string, REGISTER_REQUEST)) {
         return NULL;
     }
+    char logging[2000];
+    sprintf(logging, "Deserializing register request '%s'...", string);
+    info(logging);
 
     AuthenticationRequest *action = (AuthenticationRequest*) malloc(sizeof(AuthenticationRequest));
 
-    char *data = substring(string, strlen(REGISTER_REQUEST) + 1, strlen(string) - strlen(REGISTER_REQUEST) - 1);
+    char *data = substring(string, strlen(REGISTER_REQUEST) + 1, strlen(string) - strlen(REGISTER_REQUEST) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing register request body '%s'...", data);
+    info(logging);
+
     char *tokens = strtok(data, "|");
 
     while( tokens != NULL ) {
@@ -413,8 +609,8 @@ AuthenticationRequest* deserializeRegisterRequest(char *string)
 
         tokens = strtok(NULL, "|");
     }
-
-   return action;
+    info("Register request deserialized!");
+    return action;
 }
 
 char* serializeRegisterResponse(int status, char *message)
@@ -449,9 +645,16 @@ AuthenticationResponse* deserializeRegisterResponse(char *string)
         return NULL;
     }
 
+    char logging[2000];
+    sprintf(logging, "Deserializing register response '%s'...", string);
+    info(logging);
+
     AuthenticationResponse *action = (AuthenticationResponse*) malloc(sizeof(AuthenticationResponse));
 
-    char *data = substring(string, strlen(REGISTER_RESPONSE) + 1, strlen(string) - strlen(REGISTER_RESPONSE) - 1);
+    char *data = substring(string, strlen(REGISTER_RESPONSE) + 1, strlen(string) - strlen(REGISTER_RESPONSE) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing register response body '%s'...", data);
+    info(logging);
+
     char *tokens = strtok(data, "|");
 
     while( tokens != NULL ) {
@@ -498,9 +701,16 @@ AuthenticationResponse* deserializeLoginResponse(char *string)
         return NULL;
     }
 
+    char logging[2000];
+    sprintf(logging, "Deserializing login response '%s'...", string);
+    info(logging);
+
     AuthenticationResponse *action = (AuthenticationResponse*) malloc(sizeof(AuthenticationResponse));
 
-    char *data = substring(string, strlen(LOGIN_RESPONSE) + 1, strlen(string) - strlen(LOGIN_RESPONSE) - 1);
+    char *data = substring(string, strlen(LOGIN_RESPONSE) + 1, strlen(string) - strlen(LOGIN_RESPONSE) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing login response body '%s'...", data);
+    info(logging);
+
     char *tokens = strtok(data, "|");
 
     while( tokens != NULL ) {
@@ -555,9 +765,16 @@ MovePlayerResponse* deserializeMovePlayerResponse(char *string)
         return NULL;
     }
 
+    char logging[2000];
+    sprintf(logging, "Deserializing move player response '%s'...", string);
+    info(logging);
+
     MovePlayerResponse *action = (MovePlayerResponse*) malloc(sizeof(MovePlayerResponse));
 
-    char *data = substring(string, strlen(MOVE_PLAYER_RESPONSE) + 1, strlen(string) - strlen(MOVE_PLAYER_RESPONSE) - 1);
+    char *data = substring(string, strlen(MOVE_PLAYER_RESPONSE) + 1, strlen(string) - strlen(MOVE_PLAYER_RESPONSE) - 2); //-2 to remove '>\n' characters
+    sprintf(logging, "Deserializing move player response body '%s'...", data);
+    info(logging);
+
     char *tokens = strtok(data, "|");
 
     while( tokens != NULL ) {

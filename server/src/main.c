@@ -60,6 +60,7 @@ int main()
     int i = 0;
     while(1)
     {
+        info("Listening for client connections...");
         //Accept call creates a new socket for the incoming connection
         addr_size = sizeof serverStorage;
         newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);

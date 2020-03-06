@@ -9,9 +9,11 @@
 #include <pthread.h>
 #include "serial.h"
 #include "logging.h"
+#include "draw.h"
 #include "../../include/player.h"
 #include "../../include/game.h"
 #include "../../include/protocol.h"
+#include "../../include/menu.h"
 
 int clientSockets[100];
 int numSockets = 0;
@@ -23,6 +25,41 @@ Player *connectedPlayers = NULL;
 void addClientSocket(int clientSocket)
 {
     clientSockets[numSockets++] = clientSocket;
+}
+
+Player* getRegisteredPlayers()
+{
+    return registeredPlayers;
+}
+
+Player* getConnectedPlayers()
+{
+    return connectedPlayers;
+}
+
+void removeConnectedPlayer(Player *player)
+{
+    if(connectedPlayers == NULL)
+    {
+        return;
+    }
+    if (strcmp(connectedPlayers->username, player->username) == 0)
+    {
+        connectedPlayers = connectedPlayers->next;
+    }
+    else
+    {
+        Player *parent = connectedPlayers;
+        Player *current = connectedPlayers;
+        while (current != NULL) {
+            if (strcmp(current->username, player->username) == 0)
+            {
+                parent->next = current->next;
+            }
+            parent = current;
+            current = current->next;
+        }
+    }
 }
 
 void removeClientSocket(int clientSocket)
@@ -42,9 +79,37 @@ void removeClientSocket(int clientSocket)
 
 void broadcastNewGame(Game *game)
 {
+    info("Broadcasting new game...");
     int j;
     for( j = 0 ; j < numSockets; j++ ) {
         sendGame(clientSockets[j], game);
+    }
+}
+
+void broadcastAddedPlayer(Cell *player)
+{
+    info("Broadcasting new player...");
+    int j;
+    for( j = 0 ; j < numSockets; j++ ) {
+        sendAddedCell(clientSockets[j], player);
+    }
+}
+
+void broadcastRemovedPlayer(Cell *player)
+{
+    info("Broadcasting removed player...");
+    int j;
+    for( j = 0 ; j < numSockets; j++ ) {
+        sendRemovedCell(clientSockets[j], player);
+    }
+}
+
+void broadcastPlayerMoved(Cell *player, int status)
+{
+    info("Broadcasting player moved...");
+    int j;
+    for( j = 0 ; j < numSockets; j++ ) {
+        sendMovePlayerResponse(clientSockets[j], player, status);
     }
 }
 
@@ -113,10 +178,11 @@ void writeRegisteredPlayers()
 
     Player *current = registeredPlayers;
     while (current != NULL) {
+        line = serializePlayer(current);
+
         sprintf(logMessage, "Writing player '%s'", line);
         info(logMessage);
 
-        line = serializePlayer(current);
         fprintf (registeredPlayersFile, "%s\n", line);
         if (line)
         {
@@ -144,6 +210,22 @@ Player* getRegisteredPlayerByUsername(char *username)
     return res;
 }
 
+Player* getConnectedPlayerByUsername(char *username)
+{
+    Player *res = NULL;
+
+    Player *current = connectedPlayers;
+    while(current != NULL && res == NULL)
+    {
+        if(strcmp(current->username, username) == 0)
+        {
+            res = current;
+        }
+        current = current->next;
+    }
+    return res;
+}
+
 pthread_mutex_t registerPlayerMutex = PTHREAD_MUTEX_INITIALIZER;
 int registerPlayer(AuthenticationRequest *authenticationRequest)
 {
@@ -151,7 +233,7 @@ int registerPlayer(AuthenticationRequest *authenticationRequest)
     pthread_mutex_lock(&registerPlayerMutex);
 
     char logMessage[2000];
-    sprintf(logMessage, "Registering player '%s'", authenticationRequest->username);
+    sprintf(logMessage, "Registering player '%s' with symbol '%s'", authenticationRequest->username, authenticationRequest->symbol);
     info(logMessage);
 
     //If there is no registered player having that specific username
@@ -200,22 +282,37 @@ int loginPlayer(AuthenticationRequest *authenticationRequest)
     int status = 1;
     pthread_mutex_lock(&loginPlayerMutex);
 
+    char logMessage[2000];
+    sprintf(logMessage, "Logging-in player '%s'", authenticationRequest->username);
+    info(logMessage);
+
     //If there is a registered player having that specific username and the password matches, then he is logged in
     Player *registeredPlayer = getRegisteredPlayerByUsername(authenticationRequest->username);
     if(registeredPlayer != NULL && (strcmp(registeredPlayer->password, authenticationRequest->password) == 0))
     {
-        Player *player;
-        memcpy(&registeredPlayer, &player, sizeof(Player));
+        sprintf(logMessage, "Player '%s' is authenticated successfully", authenticationRequest->username);
+        info(logMessage);
 
-        Player *parent = connectedPlayers;
-        Player *current = connectedPlayers;
-        while(current != NULL)
+        Player *player = (Player*) malloc(sizeof(Player));
+        player->username = registeredPlayer->username;
+        player->password = registeredPlayer->password;
+        player->symbol = registeredPlayer->symbol;
+        player->color = registeredPlayer->color;
+
+        if(connectedPlayers == NULL)
         {
-            parent = current;
-            current = current->next;
+            connectedPlayers = player;
         }
-
-        parent->next = player;
+        else{
+            Player *parent = connectedPlayers;
+            Player *current = connectedPlayers;
+            while(current != NULL)
+            {
+                parent = current;
+                current = current->next;
+            }
+            parent->next = player;
+        }
 
         status = 0;
     }
@@ -224,13 +321,18 @@ int loginPlayer(AuthenticationRequest *authenticationRequest)
     return status;
 }
 
-
-void broadcastPlayerMoved(Cell *player, int status)
+void logoutPlayer(AuthenticationRequest *authenticationRequest)
 {
-    int j;
-    for( j = 0 ; j < numSockets; j++ ) {
-        sendMovePlayerResponse(clientSockets[j], player, status);
-    }
+    pthread_mutex_lock(&loginPlayerMutex);
+
+    char logMessage[2000];
+    sprintf(logMessage, "Logging-out player '%s'", authenticationRequest->username);
+    info(logMessage);
+
+    Player *connectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
+    removeConnectedPlayer(connectedPlayer);
+
+    pthread_mutex_unlock(&loginPlayerMutex);
 }
 
 pthread_mutex_t authenticationMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -241,9 +343,13 @@ void *playerThreadFunc(void *vargp)
     addClientSocket(clientSocket);
     char client_message[2000];
 
+    Cell *currentPlayerCell = NULL;
+    Player *currentConnectedPlayer = NULL;
+
     int clientConnected = 1;
     while(clientConnected)
     {
+        memset(client_message, '\0', 2000);
         if(recv(clientSocket, client_message, 2000, 0) <= 0)
         {
            warn("Connection closed. The client cut off!");
@@ -254,6 +360,9 @@ void *playerThreadFunc(void *vargp)
             AuthenticationRequest *authenticationRequest = NULL;
             MovePlayerRequest *movePlayerRequest = NULL;
             char logMessage[2100];
+
+            sprintf(logMessage, "New message from client: %s", client_message);
+            info(logMessage);
 
             //The client sent a register request
             if((authenticationRequest = deserializeRegisterRequest(client_message)) != NULL)
@@ -272,7 +381,6 @@ void *playerThreadFunc(void *vargp)
             //The client sent a login request
             else if((authenticationRequest = deserializeLoginRequest(client_message)) != NULL)
             {
-
                 sprintf(logMessage, "LoginAction: %s", client_message);
                 info(logMessage);
 
@@ -282,6 +390,9 @@ void *playerThreadFunc(void *vargp)
                 {
                     message = "Login failed. Username and/or password incorrect!";
                 }
+                sprintf(logMessage, "Login: %s", message);
+                info(logMessage);
+
                 sendLoginResponse(clientSocket, status, message);
 
                 //If login correct then the player joins the current game (if any)
@@ -290,15 +401,28 @@ void *playerThreadFunc(void *vargp)
                     Game *game = getCurrentGame();
                     if(game != NULL)
                     {
-                        Cell *player = (Cell*) malloc(sizeof(Cell));
-                        player->user = authenticationRequest->username;
-                        player->x = 0;
-                        player->y = 12;
-                        player->symbol = "G";
-                        player->color = "\x1B[35m";
+                        Player *connectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
+                        Cell *playerCell = (Cell*) malloc(sizeof(Cell));
+                        playerCell->user = authenticationRequest->username;
+                        playerCell->x = 0;
+                        playerCell->y = 12;
+                        playerCell->symbol = connectedPlayer->symbol;
+                        playerCell->color = connectedPlayer->color;
 
-                        addPlayer(game, player);
+                        //Send first the game without the new player
                         sendGame(clientSocket, game);
+
+                        //Then, add the player to the game
+                        addPlayer(game, playerCell);
+
+                        //And finally broadcasts to all connected players about the new player just joined
+                        broadcastAddedPlayer(playerCell);
+
+                        currentPlayerCell = playerCell;
+                        currentConnectedPlayer = connectedPlayer;
+
+                        drawMineField(game);
+                        setCursorToOffset();
                     }
                 }
             }
@@ -311,14 +435,39 @@ void *playerThreadFunc(void *vargp)
 
                 Game *game = getCurrentGame();
                 int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
-                int index = indexOfPlayer(game, movePlayerRequest->player);
+                Cell *playerCell = getPlayerByUsername(game, movePlayerRequest->player->user);
 
-                broadcastPlayerMoved(&(game->playerCells[index]), status);
+                broadcastPlayerMoved(playerCell, status);
+            }
+            //The client sent a logout request
+            else if((authenticationRequest = deserializeLogoutRequest(client_message)) != NULL)
+            {
+                logoutPlayer(authenticationRequest);
+
+                Game *game = getCurrentGame();
+                //remove the player from the game
+                removePlayer(game, currentPlayerCell);
+
+                //And finally broadcasts to all connected players about the removed player
+                broadcastRemovedPlayer(currentPlayerCell);
+
+                drawMineField(game);
+                setCursorToOffset();
+
+                currentPlayerCell = NULL;
+                currentConnectedPlayer = NULL;
             }
         }
     }
 
     removeClientSocket(clientSocket);
     close(clientSocket);
+
+    removePlayer(getCurrentGame(), currentPlayerCell);
+    removeConnectedPlayer(currentConnectedPlayer);
+    broadcastRemovedPlayer(currentPlayerCell);
+    drawMineField(getCurrentGame());
+    setCursorToOffset();
+
     pthread_exit(NULL);
 }

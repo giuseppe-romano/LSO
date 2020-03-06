@@ -21,5 +21,6 @@
 void drawServerTitle();
 void drawClientTitle();
 void drawMineField(Game *game);
+void drawPlayer(Player *player);
 
 #endif

@@ -3,6 +3,7 @@
 #include <time.h>
 #include <string.h>
 #include "../../include/game.h"
+#include "../../include/player.h"
 
 #define NUM_ROWS 20
 #define NUM_COLS 30
@@ -28,10 +29,22 @@ void deployRandomBombs(Game *game) {
         b->x = x == 0 ? x + 1 : ((x == game->cols - 1) ? x - 1 : x);
         b->y = rand() % game->rows;
         b->symbol = "X";
-        b->color = "\x1B[31m";
+        b->color = "red";
 
         game->bombCells[j] = *b;
     }
+}
+
+Cell* generateRandomPlayerCell(Player *player)
+{
+    Cell *cell = (Cell*) malloc(sizeof(Cell));
+    cell->user = player->username;
+    cell->x = 0;
+    cell->y = 5; //Random
+    cell->symbol = player->symbol;
+    cell->color = player->color;
+
+    return cell;
 }
 
 Game* generateNewGame() {
@@ -40,10 +53,18 @@ Game* generateNewGame() {
     game->rows = NUM_ROWS;
     game->cols = NUM_COLS;
 
-    game->numPlayers = 0;
+    Player *players = getConnectedPlayers();
 
     //Allocate the maximum number of players (one for each row)
     game->playerCells = (Cell*) malloc(game->rows * sizeof(Cell));
+
+    int count = 0;
+    Player *current = players;
+    while (current != NULL) {
+        game->playerCells[count++] = *generateRandomPlayerCell(current);
+        current = current->next;
+    }
+    game->numPlayers = count;
 
     deployRandomBombs(game);
 
@@ -69,6 +90,30 @@ int indexOfPlayer(Game* game, Cell *player) {
         }
     }
     return index;
+}
+
+Cell* getPlayerByUsername(Game *game, char *username) {
+    Cell player;
+    Cell *cell = NULL;
+    int j;
+    int found = 0;
+    for(j = 0; j < game->numPlayers; j++) {
+        if(strcmp(game->playerCells[j].user, username) == 0) {
+            player = game->playerCells[j];
+            found = 1;
+        }
+    }
+
+    if(found)
+    {
+        cell = (Cell*) malloc(sizeof(Cell));
+        cell->user = username;
+        cell->x = player.x;
+        cell->y = player.y;
+        cell->symbol = player.symbol;
+        cell->color = player.color;
+    }
+    return cell;
 }
 
 int hasBombAt(Game* game, int x, int y) {

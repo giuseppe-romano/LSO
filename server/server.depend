@@ -8,17 +8,18 @@
 1578416028 /home/peppe/UNINA/LSO/server/include/draw.h
 	"game.h"
 
-1582902530 /home/peppe/UNINA/LSO/server/include/game.h
+1583510239 /home/peppe/UNINA/LSO/server/include/game.h
 	"draw.h"
 
-1583169394 source:/home/peppe/UNINA/LSO/server/src/game/game.c
+1583510821 source:/home/peppe/UNINA/LSO/server/src/game/game.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
 	<string.h>
 	"../../include/game.h"
+	"../../include/player.h"
 
-1583233310 source:/home/peppe/UNINA/LSO/server/src/main.c
+1583338818 source:/home/peppe/UNINA/LSO/server/src/main.c
 	<stdio.h>
 	<stdlib.h>
 	<sys/socket.h>
@@ -36,16 +37,17 @@
 	"../include/menu.h"
 	"../include/player.h"
 
-1583169394 /home/peppe/UNINA/LSO/server/include/protocol.h
+1583408864 /home/peppe/UNINA/LSO/server/include/protocol.h
 	"game.h"
 
-1583169394 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
+1583408785 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	<sys/socket.h>
 	<unistd.h>
 	"serial.h"
+	"logging.h"
 	"../../include/game.h"
 	"../../include/protocol.h"
 
@@ -54,7 +56,7 @@
 
 1579098631 /home/peppe/UNINA/LSO/shared/include/serial.h
 
-1583171556 /home/peppe/UNINA/LSO/shared/draw.h
+1583404601 /home/peppe/UNINA/LSO/shared/draw.h
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -62,11 +64,11 @@
 	<unistd.h>
 	"serial.h"
 
-1583234876 /home/peppe/UNINA/LSO/shared/serial.h
+1583506771 /home/peppe/UNINA/LSO/shared/serial.h
 
-1582718469 /home/peppe/UNINA/LSO/server/include/menu.h
+1583410076 /home/peppe/UNINA/LSO/server/include/menu.h
 
-1583169522 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
+1583484468 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -75,10 +77,10 @@
 	"../../include/game.h"
 	"../../include/player.h"
 
-1583234368 /home/peppe/UNINA/LSO/server/include/player.h
+1583411270 /home/peppe/UNINA/LSO/server/include/player.h
 	"serial.h"
 
-1583235476 source:/home/peppe/UNINA/LSO/server/src/player/player.c
+1583510842 source:/home/peppe/UNINA/LSO/server/src/player/player.c
 	<stdio.h>
 	<stdlib.h>
 	<sys/socket.h>
@@ -90,9 +92,11 @@
 	<pthread.h>
 	"serial.h"
 	"logging.h"
+	"draw.h"
 	"../../include/player.h"
 	"../../include/game.h"
 	"../../include/protocol.h"
+	"../../include/menu.h"
 
 1582718469 /home/peppe/UNINA/LSO/shared/logging.h
 

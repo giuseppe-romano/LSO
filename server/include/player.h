@@ -7,6 +7,10 @@ void addClientSocket(int clientSocket);
 
 void removeClientSocket(int clientSocket);
 
+Player* getRegisteredPlayers();
+
+Player* getConnectedPlayers();
+
 void loadRegisteredPlayers(char *filepath);
 
 void broadcastNewGame(Game *game);

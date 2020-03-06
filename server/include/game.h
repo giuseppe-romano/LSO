@@ -23,6 +23,8 @@ Game* getCurrentGame();
 
 int indexOfPlayer(Game* game, Cell *player);
 
+Cell* getPlayerByUsername(Game *game, char *username);
+
 int addPlayer(Game* game, Cell *player);
 
 int removePlayer(Game* game, Cell *player);

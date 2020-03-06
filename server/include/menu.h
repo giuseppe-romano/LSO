@@ -3,6 +3,8 @@
 
 void *menuThreadFunc(void *vargp);
 
+void setCursorToOffset();
+
 void showListPlayersMenu();
 
 void showMainMenu();

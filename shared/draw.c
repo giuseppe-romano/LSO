@@ -3,6 +3,42 @@
 #include <time.h>
 #include "draw.h"
 
+char* getColorByName(char *name)
+{
+    if (strcmp(name, "red") == 0)
+    {
+        return RED;
+    }
+    else if (strcmp(name, "green") == 0)
+    {
+        return GRN;
+    }
+    else if (strcmp(name, "yellow") == 0)
+    {
+        return YEL;
+    }
+    else if (strcmp(name, "blue") == 0)
+    {
+        return BLU;
+    }
+    else if (strcmp(name, "magenta") == 0)
+    {
+        return MAG;
+    }
+    else if (strcmp(name, "ciano") == 0)
+    {
+        return CYN;
+    }
+    else if (strcmp(name, "white") == 0)
+    {
+        return WHT;
+    }
+    else /* default: */
+    {
+        return RESET;
+    }
+}
+
 void drawCell(Cell *cell, int x, int y) {
     gotoxy(x, y);
     printf("|");
@@ -11,7 +47,7 @@ void drawCell(Cell *cell, int x, int y) {
         printf("   ");
     }
     else {
-        printf("%s", cell->color);
+        printf("%s", getColorByName(cell->color));
         printf(" %s ", cell->symbol);
         printf(RESET);
     }
@@ -82,3 +118,12 @@ void drawMineField(Game *game) {
     printf("\n");
 }
 
+void drawPlayer(Player *player)
+{
+    char m[2000];
+    printf("%s", getColorByName(player->color));
+    sprintf(m, "    username: %s,  password: %s, symbol:%s", player->username, player->password, player->symbol);
+
+    printf("%-59s", m);
+    printf(RESET);
+}

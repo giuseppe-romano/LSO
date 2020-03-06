@@ -4,13 +4,20 @@
 #include "../../include/menu.h"
 #include "../../include/protocol.h"
 #include "draw.h"
+#include "serial.h"
 
+#define MOVE_UP 10
+#define MOVE_RIGHT 11
+#define MOVE_DOWN 12
+#define MOVE_LEFT 13
+
+Cell *currentPlayerCell;
 int registerResponseReceived = 0;
-int registerResponseStatus;
+int registerResponseStatus = -1;
 char *registerResponseMessage;
 
 int loginResponseReceived = 0;
-int loginResponseStatus;
+int loginResponseStatus = -1;
 char *loginResponseMessage;
 
 int notificationStatus;
@@ -42,6 +49,98 @@ void printNotificationMessage()
     notificationStatus = 0;
     notificationMessage = NULL;
 }
+
+
+void showGameMenu()
+{
+    int choice;
+    int exit = 0;
+    int invalid = 0;
+    do {
+        clearMenu();
+
+        gotoxy(1, 1);
+        printf("%-59s", " ");
+        gotoxy(1, 2);
+        printf("%-59s", " ");
+        gotoxy(1, 3);
+        printf("%-59s", " ");
+
+        gotoxy(1, 4);
+        printf("%-59s", "PLAY GAME MENU");
+        gotoxy(1, 6);
+        printf("%-59s", "    1 - Move Up");
+        gotoxy(1, 7);
+        printf("%-59s", "    2 - Move Right");
+        gotoxy(1, 8);
+        printf("%-59s", "    3 - Move Down");
+        gotoxy(1, 9);
+        printf("%-59s", "    4 - Move Left");
+
+        gotoxy(1, 11);
+        printf("%-59s", "    9 - Logout");
+
+        gotoxy(1, 13);
+        if(invalid)
+        {
+            printf(RED);
+            printf("%-59s", "Invalid option!!");
+            printf(RESET);
+        }
+        else
+        {
+            printf("%-59s", " ");
+        }
+
+        printNotificationMessage();
+
+        gotoxy(1, 12);
+        printf("%-59s", "Please make a choice: ");
+        gotoxy(23, 12);
+        if(scanf("%d", &choice) != 1)
+        {
+            choice = -1;
+            while(getchar() != '\n');
+        }
+
+        invalid = 0;
+
+        switch(choice)
+        {
+            case 1: {
+                sendMovePlayerRequest(currentPlayerCell, MOVE_UP);
+                break;
+                }
+
+            case 2: {
+                sendMovePlayerRequest(currentPlayerCell, MOVE_RIGHT);
+                break;
+                }
+
+            case 3: {
+                sendMovePlayerRequest(currentPlayerCell, MOVE_DOWN);
+                break;
+                }
+
+            case 4: {
+                sendMovePlayerRequest(currentPlayerCell, MOVE_LEFT);
+                break;
+                }
+
+            case 9:
+                sendLogoutRequest(currentPlayerCell->user);
+                system("@cls||clear");
+                drawClientTitle();
+                exit = 1;
+                break;
+
+            default:
+                invalid = 1;
+        }
+    } while(!exit);
+
+}
+
 
 void showRegisterMenu()
 {
@@ -141,22 +240,11 @@ void showLoginMenu()
 
     notificationMessage = loginResponseMessage;
     notificationStatus = loginResponseStatus;
-}
 
-void showGameMenu()
-{
-    clearMenu();
-
-    gotoxy(1, 1);
-    printf("%-59s", " ");
-    gotoxy(1, 2);
-    printf("%-59s", " ");
-    gotoxy(1, 3);
-    printf("%-59s", " ");
-    gotoxy(1, 4);
-    printf("%-59s", "GAME");
-    gotoxy(1, 6);
-
+    if(notificationStatus == 0)
+    {
+        showGameMenu();
+    }
 }
 
 void showMainMenu()
@@ -173,31 +261,15 @@ void showMainMenu()
         printf("%-59s", " ");
         gotoxy(1, 3);
         printf("%-59s", " ");
+
         gotoxy(1, 4);
         printf("%-59s", "MAIN MENU");
-
-        if(loginResponseStatus == 0)
-        {
-            gotoxy(1, 6);
-            printf("%-59s", "    1 - Register");
-            gotoxy(1, 8);
-            printf("%-59s", "    2 - Login");
-            gotoxy(1, 10);
-            printf("%-59s", "    9 - Exit");
-        }
-        else{
-            gotoxy(1, 6);
-            printf("%-59s", "    1 - Move Up");
-            gotoxy(1, 7);
-            printf("%-59s", "    2 - Move Right");
-            gotoxy(1, 8);
-            printf("%-59s", "    3 - Move Down");
-            gotoxy(1, 9);
-            printf("%-59s", "    4 - Move Left");
-
-            gotoxy(1, 11);
-            printf("%-59s", "    9 - Logout");
-        }
+        gotoxy(1, 6);
+        printf("%-59s", "    1 - Register");
+        gotoxy(1, 8);
+        printf("%-59s", "    2 - Login");
+        gotoxy(1, 10);
+        printf("%-59s", "    9 - Exit");
 
         gotoxy(1, 13);
         if(invalid)
@@ -258,6 +330,11 @@ void setLoginResponseReceived(int status, char *message)
     loginResponseStatus = status;
     loginResponseMessage = message;
     loginResponseReceived = 1;
+}
+
+void setCurrentPlayerCell(Cell *playerCell)
+{
+    currentPlayerCell = playerCell;
 }
 
 void *menuThreadFunc(void *vargp)
