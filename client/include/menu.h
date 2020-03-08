@@ -13,4 +13,6 @@ void showRegisterMenu();
 void showLoginMenu();
 void showGameMenu();
 
+void setCursorToOffset();
+
 #endif

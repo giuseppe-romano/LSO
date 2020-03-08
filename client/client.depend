@@ -9,7 +9,7 @@
 	<fcntl.h>
 	<unistd.h>
 
-1583408661 source:/home/peppe/UNINA/LSO/client/src/main.c
+1583627038 source:/home/peppe/UNINA/LSO/client/src/main.c
 	<stdio.h>
 	<sys/socket.h>
 	<netinet/in.h>
@@ -30,7 +30,7 @@
 
 1579098631 /home/peppe/UNINA/LSO/shared/include/serial.h
 
-1583404601 /home/peppe/UNINA/LSO/shared/draw.h
+1583623656 /home/peppe/UNINA/LSO/shared/draw.h
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -38,23 +38,26 @@
 	<unistd.h>
 	"serial.h"
 
-1583408678 /home/peppe/UNINA/LSO/shared/serial.h
+1583625120 /home/peppe/UNINA/LSO/shared/serial.h
 
-1582718469 /home/peppe/UNINA/LSO/shared/logging.h
+1581810313 /home/peppe/UNINA/LSO/shared/logging.h
 
-1583171260 /home/peppe/UNINA/LSO/client/include/menu.h
+1583626738 /home/peppe/UNINA/LSO/client/include/menu.h
+	"serial.h"
 
-1583239442 source:/home/peppe/UNINA/LSO/client/src/menu/menu.c
+1583626709 source:/home/peppe/UNINA/LSO/client/src/menu/menu.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
 	"../../include/menu.h"
 	"../../include/protocol.h"
 	"draw.h"
+	"serial.h"
 
-1583170373 /home/peppe/UNINA/LSO/client/include/protocol.h
+1583623656 /home/peppe/UNINA/LSO/client/include/protocol.h
+	"serial.h"
 
-1583335664 source:/home/peppe/UNINA/LSO/client/src/protocol/protocol.c
+1583623656 source:/home/peppe/UNINA/LSO/client/src/protocol/protocol.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>

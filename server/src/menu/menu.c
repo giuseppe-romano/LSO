@@ -36,14 +36,13 @@ void showPlayersMenu(char *category, Player *players)
     gotoxy(1, 4);
 
     char buffer[2000];
-    sprintf(buffer, "%s players", category);
+    sprintf(buffer, "%s PLAYERS", category);
     printf("%-59s", buffer);
 
     if(players == NULL)
     {
         gotoxy(1, 6);
-        sprintf(buffer, "    No %s players yet!", category);
-        printf("%-59s", buffer);
+        printf("%-59s", "No players yet!");
 
         gotoxy(1, 8);
         printf("%-59s", "Press any key:");
@@ -129,12 +128,12 @@ void showListPlayersMenu()
         switch(choice)
         {
             case 1: {
-                showPlayersMenu("registered", getRegisteredPlayers());
+                showPlayersMenu("REGISTERED", getRegisteredPlayers());
                 break;
             }
 
             case 2:
-                showPlayersMenu("connected", getConnectedPlayers());
+                showPlayersMenu("CONNECTED", getConnectedPlayers());
                 break;
 
             case 9:

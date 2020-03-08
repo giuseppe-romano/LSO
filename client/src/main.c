@@ -71,7 +71,7 @@ int main(){
                 Cell *cell = NULL;
 
                 char logMessage[2100];
-                sprintf(logMessage, "Message from server: '%s'", server_message);
+                sprintf(logMessage, "Complete message from server: '%s'", server_message);
                 info(logMessage);
 
                 //The server message can contain multiple messages, so it will be splitted
@@ -79,6 +79,12 @@ int main(){
                 char *message;
                 while ((message = strsep(&buffer, "\n")) != NULL)
                 {
+                    if(strlen(message) > 0)
+                    {
+                        sprintf(logMessage, "Message from server: '%s'", message);
+                        info(logMessage);
+                    }
+
                     //The server sent a register response
                     if((authenticationResponse = deserializeRegisterResponse(message)) != NULL)
                     {
@@ -86,6 +92,9 @@ int main(){
                         info(logMessage);
 
                         setRegisterResponseReceived(authenticationResponse->status, authenticationResponse->message);
+
+                        free(authenticationResponse);
+                        authenticationResponse = NULL;
                     }
                     //The server sent a login response
                     else if((authenticationResponse = deserializeLoginResponse(message)) != NULL)
@@ -94,18 +103,58 @@ int main(){
                         info(logMessage);
 
                         setLoginResponseReceived(authenticationResponse->status, authenticationResponse->message);
+
+                        free(authenticationResponse);
+                        authenticationResponse = NULL;
                     }
                     //The server sent a move player response
                     else if((movePlayerResponse = deserializeMovePlayerResponse(message)) != NULL)
                     {
                         sprintf(logMessage, "MovePlayerResponse: %s", message);
                         info(logMessage);
+
+                        switch(movePlayerResponse->status)
+                        {
+                            case ERR_PLAYER_MOVED_SUCCESS: {
+
+                                int j;
+                                for(j = 0; j < currentGame->numPlayers; j++) {
+                                    if(strcmp(currentGame->playerCells[j].user, movePlayerResponse->player->user) == 0) {
+                                        currentGame->playerCells[j].x = movePlayerResponse->player->x;
+                                        currentGame->playerCells[j].y = movePlayerResponse->player->y;
+                                    }
+                                }
+                                break;
+                            }
+                            case ERR_PLAYER_HIT_BOMB: {
+                                //Removes the player from the game
+                                break;
+                            }
+                            case ERR_USER_WIN_GAME: {
+                                //Show a notification saying which user won.
+                                break;
+                            }
+                            default: {
+                                //No action
+                            }
+                        }
+                        drawMineField(currentGame);
+                        setCursorToOffset();
+
+                        free(movePlayerResponse);
+                        movePlayerResponse = NULL;
                     }
                     //The server sent a new game
                     else if((game = deserializeGame(message)) != NULL)
                     {
                         sprintf(logMessage, "Game: %s", message);
                         info(logMessage);
+
+                        if(currentGame != NULL)
+                        {
+                            free(currentGame);
+                            currentGame = NULL;
+                        }
 
                         currentGame = game;
                         drawMineField(game);
@@ -118,9 +167,12 @@ int main(){
 
                         if(currentGame)
                         {
+                            info("Adding the new player to the game...");
                             currentGame->playerCells[currentGame->numPlayers] = *cell;
                             currentGame->numPlayers++;
+                            info("New player added to the game!");
                         }
+                        info("Drawing the game...");
                         drawMineField(currentGame);
 
                         setCurrentPlayerCell(cell);
@@ -149,6 +201,9 @@ int main(){
                             currentGame->numPlayers--;
                         }
                         drawMineField(currentGame);
+
+                        free(cell);
+                        cell = NULL;
                     }
                 }
 

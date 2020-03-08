@@ -5,6 +5,7 @@
 #include "../../include/protocol.h"
 #include "draw.h"
 #include "serial.h"
+#include "logging.h"
 
 #define MOVE_UP 10
 #define MOVE_RIGHT 11
@@ -19,9 +20,13 @@ char *registerResponseMessage;
 int loginResponseReceived = 0;
 int loginResponseStatus = -1;
 char *loginResponseMessage;
+char loggedInUsername[200];
 
 int notificationStatus;
 char *notificationMessage;
+
+int currentXInputOffset = 0;
+int currentYInputOffset = 0;
 
 void clearMenu()
 {
@@ -31,6 +36,12 @@ void clearMenu()
         gotoxy(1, i);
         printf("%-59s", " ");
     }
+}
+
+
+void setCursorToOffset()
+{
+    gotoxy(currentXInputOffset, currentYInputOffset);
 }
 
 void printNotificationMessage()
@@ -97,6 +108,8 @@ void showGameMenu()
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
         gotoxy(23, 12);
+        currentXInputOffset = 23;
+        currentYInputOffset = 12;
         if(scanf("%d", &choice) != 1)
         {
             choice = -1;
@@ -243,6 +256,7 @@ void showLoginMenu()
 
     if(notificationStatus == 0)
     {
+        strcpy(loggedInUsername, username);
         showGameMenu();
     }
 }
@@ -288,6 +302,8 @@ void showMainMenu()
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
         gotoxy(23, 12);
+        currentXInputOffset = 23;
+        currentYInputOffset = 12;
         if(scanf("%d", &choice) != 1)
         {
             choice = -1;
@@ -334,7 +350,20 @@ void setLoginResponseReceived(int status, char *message)
 
 void setCurrentPlayerCell(Cell *playerCell)
 {
-    currentPlayerCell = playerCell;
+
+    if(strcmp(playerCell->user, loggedInUsername) == 0)
+    {
+        if(currentPlayerCell != NULL)
+        {
+            free(currentPlayerCell);
+        }
+        currentPlayerCell = (Cell*)malloc(sizeof(Cell));
+        currentPlayerCell->user = playerCell->user;
+        currentPlayerCell->x = playerCell->x;
+        currentPlayerCell->y = playerCell->y;
+        currentPlayerCell->symbol = playerCell->symbol;
+        currentPlayerCell->color = playerCell->color;
+    }
 }
 
 void *menuThreadFunc(void *vargp)

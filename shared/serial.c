@@ -145,23 +145,27 @@ char* serializeGame(Game *game)
     strcat(message, NUM_PLAYERS_TOKEN);
     sprintf(str, "%d", game->numPlayers);
     strcat(message, str);
-    strcat(message, "|");
 
-    char buffer[100];
-    int j;
-    for( j = 0 ; j < game->numPlayers; j++ ) {
-        strcat(message, PLAYER_TOKEN);
+    if(game->numPlayers > 0)
+    {
+        strcat(message, "|");
 
-        sprintf(buffer, "{x=%d,y=%d,symbol=%s,color=%s,user=%s,}",
-            game->playerCells[j].x,
-            game->playerCells[j].y,
-            game->playerCells[j].symbol,
-            game->playerCells[j].color,
-            game->playerCells[j].user);
-        strcat(message, buffer);
+        char buffer[100];
+        int j;
+        for( j = 0 ; j < game->numPlayers; j++ ) {
+            strcat(message, PLAYER_TOKEN);
 
-        if(j < game->numPlayers - 1) {
-            strcat(message, "|");
+            sprintf(buffer, "{x=%d,y=%d,symbol=%s,color=%s,user=%s,}",
+                game->playerCells[j].x,
+                game->playerCells[j].y,
+                game->playerCells[j].symbol,
+                game->playerCells[j].color,
+                game->playerCells[j].user);
+            strcat(message, buffer);
+
+            if(j < game->numPlayers - 1) {
+                strcat(message, "|");
+            }
         }
     }
     strcat(message, ">\n");
@@ -181,7 +185,7 @@ Game* deserializeGame(char *string)
     sprintf(logging, "Deserializing game '%s'...", string);
     info(logging);
 
-    char *data = substring(string, strlen(NEW_GAME_ACTION) + 1, strlen(string) - strlen(NEW_GAME_ACTION) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(NEW_GAME_ACTION) + 1, strlen(string) - strlen(NEW_GAME_ACTION) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing game body '%s'...", data);
     info(logging);
 
@@ -243,7 +247,7 @@ Cell* deserializeAddedCell(char *string)
 
     Cell *cell = (Cell*) malloc(sizeof(Cell));
 
-    char *data = substring(string, strlen(ADDED_CELL_ACTION) + 1, strlen(string) - strlen(ADDED_CELL_ACTION) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(ADDED_CELL_ACTION) + 1, strlen(string) - strlen(ADDED_CELL_ACTION) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing added cell body '%s'...", data);
     info(logging);
 
@@ -301,7 +305,7 @@ Cell* deserializeRemovedCell(char *string)
 
     Cell *cell = (Cell*) malloc(sizeof(Cell));
 
-    char *data = substring(string, strlen(REMOVED_CELL_ACTION) + 1, strlen(string) - strlen(REMOVED_CELL_ACTION) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(REMOVED_CELL_ACTION) + 1, strlen(string) - strlen(REMOVED_CELL_ACTION) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing removed cell body '%s'...", data);
     info(logging);
 
@@ -424,7 +428,7 @@ MovePlayerRequest* deserializeMovePlayerRequest(char *string)
 
     MovePlayerRequest *action = (MovePlayerRequest*) malloc(sizeof(MovePlayerRequest));
 
-    char *data = substring(string, strlen(MOVE_PLAYER_REQUEST) + 1, strlen(string) - strlen(MOVE_PLAYER_REQUEST) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(MOVE_PLAYER_REQUEST) + 1, strlen(string) - strlen(MOVE_PLAYER_REQUEST) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing move player request body '%s'...", data);
     info(logging);
 
@@ -478,7 +482,7 @@ AuthenticationRequest* deserializeLoginRequest(char *string)
 
     AuthenticationRequest *action = (AuthenticationRequest*) malloc(sizeof(AuthenticationRequest));
 
-    char *data = substring(string, strlen(LOGIN_REQUEST) + 1, strlen(string) - strlen(LOGIN_REQUEST) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(LOGIN_REQUEST) + 1, strlen(string) - strlen(LOGIN_REQUEST) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing login request body '%s'...", data);
     info(logging);
 
@@ -530,7 +534,7 @@ AuthenticationRequest* deserializeLogoutRequest(char *string)
 
     AuthenticationRequest *action = (AuthenticationRequest*) malloc(sizeof(AuthenticationRequest));
 
-    char *data = substring(string, strlen(LOGOUT_REQUEST) + 1, strlen(string) - strlen(LOGOUT_REQUEST) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(LOGOUT_REQUEST) + 1, strlen(string) - strlen(LOGOUT_REQUEST) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing logout request body '%s'...", data);
     info(logging);
 
@@ -587,7 +591,7 @@ AuthenticationRequest* deserializeRegisterRequest(char *string)
 
     AuthenticationRequest *action = (AuthenticationRequest*) malloc(sizeof(AuthenticationRequest));
 
-    char *data = substring(string, strlen(REGISTER_REQUEST) + 1, strlen(string) - strlen(REGISTER_REQUEST) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(REGISTER_REQUEST) + 1, strlen(string) - strlen(REGISTER_REQUEST) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing register request body '%s'...", data);
     info(logging);
 
@@ -651,7 +655,7 @@ AuthenticationResponse* deserializeRegisterResponse(char *string)
 
     AuthenticationResponse *action = (AuthenticationResponse*) malloc(sizeof(AuthenticationResponse));
 
-    char *data = substring(string, strlen(REGISTER_RESPONSE) + 1, strlen(string) - strlen(REGISTER_RESPONSE) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(REGISTER_RESPONSE) + 1, strlen(string) - strlen(REGISTER_RESPONSE) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing register response body '%s'...", data);
     info(logging);
 
@@ -707,7 +711,7 @@ AuthenticationResponse* deserializeLoginResponse(char *string)
 
     AuthenticationResponse *action = (AuthenticationResponse*) malloc(sizeof(AuthenticationResponse));
 
-    char *data = substring(string, strlen(LOGIN_RESPONSE) + 1, strlen(string) - strlen(LOGIN_RESPONSE) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(LOGIN_RESPONSE) + 1, strlen(string) - strlen(LOGIN_RESPONSE) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing login response body '%s'...", data);
     info(logging);
 
@@ -771,7 +775,7 @@ MovePlayerResponse* deserializeMovePlayerResponse(char *string)
 
     MovePlayerResponse *action = (MovePlayerResponse*) malloc(sizeof(MovePlayerResponse));
 
-    char *data = substring(string, strlen(MOVE_PLAYER_RESPONSE) + 1, strlen(string) - strlen(MOVE_PLAYER_RESPONSE) - 2); //-2 to remove '>\n' characters
+    char *data = substring(string, strlen(MOVE_PLAYER_RESPONSE) + 1, strlen(string) - strlen(MOVE_PLAYER_RESPONSE) - 1); //to remove '>' characters
     sprintf(logging, "Deserializing move player response body '%s'...", data);
     info(logging);
 

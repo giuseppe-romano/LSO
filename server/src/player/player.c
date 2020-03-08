@@ -361,101 +361,126 @@ void *playerThreadFunc(void *vargp)
             MovePlayerRequest *movePlayerRequest = NULL;
             char logMessage[2100];
 
-            sprintf(logMessage, "New message from client: %s", client_message);
+            sprintf(logMessage, "Complete message from client: %s", client_message);
             info(logMessage);
 
-            //The client sent a register request
-            if((authenticationRequest = deserializeRegisterRequest(client_message)) != NULL)
+            //The server message can contain multiple messages, so it will be splitted
+            char *buffer = strdup(client_message);
+            char *message;
+            while ((message = strsep(&buffer, "\n")) != NULL)
             {
-                sprintf(logMessage, "RegisterAction: %s", client_message);
-                info(logMessage);
-
-                int status = registerPlayer(authenticationRequest);
-                char *message = "Registration done!";
-                if(status == 1)
+                if(strlen(message) > 0)
                 {
-                    message = "Registration failed. Username already exists!";
+                    sprintf(logMessage, "Message from client: '%s'", message);
+                    info(logMessage);
                 }
-                sendRegisterResponse(clientSocket, status, message);
-            }
-            //The client sent a login request
-            else if((authenticationRequest = deserializeLoginRequest(client_message)) != NULL)
-            {
-                sprintf(logMessage, "LoginAction: %s", client_message);
-                info(logMessage);
 
-                int status = loginPlayer(authenticationRequest);
-                char *message = "Login succeeded!";
-                if(status == 1)
+                //The client sent a register request
+                if((authenticationRequest = deserializeRegisterRequest(message)) != NULL)
                 {
-                    message = "Login failed. Username and/or password incorrect!";
-                }
-                sprintf(logMessage, "Login: %s", message);
-                info(logMessage);
+                    sprintf(logMessage, "RegisterAction: %s", message);
+                    info(logMessage);
 
-                sendLoginResponse(clientSocket, status, message);
-
-                //If login correct then the player joins the current game (if any)
-                if(status == 0)
-                {
-                    Game *game = getCurrentGame();
-                    if(game != NULL)
+                    int status = registerPlayer(authenticationRequest);
+                    char *resMessage = "Registration done!";
+                    if(status == 1)
                     {
-                        Player *connectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
-                        Cell *playerCell = (Cell*) malloc(sizeof(Cell));
-                        playerCell->user = authenticationRequest->username;
-                        playerCell->x = 0;
-                        playerCell->y = 12;
-                        playerCell->symbol = connectedPlayer->symbol;
-                        playerCell->color = connectedPlayer->color;
-
-                        //Send first the game without the new player
-                        sendGame(clientSocket, game);
-
-                        //Then, add the player to the game
-                        addPlayer(game, playerCell);
-
-                        //And finally broadcasts to all connected players about the new player just joined
-                        broadcastAddedPlayer(playerCell);
-
-                        currentPlayerCell = playerCell;
-                        currentConnectedPlayer = connectedPlayer;
-
-                        drawMineField(game);
-                        setCursorToOffset();
+                        resMessage = "Registration failed. Username already exists!";
                     }
+                    sendRegisterResponse(clientSocket, status, resMessage);
+
+                    free(authenticationRequest);
+                    authenticationRequest = NULL;
                 }
-            }
-            //The client sent a move request
-            else if((movePlayerRequest = deserializeMovePlayerRequest(client_message)) != NULL)
-            {
-                char str[2100];
-                sprintf(str, "MovePlayerAction: %s", client_message);
-                info(str);
+                //The client sent a login request
+                else if((authenticationRequest = deserializeLoginRequest(message)) != NULL)
+                {
+                    sprintf(logMessage, "LoginAction: %s", message);
+                    info(logMessage);
 
-                Game *game = getCurrentGame();
-                int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
-                Cell *playerCell = getPlayerByUsername(game, movePlayerRequest->player->user);
+                    int status = loginPlayer(authenticationRequest);
+                    char *resMessage = "Login succeeded!";
+                    if(status == 1)
+                    {
+                        resMessage = "Login failed. Username and/or password incorrect!";
+                    }
+                    sprintf(logMessage, "Login: %s", resMessage);
+                    info(logMessage);
 
-                broadcastPlayerMoved(playerCell, status);
-            }
-            //The client sent a logout request
-            else if((authenticationRequest = deserializeLogoutRequest(client_message)) != NULL)
-            {
-                logoutPlayer(authenticationRequest);
+                    sendLoginResponse(clientSocket, status, resMessage);
 
-                Game *game = getCurrentGame();
-                //remove the player from the game
-                removePlayer(game, currentPlayerCell);
+                    //If login correct then the player joins the current game (if any)
+                    if(status == 0)
+                    {
+                        Game *game = getCurrentGame();
+                        if(game != NULL)
+                        {
+                            Player *connectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
+                            Cell *playerCell = (Cell*) malloc(sizeof(Cell));
+                            playerCell->user = authenticationRequest->username;
+                            playerCell->x = 0;
+                            playerCell->y = 12;
+                            playerCell->symbol = connectedPlayer->symbol;
+                            playerCell->color = connectedPlayer->color;
 
-                //And finally broadcasts to all connected players about the removed player
-                broadcastRemovedPlayer(currentPlayerCell);
+                            //Send first the game without the new player
+                            sendGame(clientSocket, game);
 
-                drawMineField(game);
-                setCursorToOffset();
+                            //Then, add the player to the game
+                            addPlayer(game, playerCell);
 
-                currentPlayerCell = NULL;
-                currentConnectedPlayer = NULL;
+                            //And finally broadcasts to all connected players about the new player just joined
+                            broadcastAddedPlayer(playerCell);
+
+                            currentPlayerCell = playerCell;
+                            currentConnectedPlayer = connectedPlayer;
+
+                            drawMineField(game);
+                            setCursorToOffset();
+                        }
+                    }
+                    free(authenticationRequest);
+                    authenticationRequest = NULL;
+                }
+                //The client sent a move request
+                else if((movePlayerRequest = deserializeMovePlayerRequest(message)) != NULL)
+                {
+                    char str[2100];
+                    sprintf(str, "MovePlayerAction: %s", message);
+                    info(str);
+
+                    Game *game = getCurrentGame();
+                    int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
+                    Cell *playerCell = getPlayerByUsername(game, movePlayerRequest->player->user);
+
+                    drawMineField(game);
+                    setCursorToOffset();
+                    broadcastPlayerMoved(playerCell, status);
+
+                    free(movePlayerRequest);
+                    movePlayerRequest = NULL;
+                }
+                //The client sent a logout request
+                else if((authenticationRequest = deserializeLogoutRequest(message)) != NULL)
+                {
+                    logoutPlayer(authenticationRequest);
+
+                    Game *game = getCurrentGame();
+                    //remove the player from the game
+                    removePlayer(game, currentPlayerCell);
+
+                    //And finally broadcasts to all connected players about the removed player
+                    broadcastRemovedPlayer(currentPlayerCell);
+
+                    drawMineField(game);
+                    setCursorToOffset();
+
+                    currentPlayerCell = NULL;
+                    currentConnectedPlayer = NULL;
+
+                    free(authenticationRequest);
+                    authenticationRequest = NULL;
+                }
             }
         }
     }

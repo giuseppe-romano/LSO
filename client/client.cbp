@@ -36,10 +36,14 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="include/menu.h" />
+		<Unit filename="include/protocol.h" />
 		<Unit filename="src/main.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Unit filename="src/menu/menu.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/protocol/protocol.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>
