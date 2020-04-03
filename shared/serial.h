@@ -39,10 +39,8 @@ typedef struct game {
     int cols;
 
     Cell *bombCells;
-    int numBombs;
 
     Cell *playerCells;
-    int numPlayers;
 } Game;
 
 typedef struct authenticationRequest {

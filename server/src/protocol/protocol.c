@@ -31,7 +31,7 @@ void sendAddedCell(int clientSocket, Cell *player)
     logMessage(message);
     write(clientSocket, message, strlen(message));
     info("Message sent!");
-    free(message);
+ //   free(message);
 }
 
 void sendRemovedCell(int clientSocket, Cell *player)

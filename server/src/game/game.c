@@ -42,21 +42,7 @@ void deployRandomBombs(Game *game) {
             currentCell = currentCell->next;
         }
     }
-    game->numBombs = numBombs;
     game->bombCells = headCell;
-}
-
-Cell* generateRandomPlayerCell(Player *player)
-{
-    Cell *cell = (Cell*) malloc(sizeof(Cell));
-    cell->user = player->username;
-    cell->x = 0;
-    cell->y = 5; //Random
-    cell->symbol = player->symbol;
-    cell->color = player->color;
-    cell->next = NULL;
-
-    return cell;
 }
 
 Game* generateNewGame() {
@@ -69,7 +55,6 @@ Game* generateNewGame() {
 
     Player *players = getConnectedPlayers();
 
-    int count = 0;
     Player *current = players;
     Cell *headCell = NULL;
     Cell *currentCell = NULL;
@@ -86,10 +71,8 @@ Game* generateNewGame() {
             currentCell = currentCell->next;
         }
         current = current->next;
-        count++;
     }
     game->playerCells = headCell;
-    game->numPlayers = count;
 
     deployRandomBombs(game);
 
@@ -154,9 +137,6 @@ int hasPlayerAt(Game* game, int x, int y) {
 }
 
 int addPlayer(Game* game, Cell *player) {
-    if(game->numPlayers == game->rows) {
-        return ERR_MAX_NUMBER_OF_PLAYER_REACHED;
-    }
 
     if(hasPlayerAt(game, player->x, player->y) == 1)
     {
@@ -179,7 +159,6 @@ int addPlayer(Game* game, Cell *player) {
         parentCell->next = player;
 
     }
-    game->numPlayers++;
 
     return 0;
 }
@@ -211,7 +190,6 @@ int removePlayer(Game* game, Cell *player) {
             currentCell = currentCell->next;
         }
 
-        game->numPlayers--;
         free(tmp);
         tmp = NULL;
     }
@@ -220,6 +198,8 @@ int removePlayer(Game* game, Cell *player) {
 }
 
 int movePlayer(Game* game, Cell *player, int direction) {
+    int status = ERR_PLAYER_MOVED_SUCCESS;
+
     Cell *movingPlayerCell = NULL;
     Cell *currentCell = game->playerCells;
     while(currentCell != NULL)
@@ -235,43 +215,82 @@ int movePlayer(Game* game, Cell *player, int direction) {
         return ERR_PLAYER_NOT_FOUND;
     }
 
+    int newX = movingPlayerCell->x;
+    int newY = movingPlayerCell->y;
+
     switch(direction) {
         case MOVE_UP :
-            if(movingPlayerCell->y < 0) {
-                return ERR_POSITION_OUT_OF_BOUND;
+            newY = movingPlayerCell->y - 1;
+            if(newY < 0) {
+                status = ERR_POSITION_OUT_OF_BOUND;
             }
-            movingPlayerCell->y = movingPlayerCell->y - 1;
             break;
         case MOVE_RIGHT :
-            if(movingPlayerCell->x > game->cols - 1) {
-                return ERR_POSITION_OUT_OF_BOUND;
+            newX = movingPlayerCell->x + 1;
+            if(newX > game->cols - 1) {
+                status = ERR_POSITION_OUT_OF_BOUND;
             }
-            movingPlayerCell->x = movingPlayerCell->x + 1;
             break;
         case MOVE_DOWN :
-            if(movingPlayerCell->y > game->rows - 1) {
-                return ERR_POSITION_OUT_OF_BOUND;
+            newY = movingPlayerCell->y + 1;
+            if(newY > game->rows - 1) {
+                status = ERR_POSITION_OUT_OF_BOUND;
             }
-            movingPlayerCell->y = movingPlayerCell->y + 1;
             break;
         case MOVE_LEFT :
-            if(movingPlayerCell->x < 0) {
-                return ERR_POSITION_OUT_OF_BOUND;
+            newX = movingPlayerCell->x - 1;
+            if(newX < 0) {
+                status = ERR_POSITION_OUT_OF_BOUND;
             }
-            movingPlayerCell->x = movingPlayerCell->x - 1;
             break;
         default :
-            return ERR_INVALID_DIRECTION;
-   }
-
-    //Now checks if the player hits the bomb
-    if(hasBombAt(game, movingPlayerCell->x, movingPlayerCell->y)) {
-       return ERR_PLAYER_HIT_BOMB;
-    }
-    //In this case the user won the game
-    else if(movingPlayerCell->x == game->cols - 1) {
-        return ERR_USER_WIN_GAME;
+            status = ERR_INVALID_DIRECTION;
     }
 
-   return ERR_PLAYER_MOVED_SUCCESS;
+    if(status == ERR_PLAYER_MOVED_SUCCESS)
+    {
+        //Now checks if the player hits the bomb
+        if(hasBombAt(game, newX, newY))
+        {
+           status = ERR_PLAYER_HIT_BOMB;
+        }
+        else if(hasPlayerAt(game, newX, newY) == 1)
+        {
+            status = ERR_CELL_BUSY;
+        }
+        //In this case the user won the game
+        else if(newX == game->cols - 1) {
+
+            status = ERR_USER_WIN_GAME;
+        }
+        movingPlayerCell->x = newX;
+        movingPlayerCell->y = newY;
+    }
+
+    return status;
+}
+
+Cell* generateRandomPlayerCell(Player *player)
+{
+    Game *game = getCurrentGame();
+    Cell *cell = NULL;
+    if(game != NULL)
+    {
+        int y;
+        do
+        {
+            y = rand() % (game->rows - 1);
+        }
+        while(hasPlayerAt(game, 0, y));
+
+        cell = (Cell*) malloc(sizeof(Cell));
+        cell->user = player->username;
+        cell->x = 0;
+        cell->y = y;
+        cell->symbol = player->symbol;
+        cell->color = player->color;
+        cell->next = NULL;
+    }
+
+    return cell;
 }

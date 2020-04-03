@@ -53,14 +53,15 @@ void drawCell(Cell *cell, int x, int y) {
     }
 }
 
-Cell* getCellAt(Cell cells[], int numCells, int x, int y) {
+Cell* getCellAt(Cell *head, int x, int y) {
     Cell *res = NULL;
-
-    int j;
-    for(j = 0; j < numCells; j++) {
-        if(cells[j].x == x && cells[j].y == y) {
-            res = &cells[j];
+    Cell *current = head;
+    while (current != NULL && res == NULL) {
+        if(current->x == x && current->y == y) {
+            res = current;
         }
+
+        current = current->next;
     }
     return res;
 }
@@ -99,10 +100,10 @@ void drawMineField(Game *game) {
         for(j = 0; j < game->cols; j++) {
             Cell *cell = NULL;
             if(game->bombCells) {
-                cell = getCellAt(game->bombCells, game->numBombs, j, i);
+                cell = getCellAt(game->bombCells, j, i);
             }
             if(cell == NULL) {
-                cell = getCellAt(game->playerCells, game->numPlayers, j, i);
+                cell = getCellAt(game->playerCells, j, i);
             }
 
             drawCell(cell, xOffset + (j * 4), yOffset -1);
@@ -127,3 +128,20 @@ void drawPlayer(Player *player)
     printf("%-59s", m);
     printf(RESET);
 }
+
+void printNotificationMessage(int notificationStatus, char *notificationMessage)
+{
+    if(notificationMessage)
+    {
+        gotoxy(1, 20);
+        printf(GRN);
+        if(notificationStatus != 0)
+        {
+            printf(RED);
+        }
+        printf("%-59s", notificationMessage);
+        printf(RESET);
+    }
+}
+
+

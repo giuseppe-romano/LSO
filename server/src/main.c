@@ -1,11 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <arpa/inet.h>
-#include <fcntl.h> // for open
-#include <unistd.h> // for close
+#include <arpa/inet.h>	//inet_addr
 #include <pthread.h>
 
 #include "draw.h"
@@ -17,7 +11,7 @@
 #include "../include/player.h"
 
 #define MAX 80
-#define PORT 8080
+#define PORT 7799
 #define SA struct sockaddr
 
 /* S E R V E R */
@@ -34,12 +28,17 @@ int main()
     struct sockaddr_storage serverStorage;
     socklen_t addr_size;
     //Create the socket.
-    serverSocket = socket(PF_INET, SOCK_STREAM, 0);
+    if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) <= 0)
+    {
+        perror("socket failed");
+        exit(EXIT_FAILURE);
+    }
+
     // Configure settings of the server address struct
     // Address family = Internet
     serverAddr.sin_family = AF_INET;
     //Set port number, using htons function to use proper byte order
-    serverAddr.sin_port = htons(7799);
+    serverAddr.sin_port = htons(PORT);
     //Set IP address to localhost
     serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); //inet_addr("127.0.0.1");
     //Set all bits of the padding field to 0

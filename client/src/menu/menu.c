@@ -44,24 +44,6 @@ void setCursorToOffset()
     gotoxy(currentXInputOffset, currentYInputOffset);
 }
 
-void printNotificationMessage()
-{
-    if(notificationMessage)
-    {
-        gotoxy(1, 20);
-        printf(GRN);
-        if(notificationStatus != 0)
-        {
-            printf(RED);
-        }
-        printf("%-59s", notificationMessage);
-        printf(RESET);
-    }
-    notificationStatus = 0;
-    notificationMessage = NULL;
-}
-
-
 void showGameMenu()
 {
     int choice;
@@ -103,7 +85,9 @@ void showGameMenu()
             printf("%-59s", " ");
         }
 
-        printNotificationMessage();
+        printNotificationMessage(notificationStatus, notificationMessage);
+        notificationStatus = 0;
+        notificationMessage = NULL;
 
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
@@ -247,6 +231,8 @@ void showLoginMenu()
     {
         while(getchar() != '\n');
     }
+    strcpy(loggedInUsername, username);
+
     sendLoginRequest(username, password);
     while(loginResponseReceived == 0);
     loginResponseReceived = 0;
@@ -257,7 +243,12 @@ void showLoginMenu()
     if(notificationStatus == 0)
     {
         strcpy(loggedInUsername, username);
+
         showGameMenu();
+    }
+    else
+    {
+        memset(loggedInUsername, '\0', 200);
     }
 }
 
@@ -297,7 +288,9 @@ void showMainMenu()
             printf("%-59s", " ");
         }
 
-        printNotificationMessage();
+        printNotificationMessage(notificationStatus, notificationMessage);
+        notificationStatus = 0;
+        notificationMessage = NULL;
 
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
@@ -350,14 +343,13 @@ void setLoginResponseReceived(int status, char *message)
 
 void setCurrentPlayerCell(Cell *playerCell)
 {
-
     if(strcmp(playerCell->user, loggedInUsername) == 0)
     {
-        if(currentPlayerCell != NULL)
+        info("Setting player as current player");
+        if(currentPlayerCell == NULL)
         {
-            free(currentPlayerCell);
+            currentPlayerCell = (Cell*)malloc(sizeof(Cell));
         }
-        currentPlayerCell = (Cell*)malloc(sizeof(Cell));
         currentPlayerCell->user = playerCell->user;
         currentPlayerCell->x = playerCell->x;
         currentPlayerCell->y = playerCell->y;

@@ -60,7 +60,7 @@ int main(){
             if(recv(serverSocket, server_message, 2000, 0) <= 0)
             {
                 warn("Connection closed. The server cut off!");
-                printf("Connection closed. The server cut off!\n");
+                printNotificationMessage(-1, "Connection closed. The server cut off!\n");
                 serverAlive = 0;
             }
             else
@@ -81,7 +81,7 @@ int main(){
                 {
                     if(strlen(message) > 0)
                     {
-                        sprintf(logMessage, "Message from server: '%s'", message);
+                        sprintf(logMessage, "Processing server message : '%s'", message);
                         info(logMessage);
                     }
 
@@ -113,25 +113,34 @@ int main(){
                         sprintf(logMessage, "MovePlayerResponse: %s", message);
                         info(logMessage);
 
+                        Cell *current = currentGame->playerCells;
+                        while (current != NULL) {
+                            if(strcmp(current->user, movePlayerResponse->player->user) == 0) {
+                                current->x = movePlayerResponse->player->x;
+                                current->y = movePlayerResponse->player->y;
+                            }
+
+                            current = current->next;
+                        }
+
                         switch(movePlayerResponse->status)
                         {
                             case ERR_PLAYER_MOVED_SUCCESS: {
-
-                                int j;
-                                for(j = 0; j < currentGame->numPlayers; j++) {
-                                    if(strcmp(currentGame->playerCells[j].user, movePlayerResponse->player->user) == 0) {
-                                        currentGame->playerCells[j].x = movePlayerResponse->player->x;
-                                        currentGame->playerCells[j].y = movePlayerResponse->player->y;
-                                    }
-                                }
+                                sprintf(logMessage, "The player '%s' moved with success!", movePlayerResponse->player->user);
+                                info(logMessage);
+                                printNotificationMessage(ERR_PLAYER_MOVED_SUCCESS, logMessage);
                                 break;
                             }
                             case ERR_PLAYER_HIT_BOMB: {
-                                //Removes the player from the game
+                                sprintf(logMessage, "The player '%s' hit a bomb. He blew up!", movePlayerResponse->player->user);
+                                info(logMessage);
+                                printNotificationMessage(ERR_PLAYER_HIT_BOMB, logMessage);
                                 break;
                             }
                             case ERR_USER_WIN_GAME: {
-                                //Show a notification saying which user won.
+                                sprintf(logMessage, "The player '%s' won!", movePlayerResponse->player->user);
+                                info(logMessage);
+                                printNotificationMessage(0, logMessage);
                                 break;
                             }
                             default: {
@@ -157,6 +166,7 @@ int main(){
                         }
 
                         currentGame = game;
+                        currentGame->bombCells = NULL;
                         drawMineField(game);
                     }
                     //The server sent an added player
@@ -168,12 +178,28 @@ int main(){
                         if(currentGame)
                         {
                             info("Adding the new player to the game...");
-                            currentGame->playerCells[currentGame->numPlayers] = *cell;
-                            currentGame->numPlayers++;
-                            info("New player added to the game!");
+                            if(currentGame->playerCells == NULL)
+                            {
+                                currentGame->playerCells = cell;
+                            }
+                            else
+                            {
+                                Cell *parent = currentGame->playerCells;
+                                Cell *current = currentGame->playerCells;
+                                while (current != NULL) {
+                                    parent = current;
+                                    current = current->next;
+                                }
+                                parent->next = cell;
+                            }
+                            sprintf(logMessage, "Player '%s' added to the game!", cell->user);
+                            printNotificationMessage(0, logMessage);
+                            info(logMessage);
+
+                            info("Drawing the game...");
+                            drawMineField(currentGame);
+                            info("Game drove!");
                         }
-                        info("Drawing the game...");
-                        drawMineField(currentGame);
 
                         setCurrentPlayerCell(cell);
                     }
@@ -185,20 +211,30 @@ int main(){
 
                         if(currentGame)
                         {
-                            int index = -1;
-                            int j;
-                            for(j = 0; j < currentGame->numPlayers; j++) {
-                                if(strcmp(currentGame->playerCells[j].user, cell->user) == 0) {
-                                    index = j;
+                            Cell *tmp = NULL;
+                            Cell *parent = currentGame->playerCells;
+                            if(strcmp(parent->user, cell->user) == 0) {
+                                tmp = currentGame->playerCells;
+                                currentGame->playerCells = parent->next;
+                            }
+                            else
+                            {
+                                Cell *current = currentGame->playerCells;
+                                while (current != NULL) {
+                                    if(strcmp(current->user, cell->user) == 0) {
+                                        tmp = current;
+                                    }
+
+                                    current = current->next;
                                 }
                             }
 
-                            int shiftFrom = index + 1;
-                            for(j = shiftFrom; j < currentGame->numPlayers; j++) {
-                                currentGame->playerCells[j - 1] = currentGame->playerCells[j];
+                            sprintf(logMessage, "Player '%s' removed from the game!", tmp->user);
+                            printNotificationMessage(0, logMessage);
+                            if(tmp != NULL)
+                            {
+                                free(tmp);
                             }
-
-                            currentGame->numPlayers--;
                         }
                         drawMineField(currentGame);
 
@@ -206,14 +242,12 @@ int main(){
                         cell = NULL;
                     }
                 }
-
             }
-
         }
-        close(serverSocket);
     }
 
     pthread_cancel(menu_thread_id);
+    close(serverSocket);
 
     return 0;
 }

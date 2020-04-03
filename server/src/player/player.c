@@ -153,6 +153,7 @@ void loadRegisteredPlayers(char *filepath)
         else
         {
             current->next = p;
+            current = current->next;
         }
     }
 
@@ -290,31 +291,39 @@ int loginPlayer(AuthenticationRequest *authenticationRequest)
     Player *registeredPlayer = getRegisteredPlayerByUsername(authenticationRequest->username);
     if(registeredPlayer != NULL && (strcmp(registeredPlayer->password, authenticationRequest->password) == 0))
     {
-        sprintf(logMessage, "Player '%s' is authenticated successfully", authenticationRequest->username);
-        info(logMessage);
-
-        Player *player = (Player*) malloc(sizeof(Player));
-        player->username = registeredPlayer->username;
-        player->password = registeredPlayer->password;
-        player->symbol = registeredPlayer->symbol;
-        player->color = registeredPlayer->color;
-
-        if(connectedPlayers == NULL)
+        Player *alreadyConnectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
+        if(alreadyConnectedPlayer != NULL)
         {
-            connectedPlayers = player;
+            status = 2; //Another user already logged in with same credentials, no way to login twice
         }
-        else{
-            Player *parent = connectedPlayers;
-            Player *current = connectedPlayers;
-            while(current != NULL)
-            {
-                parent = current;
-                current = current->next;
-            }
-            parent->next = player;
-        }
+        else
+        {
+            sprintf(logMessage, "Player '%s' is authenticated successfully", authenticationRequest->username);
+            info(logMessage);
 
-        status = 0;
+            Player *player = (Player*) malloc(sizeof(Player));
+            player->username = registeredPlayer->username;
+            player->password = registeredPlayer->password;
+            player->symbol = registeredPlayer->symbol;
+            player->color = registeredPlayer->color;
+
+            if(connectedPlayers == NULL)
+            {
+                connectedPlayers = player;
+            }
+            else{
+                Player *parent = connectedPlayers;
+                Player *current = connectedPlayers;
+                while(current != NULL)
+                {
+                    parent = current;
+                    current = current->next;
+                }
+                parent->next = player;
+            }
+
+            status = 0;
+        }
     }
 
     pthread_mutex_unlock(&loginPlayerMutex);
@@ -404,6 +413,10 @@ void *playerThreadFunc(void *vargp)
                     {
                         resMessage = "Login failed. Username and/or password incorrect!";
                     }
+                    else if(status == 2)
+                    {
+                        resMessage = "Login failed. Another user logged in with same credentials!";
+                    }
                     sprintf(logMessage, "Login: %s", resMessage);
                     info(logMessage);
 
@@ -416,12 +429,8 @@ void *playerThreadFunc(void *vargp)
                         if(game != NULL)
                         {
                             Player *connectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
-                            Cell *playerCell = (Cell*) malloc(sizeof(Cell));
-                            playerCell->user = authenticationRequest->username;
-                            playerCell->x = 0;
-                            playerCell->y = 12;
-                            playerCell->symbol = connectedPlayer->symbol;
-                            playerCell->color = connectedPlayer->color;
+
+                            Cell *playerCell = generateRandomPlayerCell(connectedPlayer);
 
                             //Send first the game without the new player
                             sendGame(clientSocket, game);
@@ -453,9 +462,28 @@ void *playerThreadFunc(void *vargp)
                     int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
                     Cell *playerCell = getPlayerByUsername(game, movePlayerRequest->player->user);
 
+                    if(status == ERR_PLAYER_HIT_BOMB)
+                    {
+                        //The player blew up, removing
+                        removePlayer(game, playerCell);
+
+                        //Move back to the first column to retry
+                        playerCell = generateRandomPlayerCell(currentConnectedPlayer);
+                        addPlayer(game, playerCell);
+
+                    }
+
+                    broadcastPlayerMoved(playerCell, status);
+
+                    //If the user won the game then a new game gets generated and notified to all connected players
+                    if(status == ERR_USER_WIN_GAME)
+                    {
+                        game = generateNewGame();
+                        broadcastNewGame(game);
+                    }
+
                     drawMineField(game);
                     setCursorToOffset();
-                    broadcastPlayerMoved(playerCell, status);
 
                     free(movePlayerRequest);
                     movePlayerRequest = NULL;
@@ -488,9 +516,15 @@ void *playerThreadFunc(void *vargp)
     removeClientSocket(clientSocket);
     close(clientSocket);
 
-    removePlayer(getCurrentGame(), currentPlayerCell);
-    removeConnectedPlayer(currentConnectedPlayer);
-    broadcastRemovedPlayer(currentPlayerCell);
+    if(currentPlayerCell != NULL)
+    {
+        removePlayer(getCurrentGame(), currentPlayerCell);
+        broadcastRemovedPlayer(currentPlayerCell);
+    }
+    if(currentConnectedPlayer != NULL)
+    {
+        removeConnectedPlayer(currentConnectedPlayer);
+    }
     drawMineField(getCurrentGame());
     setCursorToOffset();
 

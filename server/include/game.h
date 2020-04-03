@@ -7,6 +7,8 @@ Game* generateNewGame();
 
 Game* getCurrentGame();
 
+Cell* generateRandomPlayerCell(Player *player);
+
 Cell* getPlayerByUsername(Game *game, char *username);
 
 int addPlayer(Game* game, Cell *player);

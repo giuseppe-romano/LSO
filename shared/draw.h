@@ -22,5 +22,6 @@ void drawServerTitle();
 void drawClientTitle();
 void drawMineField(Game *game);
 void drawPlayer(Player *player);
+void printNotificationMessage(int notificationStatus, char *notificationMessage);
 
 #endif
