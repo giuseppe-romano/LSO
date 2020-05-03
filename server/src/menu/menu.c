@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
+#include <sys/socket.h>
+
 #include "../../include/menu.h"
 #include "draw.h"
+#include "logging.h"
 #include "../../include/game.h"
 #include "../../include/player.h"
-
-int currentXInputOffset = 0;
-int currentYInputOffset = 0;
 
 void clearMenu()
 {
@@ -19,13 +20,12 @@ void clearMenu()
     }
 }
 
-void setCursorToOffset()
-{
-    gotoxy(currentXInputOffset, currentYInputOffset);
-}
-
 void showPlayersMenu(char *category, Player *players)
 {
+    char logMessage[2000];
+    sprintf(logMessage, "Show players menu category '%s'", category);
+    infoMenu(logMessage);
+
     clearMenu();
     gotoxy(1, 1);
     printf("%-59s", " ");
@@ -47,8 +47,7 @@ void showPlayersMenu(char *category, Player *players)
         gotoxy(1, 8);
         printf("%-59s", "Press any key:");
         gotoxy(16, 8);
-        currentXInputOffset = 16;
-        currentYInputOffset = 8;
+        setInteractiveCursorCoords(16, 8);
     }
     else
     {
@@ -65,19 +64,18 @@ void showPlayersMenu(char *category, Player *players)
         gotoxy(1, offset + 2);
         printf("%-59s", "Press any key:");
         gotoxy(16, offset + 2);
-        currentXInputOffset = 16;
-        currentYInputOffset = offset + 2;
+        setInteractiveCursorCoords(16, offset + 2);
     }
 
-    int choice;
-    if(scanf("%d", &choice) != 1)
-    {
-        while(getchar() != '\n');
-    }
+    char choice;
+    scanf("%c", &choice);
+    while(getchar() != '\n');
 }
 
 void showListPlayersMenu()
 {
+    infoMenu("Show list players menu");
+
     int choice;
     int exit = 0;
     int invalid = 0;
@@ -114,8 +112,7 @@ void showListPlayersMenu()
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
         gotoxy(23, 12);
-        currentXInputOffset = 23;
-        currentYInputOffset = 12;
+        setInteractiveCursorCoords(23, 12);
 
         if(scanf("%d", &choice) != 1)
         {
@@ -148,6 +145,8 @@ void showListPlayersMenu()
 
 void showMainMenu()
 {
+    infoMenu("Show main menu");
+
     int choice;
     int exit = 0;
     int invalid = 0;
@@ -184,8 +183,7 @@ void showMainMenu()
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
         gotoxy(23, 12);
-        currentXInputOffset = 23;
-        currentYInputOffset = 12;
+        setInteractiveCursorCoords(23, 12);
         if(scanf("%d", &choice) != 1)
         {
             choice = -1;
@@ -220,11 +218,27 @@ void showMainMenu()
 
 void *menuThreadFunc(void *vargp)
 {
+    int serverSocket = *((int *)vargp);
+    pid_t pid = getpid();
+
     //Creates a new game when boots
     Game *game = generateNewGame();
     drawMineField(game);
 
     drawServerTitle();
     showMainMenu();
+
+    infoMenu("Quitting Menu's thread...");
+    infoMenu("Shutting down server socket...");
+    shutdown(serverSocket, SHUT_RDWR);
+
+
+    shutdownClientSockets();
+
+
+    killPlayerThreads();
+
+    infoMenu("Killing server...");
+    kill(pid, SIGTERM);
     exit(1);
 }

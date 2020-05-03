@@ -18,10 +18,12 @@
 #define WHT   "\x1B[37m"
 #define RESET "\x1B[0m"
 
+void setInteractiveCursorCoords(int x, int y);
 void drawServerTitle();
 void drawClientTitle();
 void drawMineField(Game *game);
 void drawPlayer(Player *player);
+void drawConnectedPlayer(Cell *player);
 void printNotificationMessage(int notificationStatus, char *notificationMessage);
 
 #endif

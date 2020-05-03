@@ -13,6 +13,7 @@ void initLogFile(char* _filename)
 
     if (file == NULL) {
         file = fopen(filename, "a+"); // a+ (create + append)
+        fprintf (file, "\n\n\n");
     }
 }
 
@@ -24,24 +25,72 @@ char* timestamp()
     return buff;
 }
 
-void _log(char* message, char* level)
+void _log(char* category, char* message, char* level)
 {
     initLogFile(NULL);
-    fprintf (file, "[%s][%s] - %s\n", timestamp(), level, message);
+    char* t = timestamp();
+    fprintf (file, "[%s][%s] - [%s] - %s\n", t, level, category, message);
     fflush(file);
+
+    free(t);
 }
 
-void info(char* message)
+void info(char* category, char* message)
 {
-    _log(message, "INFO");
+    _log(category, message, "INFO");
 }
 
-void warn(char* message)
+void warn(char* category, char* message)
 {
-    _log(message, "WARN");
+    _log(category, message, "WARN");
 }
 
-void error(char* message)
+void error(char* category, char* message)
 {
-    _log(message, "ERROR");
+    _log(category, message, "ERROR");
+}
+
+void infoMain(char* message)
+{
+    info("MAIN", message);
+}
+void warnMain(char* message)
+{
+    warn("MAIN", message);
+}
+void errorMain(char* message)
+{
+    error("MAIN", message);
+}
+void infoSerial(char* message)
+{
+    info("SERIAL", message);
+}
+void infoPlayer(char* message)
+{
+    info("PLAYER", message);
+}
+void warnPlayer(char* message)
+{
+    warn("PLAYER", message);
+}
+void infoProtocol(char* message)
+{
+    info("PROTOCOL", message);
+}
+void infoGame(char* message)
+{
+    info("GAME", message);
+}
+void warnGame(char* message)
+{
+    warn("GAME", message);
+}
+void infoMenu(char* message)
+{
+    info("MENU", message);
+}
+void infoDraw(char* message)
+{
+    info("DRAW", message);
 }

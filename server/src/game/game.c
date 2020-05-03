@@ -4,6 +4,7 @@
 #include <string.h>
 #include "../../include/game.h"
 #include "../../include/player.h"
+#include "logging.h"
 
 #define NUM_ROWS 20
 #define NUM_COLS 30
@@ -11,6 +12,7 @@
 Game *currentGame = NULL;
 
 void deployRandomBombs(Game *game) {
+    infoGame("Deploying bombs randomly...");
 
     /* Intializes random number generator */
     time_t t;
@@ -43,9 +45,15 @@ void deployRandomBombs(Game *game) {
         }
     }
     game->bombCells = headCell;
+
+    char logMessage[2000];
+    sprintf(logMessage, "Deployed %d bombs", numBombs);
+    infoGame(logMessage);
+
 }
 
 Game* generateNewGame() {
+    infoGame("Generating new game...");
 
     Game *game = (Game*) malloc(sizeof(Game));
     game->rows = NUM_ROWS;
@@ -78,10 +86,13 @@ Game* generateNewGame() {
 
     if(currentGame != NULL)
     {
+        infoGame("Freeing old game...");
         free(currentGame);
     }
 
     currentGame = game;
+    infoGame("New game generated succesfully!");
+
     return game;
 }
 
@@ -137,6 +148,9 @@ int hasPlayerAt(Game* game, int x, int y) {
 }
 
 int addPlayer(Game* game, Cell *player) {
+    char logMessage[2000];
+    sprintf(logMessage, "Adding a new player '%s'", player->user);
+    infoGame(logMessage);
 
     if(hasPlayerAt(game, player->x, player->y) == 1)
     {
@@ -159,13 +173,20 @@ int addPlayer(Game* game, Cell *player) {
         parentCell->next = player;
 
     }
-
+    infoGame("New player added succesfully!");
     return 0;
 }
 
 int removePlayer(Game* game, Cell *player) {
-    int hasPlayer = hasPlayerAt(game, player->x, player->y);
-    if(!hasPlayer) {
+    char logMessage[2000];
+    sprintf(logMessage, "Removing player '%s'", player->user);
+    infoGame(logMessage);
+
+    Cell *p = getPlayerByUsername(game, player->user);
+    if(p == NULL) {
+        sprintf(logMessage, "Player '%s' not found", player->user);
+        warnGame(logMessage);
+
         return ERR_PLAYER_NOT_FOUND;
     }
 
@@ -193,11 +214,15 @@ int removePlayer(Game* game, Cell *player) {
         free(tmp);
         tmp = NULL;
     }
-
+    infoGame("Player removed succesfully!");
     return 0;
 }
 
 int movePlayer(Game* game, Cell *player, int direction) {
+    char logMessage[2000];
+    sprintf(logMessage, "Moving player '%s' to %d", player->user, direction);
+    infoGame(logMessage);
+
     int status = ERR_PLAYER_MOVED_SUCCESS;
 
     Cell *movingPlayerCell = NULL;
@@ -212,6 +237,9 @@ int movePlayer(Game* game, Cell *player, int direction) {
     }
 
     if(movingPlayerCell == NULL) {
+        sprintf(logMessage, "Player '%s' not found", player->user);
+        warnGame(logMessage);
+
         return ERR_PLAYER_NOT_FOUND;
     }
 
@@ -252,16 +280,23 @@ int movePlayer(Game* game, Cell *player, int direction) {
         //Now checks if the player hits the bomb
         if(hasBombAt(game, newX, newY))
         {
-           status = ERR_PLAYER_HIT_BOMB;
+            warnGame("Player hit a bomb. Blew up!");
+            status = ERR_PLAYER_HIT_BOMB;
         }
         else if(hasPlayerAt(game, newX, newY) == 1)
         {
+            warnGame("Player hit a busy cell.");
             status = ERR_CELL_BUSY;
+            newX = movingPlayerCell->x;
+            newY = movingPlayerCell->y;
         }
         //In this case the user won the game
         else if(newX == game->cols - 1) {
-
+            infoGame("Player won the game!");
             status = ERR_USER_WIN_GAME;
+        }
+        else {
+            infoGame("Player moved succesfully!");
         }
         movingPlayerCell->x = newX;
         movingPlayerCell->y = newY;
@@ -272,6 +307,10 @@ int movePlayer(Game* game, Cell *player, int direction) {
 
 Cell* generateRandomPlayerCell(Player *player)
 {
+    char logMessage[2000];
+    sprintf(logMessage, "Generating random position for player '%s'", player->username);
+    infoGame(logMessage);
+
     Game *game = getCurrentGame();
     Cell *cell = NULL;
     if(game != NULL)
@@ -291,6 +330,9 @@ Cell* generateRandomPlayerCell(Player *player)
         cell->color = player->color;
         cell->next = NULL;
     }
+
+    sprintf(logMessage, "Player positioned at x=%d, y=%d", cell->x, cell->y);
+    infoGame(logMessage);
 
     return cell;
 }

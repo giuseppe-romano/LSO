@@ -24,7 +24,44 @@ Player *connectedPlayers = NULL;
 
 void addClientSocket(int clientSocket)
 {
+    char logMessage[200];
+    sprintf(logMessage, "Adding client socket '%d' into the list", clientSocket);
+    infoPlayer(logMessage);
+
     clientSockets[numSockets++] = clientSocket;
+}
+
+void shutdownClientSockets()
+{
+    infoPlayer("Shutting down all client's sockets...");
+    char logMessage[200];
+
+    int j;
+    for( j = 0 ; j < numSockets; j++ ) {
+        sprintf(logMessage, "Shutting down client's socket %d...", clientSockets[j]);
+        infoPlayer(logMessage);
+
+        shutdown(clientSockets[j], SHUT_RDWR);
+    }
+}
+
+pthread_t playerThreads[100];
+int numThreads = 0;
+void addPlayerThread(pthread_t playerThread)
+{
+    infoPlayer("Adding a new player's thread into the list");
+
+    playerThreads[numThreads++] = playerThread;
+}
+
+void killPlayerThreads()
+{
+    infoPlayer("Killing all player's threads...");
+
+    int j;
+    for( j = 0 ; j < numThreads; j++ ) {
+        pthread_cancel(playerThreads[j]);
+    }
 }
 
 Player* getRegisteredPlayers()
@@ -79,7 +116,7 @@ void removeClientSocket(int clientSocket)
 
 void broadcastNewGame(Game *game)
 {
-    info("Broadcasting new game...");
+    infoPlayer("Broadcasting new game...");
     int j;
     for( j = 0 ; j < numSockets; j++ ) {
         sendGame(clientSockets[j], game);
@@ -88,7 +125,7 @@ void broadcastNewGame(Game *game)
 
 void broadcastAddedPlayer(Cell *player)
 {
-    info("Broadcasting new player...");
+    infoPlayer("Broadcasting new player...");
     int j;
     for( j = 0 ; j < numSockets; j++ ) {
         sendAddedCell(clientSockets[j], player);
@@ -97,7 +134,7 @@ void broadcastAddedPlayer(Cell *player)
 
 void broadcastRemovedPlayer(Cell *player)
 {
-    info("Broadcasting removed player...");
+    infoPlayer("Broadcasting removed player...");
     int j;
     for( j = 0 ; j < numSockets; j++ ) {
         sendRemovedCell(clientSockets[j], player);
@@ -106,7 +143,7 @@ void broadcastRemovedPlayer(Cell *player)
 
 void broadcastPlayerMoved(Cell *player, int status)
 {
-    info("Broadcasting player moved...");
+    infoPlayer("Broadcasting player moved...");
     int j;
     for( j = 0 ; j < numSockets; j++ ) {
         sendMovePlayerResponse(clientSockets[j], player, status);
@@ -123,13 +160,13 @@ void loadRegisteredPlayers(char *filepath)
 
     char logMessage[2000];
     sprintf(logMessage, "Loading registered players from database file '%s'", filepath);
-    info(logMessage);
+    infoPlayer(logMessage);
 
     registeredPlayersFile = fopen(filepath, "r");
     if (registeredPlayersFile == NULL)
     {
         sprintf(logMessage, "The database file '%s' does not exist!", filepath);
-        warn(logMessage);
+        warnPlayer(logMessage);
         return;
     }
 
@@ -142,7 +179,7 @@ void loadRegisteredPlayers(char *filepath)
         }
 
         sprintf(logMessage, "Loaded player '%s'", line);
-        info(logMessage);
+        infoPlayer(logMessage);
 
         Player *p = deserializePlayer(line);
         if(head == NULL)
@@ -173,7 +210,7 @@ void writeRegisteredPlayers()
 
     char logMessage[2000];
     sprintf(logMessage, "Writing registered players to database file '%s'", registeredPlayersFilepath);
-    info(logMessage);
+    infoPlayer(logMessage);
 
     registeredPlayersFile = fopen(registeredPlayersFilepath, "w");
 
@@ -182,7 +219,7 @@ void writeRegisteredPlayers()
         line = serializePlayer(current);
 
         sprintf(logMessage, "Writing player '%s'", line);
-        info(logMessage);
+        infoPlayer(logMessage);
 
         fprintf (registeredPlayersFile, "%s\n", line);
         if (line)
@@ -235,7 +272,7 @@ int registerPlayer(AuthenticationRequest *authenticationRequest)
 
     char logMessage[2000];
     sprintf(logMessage, "Registering player '%s' with symbol '%s'", authenticationRequest->username, authenticationRequest->symbol);
-    info(logMessage);
+    infoPlayer(logMessage);
 
     //If there is no registered player having that specific username
     if(getRegisteredPlayerByUsername(authenticationRequest->username) == NULL)
@@ -262,7 +299,7 @@ int registerPlayer(AuthenticationRequest *authenticationRequest)
             parent->next = player;
         }
         sprintf(logMessage, "Player '%s' registered with success!", authenticationRequest->username);
-        warn(logMessage);
+        warnPlayer(logMessage);
 
         writeRegisteredPlayers();
 
@@ -270,7 +307,7 @@ int registerPlayer(AuthenticationRequest *authenticationRequest)
     }
     else{
         sprintf(logMessage, "Player '%s' already exists!", authenticationRequest->username);
-        warn(logMessage);
+        warnPlayer(logMessage);
     }
 
     pthread_mutex_unlock(&registerPlayerMutex);
@@ -285,7 +322,7 @@ int loginPlayer(AuthenticationRequest *authenticationRequest)
 
     char logMessage[2000];
     sprintf(logMessage, "Logging-in player '%s'", authenticationRequest->username);
-    info(logMessage);
+    infoPlayer(logMessage);
 
     //If there is a registered player having that specific username and the password matches, then he is logged in
     Player *registeredPlayer = getRegisteredPlayerByUsername(authenticationRequest->username);
@@ -299,7 +336,7 @@ int loginPlayer(AuthenticationRequest *authenticationRequest)
         else
         {
             sprintf(logMessage, "Player '%s' is authenticated successfully", authenticationRequest->username);
-            info(logMessage);
+            infoPlayer(logMessage);
 
             Player *player = (Player*) malloc(sizeof(Player));
             player->username = registeredPlayer->username;
@@ -336,7 +373,7 @@ void logoutPlayer(AuthenticationRequest *authenticationRequest)
 
     char logMessage[2000];
     sprintf(logMessage, "Logging-out player '%s'", authenticationRequest->username);
-    info(logMessage);
+    infoPlayer(logMessage);
 
     Player *connectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
     removeConnectedPlayer(connectedPlayer);
@@ -361,7 +398,7 @@ void *playerThreadFunc(void *vargp)
         memset(client_message, '\0', 2000);
         if(recv(clientSocket, client_message, 2000, 0) <= 0)
         {
-           warn("Connection closed. The client cut off!");
+           warnPlayer("Connection closed. The client cut off!");
            clientConnected = 0;
         }
         else
@@ -371,7 +408,7 @@ void *playerThreadFunc(void *vargp)
             char logMessage[2100];
 
             sprintf(logMessage, "Complete message from client: %s", client_message);
-            info(logMessage);
+            infoPlayer(logMessage);
 
             //The server message can contain multiple messages, so it will be splitted
             char *buffer = strdup(client_message);
@@ -381,14 +418,14 @@ void *playerThreadFunc(void *vargp)
                 if(strlen(message) > 0)
                 {
                     sprintf(logMessage, "Message from client: '%s'", message);
-                    info(logMessage);
+                    infoPlayer(logMessage);
                 }
 
                 //The client sent a register request
                 if((authenticationRequest = deserializeRegisterRequest(message)) != NULL)
                 {
                     sprintf(logMessage, "RegisterAction: %s", message);
-                    info(logMessage);
+                    infoPlayer(logMessage);
 
                     int status = registerPlayer(authenticationRequest);
                     char *resMessage = "Registration done!";
@@ -405,7 +442,7 @@ void *playerThreadFunc(void *vargp)
                 else if((authenticationRequest = deserializeLoginRequest(message)) != NULL)
                 {
                     sprintf(logMessage, "LoginAction: %s", message);
-                    info(logMessage);
+                    infoPlayer(logMessage);
 
                     int status = loginPlayer(authenticationRequest);
                     char *resMessage = "Login succeeded!";
@@ -418,7 +455,7 @@ void *playerThreadFunc(void *vargp)
                         resMessage = "Login failed. Another user logged in with same credentials!";
                     }
                     sprintf(logMessage, "Login: %s", resMessage);
-                    info(logMessage);
+                    infoPlayer(logMessage);
 
                     sendLoginResponse(clientSocket, status, resMessage);
 
@@ -456,7 +493,7 @@ void *playerThreadFunc(void *vargp)
                 {
                     char str[2100];
                     sprintf(str, "MovePlayerAction: %s", message);
-                    info(str);
+                    infoPlayer(str);
 
                     Game *game = getCurrentGame();
                     int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
@@ -473,7 +510,10 @@ void *playerThreadFunc(void *vargp)
 
                     }
 
-                    broadcastPlayerMoved(playerCell, status);
+                    if(status != ERR_CELL_BUSY)
+                    {
+                        broadcastPlayerMoved(playerCell, status);
+                    }
 
                     //If the user won the game then a new game gets generated and notified to all connected players
                     if(status == ERR_USER_WIN_GAME)

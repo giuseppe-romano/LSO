@@ -2,6 +2,26 @@
 #include <stdlib.h>
 #include <time.h>
 #include "draw.h"
+#include "logging.h"
+
+int currentXInputOffset = 0;
+int currentYInputOffset = 0;
+
+void setInteractiveCursorCoords(int x, int y)
+{
+    currentXInputOffset = x;
+    currentYInputOffset = y;
+}
+
+void setCursorToOffset()
+{
+    char logMessage[2000];
+    sprintf(logMessage, "Set cursor to x=%d, y=%d", currentXInputOffset, currentYInputOffset);
+    infoDraw(logMessage);
+
+    gotoxy(currentXInputOffset, currentYInputOffset);
+}
+
 
 char* getColorByName(char *name)
 {
@@ -67,24 +87,31 @@ Cell* getCellAt(Cell *head, int x, int y) {
 }
 
 void drawServerTitle() {
+    infoDraw("Drawing Server title...");
     system("setterm -bold on");
 
     gotoxy(91, 2);
     printf("M I N E F I E L D   G A M E   -   S E R V E R   C O N S O L E");
 
     system("setterm -bold off");
+    infoDraw("Server title drawn!");
+    setCursorToOffset();
 }
 
 void drawClientTitle() {
+    infoDraw("Drawing Client title...");
     system("setterm -bold on");
 
     gotoxy(91, 2);
     printf("M I N E F I E L D   G A M E   -   C L I E N T   C O N S O L E");
 
     system("setterm -bold off");
+    infoDraw("Client title drawn!");
+    setCursorToOffset();
 }
 
 void drawMineField(Game *game) {
+    infoDraw("Drawing Minefield...");
     int i, j;
 
     int yOffset = 5;
@@ -117,22 +144,28 @@ void drawMineField(Game *game) {
     }
 
     printf("\n");
+    infoDraw("Minefield drawn!");
+    setCursorToOffset();
 }
 
 void drawPlayer(Player *player)
 {
+    infoDraw("Drawing Player...");
     char m[2000];
     printf("%s", getColorByName(player->color));
     sprintf(m, "    username: %s,  password: %s, symbol:%s", player->username, player->password, player->symbol);
 
     printf("%-59s", m);
     printf(RESET);
+    infoDraw("Player drawn!");
+    setCursorToOffset();
 }
 
 void printNotificationMessage(int notificationStatus, char *notificationMessage)
 {
     if(notificationMessage)
     {
+        infoDraw("Drawing Notification message...");
         gotoxy(1, 20);
         printf(GRN);
         if(notificationStatus != 0)
@@ -141,7 +174,28 @@ void printNotificationMessage(int notificationStatus, char *notificationMessage)
         }
         printf("%-59s", notificationMessage);
         printf(RESET);
+        infoDraw("Notification message drawn!");
     }
+    setCursorToOffset();
+}
+
+void drawConnectedPlayer(Cell *player)
+{
+    gotoxy(60, 4);
+    printf("%-100s", " ");
+    if(player != NULL)
+    {
+        infoDraw("Drawing Connected Player...");
+
+        gotoxy(60, 4);
+        printf("Welcome %s (", player->user);
+        printf("%s", getColorByName(player->color));
+        printf("%s", player->symbol);
+        printf(RESET);
+        printf(")");
+        infoDraw("Connected Player drawn!");
+    }
+    setCursorToOffset();
 }
 
 

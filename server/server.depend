@@ -11,18 +11,20 @@
 1585066369 /home/peppe/UNINA/LSO/server/include/game.h
 	"draw.h"
 
-1585087480 source:/home/peppe/UNINA/LSO/server/src/game/game.c
+1588260767 source:/home/peppe/UNINA/LSO/server/src/game/game.c
 	<stdio.h>
 	<stdlib.h>
 	<time.h>
 	<string.h>
 	"../../include/game.h"
 	"../../include/player.h"
+	"logging.h"
 
-1584229318 source:/home/peppe/UNINA/LSO/server/src/main.c
+1588523014 source:/home/peppe/UNINA/LSO/server/src/main.c
 	<sys/socket.h>
 	<arpa/inet.h>
 	<pthread.h>
+	<getopt.h>
 	"draw.h"
 	"serial.h"
 	"logging.h"
@@ -34,7 +36,7 @@
 1583623656 /home/peppe/UNINA/LSO/server/include/protocol.h
 	"game.h"
 
-1584367163 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
+1587073084 source:/home/peppe/UNINA/LSO/server/src/protocol/protocol.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -50,7 +52,7 @@
 
 1579098631 /home/peppe/UNINA/LSO/shared/include/serial.h
 
-1585068031 /home/peppe/UNINA/LSO/shared/draw.h
+1588257395 /home/peppe/UNINA/LSO/shared/draw.h
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
@@ -60,21 +62,24 @@
 
 1584229580 /home/peppe/UNINA/LSO/shared/serial.h
 
-1583623656 /home/peppe/UNINA/LSO/server/include/menu.h
+1588521345 /home/peppe/UNINA/LSO/server/include/menu.h
 
-1584228870 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
+1588521769 source:/home/peppe/UNINA/LSO/server/src/menu/menu.c
 	<stdio.h>
 	<stdlib.h>
 	<string.h>
+	<signal.h>
+	<sys/socket.h>
 	"../../include/menu.h"
 	"draw.h"
+	"logging.h"
 	"../../include/game.h"
 	"../../include/player.h"
 
-1583623656 /home/peppe/UNINA/LSO/server/include/player.h
+1588521207 /home/peppe/UNINA/LSO/server/include/player.h
 	"serial.h"
 
-1585127537 source:/home/peppe/UNINA/LSO/server/src/player/player.c
+1588521789 source:/home/peppe/UNINA/LSO/server/src/player/player.c
 	<stdio.h>
 	<stdlib.h>
 	<sys/socket.h>
@@ -92,5 +97,5 @@
 	"../../include/protocol.h"
 	"../../include/menu.h"
 
-1581810313 /home/peppe/UNINA/LSO/shared/logging.h
+1587935828 /home/peppe/UNINA/LSO/shared/logging.h
 

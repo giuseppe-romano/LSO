@@ -5,7 +5,13 @@
 
 void addClientSocket(int clientSocket);
 
+void shutdownClientSockets();
+
 void removeClientSocket(int clientSocket);
+
+void addPlayerThread(pthread_t playerThread);
+
+void killPlayerThreads();
 
 Player* getRegisteredPlayers();
 

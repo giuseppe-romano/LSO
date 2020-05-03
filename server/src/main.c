@@ -1,6 +1,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>	//inet_addr
 #include <pthread.h>
+#include <getopt.h>
 
 #include "draw.h"
 #include "serial.h"
@@ -10,78 +11,128 @@
 #include "../include/menu.h"
 #include "../include/player.h"
 
-#define MAX 80
-#define PORT 7799
-#define SA struct sockaddr
+static struct option long_options[] =
+{
+    {"help",  no_argument, 0, 'h'},
+    {"port",  required_argument, 0, 'p'},
+    {"log",   required_argument, 0, 'l'},
+    {0, 0, 0, 0}
+};
+
+void printUsage()
+{
+    printf("Unable to start the Minefield server.\n");
+    printf("Usage: ./server --options--\n");
+    printf("\tOptions are:\n"
+           "\t\t--help: Print this message\n"
+           "\t\t--port: (optional) listening port (default: 8000)\n"
+           "\t\t--log:  (optional) the log filename (default ./server.log)\n");
+}
 
 /* S E R V E R */
-int main()
+int main(int argc, char *argv[ ])
 {
+    int option_index = 0;
+
+    char *logFile = "server.log";
+    int port = 8000;
+
+    int c;
+    while ((c = getopt_long(argc, argv, "h:p:l:", long_options, &option_index)) != -1) {
+        switch (c)
+        {
+            case 'h':
+              printUsage();
+              exit(-1);
+              break;
+
+            case 'p':
+              sscanf(optarg, "%d", &port);
+              break;
+
+            case 'l':
+              logFile = optarg;
+              break;
+        }
+    }
+
     system("@cls||clear");
-    initLogFile("server.log");
-    //Creates a thread responsible for the menu console.
-    pthread_t menu_thread_id;
-    pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
+    //Initializes the log file on which any activity will be logged
+    initLogFile(logFile);
+
+    infoMain("Starting Minefield server...");
 
     int serverSocket, newSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_storage serverStorage;
     socklen_t addr_size;
-    //Create the socket.
+
+    //Create the server socket.
     if ((serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) <= 0)
     {
         perror("socket failed");
         exit(EXIT_FAILURE);
     }
+    int t = 1;
+    setsockopt(serverSocket, SOL_SOCKET,SO_REUSEADDR, &t, sizeof(int));
+
+    pid_t pid = getpid();
+    char logMessage2[200];
+        sprintf(logMessage2, "PID %d", pid);
+        infoMain(logMessage2);
+
+    //Creates a thread responsible for the menu console.
+    pthread_t menu_thread_id;
+    pthread_create(&menu_thread_id, NULL, menuThreadFunc, &serverSocket);
 
     // Configure settings of the server address struct
     // Address family = Internet
     serverAddr.sin_family = AF_INET;
     //Set port number, using htons function to use proper byte order
-    serverAddr.sin_port = htons(PORT);
+    serverAddr.sin_port = htons(port);
     //Set IP address to localhost
-    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); //inet_addr("127.0.0.1");
+    serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); //any network interface address
     //Set all bits of the padding field to 0
     memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
     //Bind the address struct to the socket
     bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-    //Listen on the socket, with 40 max connection requests queued
 
-    if(listen(serverSocket, 50)==0)
-        info("Server started. Listening...");
+    //Listen on the socket, with 50 max connection requests queued
+    if(listen(serverSocket, 50) == 0)
+    {
+        char logMessage[200];
+        sprintf(logMessage, "Server started. Listening on port %d", port);
+        infoMain(logMessage);
+    }
     else
-        error("Server Error");
+    {
+        errorMain("Server Error");
+    }
 
     //Loads the list of registered players (stored into a dedicated file)
     loadRegisteredPlayers("registered-players.db");
 
-    pthread_t tid[60];
-    int i = 0;
+    pthread_t tid;
+
     while(1)
     {
-        info("Listening for client connections...");
+        infoMain("Listening for client connections...");
         //Accept call creates a new socket for the incoming connection
         addr_size = sizeof serverStorage;
         newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);
 
-        info("New client connected, creating a thread");
+        infoMain("New client connected, creating a thread");
         //for each client request creates a thread and assign the client request to it to process
         //so the main thread can entertain next request
-        if( pthread_create(&tid[i], NULL, playerThreadFunc, &newSocket) != 0 )
-            error("Failed to create thread\n");
-        if( i >= 50)
+        if( pthread_create(&tid, NULL, playerThreadFunc, &newSocket) != 0 )
         {
-            i = 0;
-            while(i < 50)
-            {
-                pthread_join(tid[i++],NULL);
-            }
-            i = 0;
+            errorMain("Failed to create thread\n");
         }
+        addPlayerThread(tid);
     }
 
-    info("Server shutting down...");
-    close(serverSocket);
+    infoMain("Server shutting down...");
+    shutdown(serverSocket, SHUT_RDWR);
 
     return 0;
 }

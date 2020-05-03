@@ -25,9 +25,6 @@ char loggedInUsername[200];
 int notificationStatus;
 char *notificationMessage;
 
-int currentXInputOffset = 0;
-int currentYInputOffset = 0;
-
 void clearMenu()
 {
     int i;
@@ -38,14 +35,10 @@ void clearMenu()
     }
 }
 
-
-void setCursorToOffset()
-{
-    gotoxy(currentXInputOffset, currentYInputOffset);
-}
-
 void showGameMenu()
 {
+    infoMenu("Show game menu");
+
     int choice;
     int exit = 0;
     int invalid = 0;
@@ -89,11 +82,13 @@ void showGameMenu()
         notificationStatus = 0;
         notificationMessage = NULL;
 
+        drawConnectedPlayer(currentPlayerCell);
+
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
         gotoxy(23, 12);
-        currentXInputOffset = 23;
-        currentYInputOffset = 12;
+        setInteractiveCursorCoords(23, 12);
+
         if(scanf("%d", &choice) != 1)
         {
             choice = -1;
@@ -128,6 +123,7 @@ void showGameMenu()
                 sendLogoutRequest(currentPlayerCell->user);
                 system("@cls||clear");
                 drawClientTitle();
+                drawConnectedPlayer(NULL);
                 exit = 1;
                 break;
 
@@ -135,12 +131,13 @@ void showGameMenu()
                 invalid = 1;
         }
     } while(!exit);
-
 }
 
 
 void showRegisterMenu()
 {
+    infoMenu("Show register menu");
+
     clearMenu();
 
     gotoxy(1, 1);
@@ -201,6 +198,8 @@ void showRegisterMenu()
 
 void showLoginMenu()
 {
+    infoMenu("Show login menu");
+
     clearMenu();
 
     gotoxy(1, 1);
@@ -231,6 +230,7 @@ void showLoginMenu()
     {
         while(getchar() != '\n');
     }
+
     strcpy(loggedInUsername, username);
 
     sendLoginRequest(username, password);
@@ -254,6 +254,8 @@ void showLoginMenu()
 
 void showMainMenu()
 {
+    infoMenu("Show main menu");
+
     int choice;
     int exit = 0;
     int invalid = 0;
@@ -295,8 +297,8 @@ void showMainMenu()
         gotoxy(1, 12);
         printf("%-59s", "Please make a choice: ");
         gotoxy(23, 12);
-        currentXInputOffset = 23;
-        currentYInputOffset = 12;
+        setInteractiveCursorCoords(23, 12);
+
         if(scanf("%d", &choice) != 1)
         {
             choice = -1;
@@ -345,7 +347,7 @@ void setCurrentPlayerCell(Cell *playerCell)
 {
     if(strcmp(playerCell->user, loggedInUsername) == 0)
     {
-        info("Setting player as current player");
+        infoMenu("Setting player as current player");
         if(currentPlayerCell == NULL)
         {
             currentPlayerCell = (Cell*)malloc(sizeof(Cell));

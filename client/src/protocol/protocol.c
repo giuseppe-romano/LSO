@@ -18,7 +18,7 @@ void logMessage(char *message)
 {
     char logging[2000];
     sprintf(logging, "Sending message '%s' over the network...", message);
-    info(logging);
+    infoProtocol(logging);
 }
 
 void sendRegisterRequest(char *username, char *password, char *color, char *symbol)
@@ -27,7 +27,7 @@ void sendRegisterRequest(char *username, char *password, char *color, char *symb
     logMessage(message);
 
     write(serverSocket, message, strlen(message));
-    info("Message sent!");
+    infoProtocol("Message sent!");
     free(message);
 }
 
@@ -37,7 +37,7 @@ void sendLoginRequest(char *username, char *password)
     logMessage(message);
 
     write(serverSocket, message, strlen(message));
-    info("Message sent!");
+    infoProtocol("Message sent!");
     free(message);
 }
 
@@ -47,7 +47,7 @@ void sendLogoutRequest(char *username)
     logMessage(message);
 
     write(serverSocket, message, strlen(message));
-    info("Message sent!");
+    infoProtocol("Message sent!");
     free(message);
 }
 
@@ -57,6 +57,6 @@ void sendMovePlayerRequest(Cell *player, int direction)
     logMessage(message);
 
     write(serverSocket, message, strlen(message));
-    info("Message sent!");
+    infoProtocol("Message sent!");
     free(message);
 }
