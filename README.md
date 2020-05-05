@@ -7,10 +7,12 @@
 2. [Istallazione](#installation)
     1. [Prerequisiti di sistema](#system-requirements)
     2. [Scaricare il codice sorgente](#source-code-download)
+    3. [Compilazione del server](#server-build)
+    4. [Compilazione del client](#client-build)
 3. [Another paragraph](#paragraph2)
 
 ## Introduzione <a name="introduction"></a>
-Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: S, N, E, O. 
+Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
 Il server posizionerà nella matrice mine in posizioni random. 
 
 Ogni utente, una volta connesso al server, verrà posizionato in una posizione random sulla prima colonna della matrice e dovrà raggiungere una qualunque posizione dell'ultima colonna.
@@ -36,10 +38,34 @@ $ sudo apt-get install build-essential
 
 Il pacchetto **build-essential** contiene tutti gli strumenti e le librerie di base per compilare pacchetti. Esso generalmente include i compilatori GCC/g++, librerie ed altri strumenti.
 
+Inoltre occorre installare git client allo scopo di effettuare il cloning del repository sulla propria macchina locale. Per installare git eseguire il seguente comando:
 
+```sh
+$ sudo apt install git-all
+```
+
+Infine, per la compilazione del codice sorgente, viene utilizzato il make tool. Per installare make eseguire il seguente comando:
+
+```sh
+$ sudo apt-get install make
+```
 
 ### Scaricare il codice sorgente <a name="source-code-download"></a>
-Some introduction text, formatted in heading 2 style
+Il codice sorgente è disponibile su github all'indirizzo [LSO](https://github.com/giuseppe-romano/LSO), pertanto è sufficiente clonare il repository sul proprio computer con il seguente comando:
+
+```sh
+$ cd myFavouriteFolder
+$ git clone https://github.com/giuseppe-romano/LSO.git
+```
+
+A termine, nella cartella *myFavouriteFolder* dovresti trovare una cartella **LSO** nella quale vi sono tutti i sorgenti. I sorgenti sono suddivisi in tre sotto-cartelle:
+- **shared** contiene il codice condiviso tra il server ed il client; funzioni di logging, drawing etc etc
+- **server** contiene il codice del programma server
+- **client** contiene il codice del programma client
+
+###  [Compilazione del server] <a name="server-build"></a>
+
+###  [Compilazione del client] <a name="client-build"></a>
 
 ## Some paragraph <a name="paragraph1"></a>
 The first paragraph text
