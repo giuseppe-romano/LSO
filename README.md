@@ -1,5 +1,4 @@
-#Minefield Game
-
+# Minefield Game
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/minefield.jpg)
 
 **Table of Contents**
@@ -8,7 +7,7 @@
 
 [TOC]
 
-#Descrizione del sistema
+# Descrizione del sistema
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: S, N, E, O. 
 Il server posizionerà nella matriceminein posizioni random. Ogni utente, una volta connesso al server, verrà posizionato in una posizione random sulla prima colonna della matrice e dovrà raggiungere una qualunque posizione dell'ultima colonna.
 La posizione delle mine sulla mappa sarà nascosta per l'utente, saranno invece visibili gli avversari. Dopo ogni passo l'utente riceverà l'informazione sull'effetto proprio movimento: - se lo spostamento porterà su di una mina l'utente verrà eliminato; 
