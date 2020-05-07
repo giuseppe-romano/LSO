@@ -92,7 +92,7 @@ In questa sezione vengono documentate tutte le funzionalità offerte dal gioco *
 ### Manuale d'uso del server <a name="user-guide-server"></a>
 Il programma server è il programma principale del gioco, esso è responsabile di fornire i servizi TCP a tutti i client che vogliono connettersi e giocare una partita. Inoltre il server è il detentore delle regole del gioco, ogni azione del client viene dapprima vagliata dal server per poi renderla effettiva ed eventualmente notificata in broadcast agli altri client collegati al gioco.
 
-### Avvio del server <a name="start-server"></a>
+#### Avvio del server <a name="start-server"></a>
 Per avviare il server con i parametri di default, eseguire il seguente comando:
 ```sh
 $ cd myFolder/LSO/server
@@ -110,12 +110,12 @@ In fase di avvio il server mostra un menù interattivo a sinistra e la matrice d
 
 Il server genera sin da subito una sessione di gioco dispiegando diverse bombe in posizioni casuali ad eccezione della prima e dell'ultima colonna le quali sono, rispettivamente, la colonna in cui vengono posizionati i giocatori e la colonna di arrivo dove il giocatore vince la partita.
 
-### Avvia una nuova sessione di gioco <a name="start-new-session"></a>
+#### Avvia una nuova sessione di gioco <a name="start-new-session"></a>
 Per avviare una nuova sessione di gioco, digitare **1** e premere *INVIO*. 
 
 Qualora vi fossero giocatori sul campo minato, questi verranno riposizionati sulla prima colonna in maniera casuale e potranno continuare a giocare nella nuova sessione di gioco.
 
-### Visualizza la lista dei giocatori <a name="show-players-list"></a>
+#### Visualizza la lista dei giocatori <a name="show-players-list"></a>
 Il server può in qualsiasi momento visualizzare la lista dei giocatori registrati e quelli che sono connessi alla sessione di gioco.
 Per visualizzare la lista dei giocatori, digitare **2** e premere *INVIO*.
 
@@ -123,8 +123,18 @@ Il sistema mostra il seguente sotto menù :
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/list-players-menu.jpg)
 
+Da quì è possibile visualizzare la lista dei giocatori registrati e la lista dei giocatori connessi al gioco.
 
-### Terminazione del server <a name="stop-server"></a>
+- Per visualizzare la lista dei giocatori registrati, digitare **1** e premere *INVIO*.
+
+- Per visualizzare la lista dei giocatori connessi, digitare **2** e premere *INVIO*.
+
+**NOTA:** Ogni giocatore viene visualizzato con un colore specifico, esso è il colore che l'utente ha scelto in fase di registrazione.
+
+Per tornare al menù principale, digitare **9** e premere *INVIO*.
+
+#### Terminazione del server <a name="stop-server"></a>
+Per terminare il server, dal menù principale, digitare **9** e premere *INVIO*.
 
 ### Manuale d'uso del client <a name="user-guide-client"></a>
 
