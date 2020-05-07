@@ -99,7 +99,7 @@ $ cd myFolder/LSO/server
 $ ./server
 ```
 Di default il server si mette in ascolto sulla porta **8000** e logga tutte le operazioni nel file **server.log**. 
-Qualora si avesse la necessità di avviare il server su una porta diversa e/o voler scrivere il file log in un'altra locazione è possibile specificare i parametri di avvio del server, come ad esempio:
+Qualora si avesse la necessità di avviare il server su una porta diversa e/o voler scrivere il file log in un'altra locazione è possibile specificare questi parametri in fase di avvio, come ad esempio:
 ```sh
 $ cd myFolder/LSO/server
 $ ./server --port 1234 --log another/location/file.log
@@ -111,11 +111,18 @@ In fase di avvio il server mostra un menù interattivo a sinistra e la matrice d
 Il server genera sin da subito una sessione di gioco dispiegando diverse bombe in posizioni casuali ad eccezione della prima e dell'ultima colonna le quali sono, rispettivamente, la colonna in cui vengono posizionati i giocatori e la colonna di arrivo dove il giocatore vince la partita.
 
 ### Avvia una nuova sessione di gioco <a name="start-new-session"></a>
-Per avviare una nuova sessione di gioco, digitare **1** e premere INVIO. 
+Per avviare una nuova sessione di gioco, digitare **1** e premere *INVIO*. 
 
-Qualora vi fossero giocatori sul campo minato, questi vengono riposizionati sulla prima colonna in maniera casuale e possono continuare a giocare nella nuova sessione di gioco.
+Qualora vi fossero giocatori sul campo minato, questi verranno riposizionati sulla prima colonna in maniera casuale e potranno continuare a giocare nella nuova sessione di gioco.
 
 ### Visualizza la lista dei giocatori <a name="show-players-list"></a>
+Il server può in qualsiasi momento visualizzare la lista dei giocatori registrati e quelli che sono connessi alla sessione di gioco.
+Per visualizzare la lista dei giocatori, digitare **2** e premere *INVIO*.
+
+Il sistema mostra il seguente sotto menù :
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/list-players-menu.jpg)
+
 
 ### Terminazione del server <a name="stop-server"></a>
 
