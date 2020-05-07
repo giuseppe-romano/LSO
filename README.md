@@ -16,6 +16,10 @@
         3. [Visualizza la lista dei giocatori](#show-players-list)
         4. [Terminazione del server](#stop-server)
     2. [Manuale d'uso del client](#user-guide-client)
+        1. [Avvio del client](#start-client)
+        2. [Registrarsi come nuovo utente](#register)
+        3. [Accedere al gioco](#login)
+        4. [Terminazione del client](#stop-client)
 4. [Specifiche tecniche](#tech-specs)
 
 ## Introduzione <a name="introduction"></a>
@@ -138,6 +142,13 @@ Per terminare il server, dal menù principale, digitare **9** e premere *INVIO*.
 
 ### Manuale d'uso del client <a name="user-guide-client"></a>
 
+#### Avvio del client <a name="start-client"></a>
+
+#### Registrarsi come nuovo utente <a name="register"></a>
+
+#### Accedere al gioco <a name="login"></a>
+
+#### Terminazione del client <a name="stop-client"></a>
 
 ## Specifiche tecniche <a name="tech-specs"></a>
 ```c
