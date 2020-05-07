@@ -10,6 +10,13 @@
     3. [Compilazione del server](#server-build)
     4. [Compilazione del client](#client-build)
 3. [Manuale d'uso](#user-guide)
+    1. [Manuale d'uso del server](#user-guide-server)
+        1. [Avvio del server](#start-server)
+        2. [Avvia una nuova sessione di gioco](#start-new-session)
+        3. [Visualizza la lista dei giocatori](#show-players-list)
+        4. [Terminazione del server](#stop-server)
+    2. [Manuale d'uso del client](#user-guide-client)
+4. [Specifiche tecniche](#tech-specs)
 
 ## Introduzione <a name="introduction"></a>
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
@@ -54,11 +61,11 @@ $ sudo apt-get install make
 Il codice sorgente è disponibile su github all'indirizzo [LSO](https://github.com/giuseppe-romano/LSO), pertanto è sufficiente clonare il repository sul proprio computer con il seguente comando:
 
 ```sh
-$ cd myFavouriteFolder
+$ cd myFolder
 $ git clone https://github.com/giuseppe-romano/LSO.git
 ```
 
-A termine, nella cartella *myFavouriteFolder* dovresti trovare una cartella **LSO** nella quale vi sono tutti i sorgenti. I sorgenti sono suddivisi in tre sotto-cartelle:
+A termine, nella cartella *myFolder* dovresti trovare una cartella **LSO** nella quale vi sono tutti i sorgenti. I sorgenti sono suddivisi in tre sotto-cartelle:
 - **shared** contiene il codice condiviso tra il server ed il client; funzioni di logging, drawing etc etc
 - **server** contiene il codice del programma server
 - **client** contiene il codice del programma client
@@ -66,7 +73,7 @@ A termine, nella cartella *myFavouriteFolder* dovresti trovare una cartella **LS
 ###  Compilazione del server <a name="server-build"></a>
 Il codice sorgente del server risiede nella sotto-cartella **server**, per compilare quindi il server occorre eseguire i seguenti comandi:
 ```sh
-$ cd myFavouriteFolder/LSO/server
+$ cd myFolder/LSO/server
 $ make
 ```
 A termine, il make ha generato l'eseguibile **server** nella medesima cartella.
@@ -74,13 +81,48 @@ A termine, il make ha generato l'eseguibile **server** nella medesima cartella.
 ###  Compilazione del client <a name="client-build"></a>
 Parimenti al server, il codice sorgente del client risiede nella sotto-cartella **client**, per compilare quindi il client occorre eseguire i seguenti comandi:
 ```sh
-$ cd myFavouriteFolder/LSO/client
+$ cd myFolder/LSO/client
 $ make
 ```
 A termine, il make ha generato l'eseguibile **client** nella medesima cartella.
 
 ## Manuale d'uso <a name="user-guide"></a>
+In questa sezione vengono documentate tutte le funzionalità offerte dal gioco **MineField**, il gioco è suddiviso in due programmi distinti il server ed il client. Il manuale d'uso ha lo scopo di fornire indicazioni all'utente circa le funzionalità e gli scenari d'uso (principali ed alternativi/di errore).
 
+### Manuale d'uso del server <a name="user-guide-server"></a>
+Il programma server è il programma principale del gioco, esso è responsabile di fornire i servizi TCP a tutti i client che vogliono connettersi e giocare una partita. Inoltre il server è il detentore delle regole del gioco, ogni azione del client viene dapprima vagliata dal server per poi renderla effettiva ed eventualmente notificata in broadcast agli altri client collegati al gioco.
+
+### Avvio del server <a name="start-server"></a>
+Per avviare il server con i parametri di default, eseguire il seguente comando:
+```sh
+$ cd myFolder/LSO/server
+$ ./server
+```
+Di default il server si mette in ascolto sulla porta **8000** e logga tutte le operazioni nel file **server.log**. 
+Qualora si avesse la necessità di avviare il server su una porta diversa e/o voler scrivere il file log in un'altra locazione è possibile specificare i parametri di avvio del server, come ad esempio:
+```sh
+$ cd myFolder/LSO/server
+$ ./server --port 1234 --log another/location/file.log
+```
+In fase di avvio il server mostra un menù interattivo a sinistra e la matrice del campo minato con una sessione già avviata.
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/server-main.jpg)
+
+Il server genera sin da subito una sessione di gioco dispiegando diverse bombe in posizioni casuali ad eccezione della prima e dell'ultima colonna le quali sono, rispettivamente, la colonna in cui vengono posizionati i giocatori e la colonna di arrivo dove il giocatore vince la partita.
+
+### Avvia una nuova sessione di gioco <a name="start-new-session"></a>
+Per avviare una nuova sessione di gioco, digitare **1** e premere INVIO. 
+
+Qualora vi fossero giocatori sul campo minato, questi vengono riposizionati sulla prima colonna in maniera casuale e possono continuare a giocare nella nuova sessione di gioco.
+
+### Visualizza la lista dei giocatori <a name="show-players-list"></a>
+
+### Terminazione del server <a name="stop-server"></a>
+
+### Manuale d'uso del client <a name="user-guide-client"></a>
+
+
+## Specifiche tecniche <a name="tech-specs"></a>
 ```c
 char* substr = malloc(4);
 strrncpy(substr, buff+10, 4);
