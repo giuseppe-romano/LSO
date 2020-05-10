@@ -167,8 +167,42 @@ All'avvio del client viene mostrata la seguente schermata:
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-main.jpg)
 
-
 #### Registrarsi come nuovo utente <a name="register"></a>
+Un utente, per accedere al gioco, deve registrarsi come giocatore. La fase di registrazione è molto semplice, è sufficiente fornire lo **username**, la **password**, il colore di gioco e il simbolo di gioco con cui l'utente verrà visualizzato sul campo minato.
+
+Per effettuare la registrazione, quindi, digitare **1** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare alcune informazioni:
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-username.jpg)
+
+Digitare il proprio nome utente e premere *INVIO*
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-password.jpg)
+
+Digitare la propria password e premere *INVIO*.
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-color.jpg)
+
+Scegliere il colore con il quale essere visualizzato sul campo minato e premere *INVIO*.
+**ATTENZIONE:** I colori possibili sono:
+> * red 
+> * green 
+> * yellow 
+> * blue
+> * magenta
+> * ciano
+> * white
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-symbol.jpg)
+
+Digitare il proprio simbolo formato da un singolo carattere e premere *INVIO*.
+
+Al termine, il sistema ritorna al menù principale mostrando un mesaggio di notifica sullo stato della registrazione appena effettuata. Se la registrazione ha avuto successo allora viene mostrata la seguente schermata:
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-registration-done.jpg)
+
+Se invece la registrazione è fallita magari perchè l'utente risulta già registrato allora il sistema mostra la seguente schermata:
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-registration-failed.jpg)
 
 #### Accedere al gioco <a name="login"></a>
 
