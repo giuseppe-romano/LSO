@@ -171,16 +171,14 @@ All'avvio del client viene mostrata la seguente schermata:
 #### Registrarsi come nuovo utente <a name="register"></a>
 Un utente, per accedere al gioco, deve registrarsi come giocatore. La fase di registrazione è molto semplice, è sufficiente fornire il nome utente, la password, il colore di gioco e il simbolo di gioco con cui l'utente verrà visualizzato sul campo minato.
 
-Per effettuare la registrazione, quindi, digitare **1** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare alcune informazioni:
+Per effettuare la registrazione, quindi, dal menù principale digitare **1** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare alcune informazioni:
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-username.jpg)
 
 Digitare il proprio nome utente e premere *INVIO*
-
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-password.jpg)
 
 Digitare la propria password e premere *INVIO*.
-
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-color.jpg)
 
 Scegliere il colore con il quale essere visualizzato sul campo minato e premere *INVIO*.
@@ -209,7 +207,7 @@ Se invece la registrazione è fallita magari perchè l'utente risulta già regis
 #### Accedere al gioco <a name="login"></a>
 Per accedere al gioco occorre essere registrati al sito, se non sei ancora registrato allora vai alla sezione [Registrarsi come nuovo utente.](#register)
 
-Per effettuare l'accesso, digitare **2** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare il nome utente e la password forniti in fase di registrazione:
+Per effettuare l'accesso, dal menù principale digitare **2** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare il nome utente e la password forniti in fase di registrazione:
 
 Digitare il nome utente e premere *INVIO*.
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-username.jpg)
@@ -217,7 +215,8 @@ Digitare il nome utente e premere *INVIO*.
 Digitare la password e premere *INVIO*.
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-password.jpg)
 
-Al termine, se la login ha avuto successo, il sistema mostra la schermata di gioco con il campo minato ed eventualmente gli altri giocatori connessi al gioco.
+Al termine, se la login ha avuto successo, il sistema mostra la schermata di gioco con il campo minato ed eventualmente gli altri giocatori connessi al gioco. 
+Il sistema aggiunge il giocatore sulla prima colonna a sinistra in maniera casuale.
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-done.jpg)
 
@@ -228,6 +227,37 @@ Inoltre, se la login fallisce, il sistema ritorna al menù principale con un mes
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-failed.jpg)
 
 #### Giocare una partita <a name="play-game"></a>
+Per giocare una partita occorre dapprima effettuare la login, se non si è già loggati si prega di seguire la procedura descritta nella sezione [Accedere al gioco.](#login)
+
+Una volta effettuata la login, il sistema mostra la schermata di gioco con il campo minato.
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-done.jpg)
+
+Dal menù di gioco è possibile scegliere una tra le quattro direzioni possibili (**S**, **N**, **E**, **O**).
+
+> * Premere **1** e *INVIO* per spostarsi verso l'alto &uarr;
+> * Premere **2** e *INVIO* per spostarsi verso destra &rarr;
+> * Premere **3** e *INVIO* per spostarsi verso il basso &darr;
+> * Premere **4** e *INVIO* per spostarsi verso sinistra &larr;
+
+Ad ogni spostamento di un qualsiasi giocatore vengono notificati tutti i giocatori circa l'esito dello spostamento, infatti uno spostamento può determinare le seguenti condizioni:
+
+> * Il giocatore si sposta con successo senza toccare alcun ostacolo e/o bomba. In tal caso tutti i giocatori vengono notificati con il messaggio: 
+```html
+The player 'G' (giuseppe) moved with success!
+```
+
+> * Il giocatore si sposta in una locazione già occupata da un altro giocatore. In tal caso l'azione diventa nulla e nessuno spostamento viene effettuato.
+
+> * Il giocatore si sposta in una locazione esplosiva. In tal caso il giocatore che è saltato in aria viene riposizionato in maniera casuale sulla prima colonna e tutti i giocatori vengono notificati con il messaggio: 
+```html
+The player 'G' (giuseppe) hit a bomb. He blew up!
+```
+
+> * Il giocatore vince la partita raggiungendo una qualsiasi locazione dell'ultima colonna. In tal caso una nuova sessione di gioco viene generata in automatico dal server e tutti i giocatori vengono notificati con il messaggio: 
+```html
+The player 'G' (giuseppe) won. Game restarted!
+```
 
 #### Terminazione del client <a name="stop-client"></a>
 Per terminare il client, dal menù principale, digitare **9** e premere *INVIO*.
