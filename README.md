@@ -28,6 +28,7 @@ Il server posizionerà nella matrice mine in posizioni random.
 
 Ogni utente, una volta connesso al server, verrà posizionato in una posizione random sulla prima colonna della matrice e dovrà raggiungere una qualunque posizione dell'ultima colonna.
 La posizione delle mine sulla mappa sarà nascosta per l'utente, saranno invece visibili gli avversari. Dopo ogni passo l'utente riceverà l'informazione sull'effetto proprio movimento: 
+
 - se lo spostamento porterà su di una mina l'utente verrà eliminato; 
 
 - se lo spostamento porterà nella locazione di uno degli utenti, tale spostamento sarà nullo e l'utente rimarrà nella posizione precedente. 
@@ -80,7 +81,7 @@ Il codice sorgente del server risiede nella sotto-cartella **server**, per compi
 $ cd myFolder/LSO/server
 $ make
 ```
-A termine, il make ha generato l'eseguibile **server** nella medesima cartella.
+A termine, il make genera l'eseguibile **server** nella medesima cartella.
 
 ###  Compilazione del client <a name="client-build"></a>
 Parimenti al server, il codice sorgente del client risiede nella sotto-cartella **client**, per compilare quindi il client occorre eseguire i seguenti comandi:
@@ -88,15 +89,18 @@ Parimenti al server, il codice sorgente del client risiede nella sotto-cartella 
 $ cd myFolder/LSO/client
 $ make
 ```
-A termine, il make ha generato l'eseguibile **client** nella medesima cartella.
+A termine, il make genera l'eseguibile **client** nella medesima cartella.
 
 ## Manuale d'uso <a name="user-guide"></a>
 In questa sezione vengono documentate tutte le funzionalità offerte dal gioco **MineField**, il gioco è suddiviso in due programmi distinti il server ed il client. Il manuale d'uso ha lo scopo di fornire indicazioni all'utente circa le funzionalità e gli scenari d'uso (principali ed alternativi/di errore).
 
 ### Manuale d'uso del server <a name="user-guide-server"></a>
-Il programma server è il programma principale del gioco, esso è responsabile di fornire i servizi TCP a tutti i client che vogliono connettersi e giocare una partita. Inoltre il server è il detentore delle regole del gioco, ogni azione del client viene dapprima vagliata dal server per poi renderla effettiva ed eventualmente notificata in broadcast agli altri client collegati al gioco.
+Il programma server è il programma principale del gioco, esso offre una serie di servizi a tutti i client che vogliono connettersi e provare a sfidare la sorte giocando una partita sul campo minato. 
+Il server è il detentore delle regole del gioco, ogni azione del client viene dapprima vagliata dal server per poi renderla effettiva ed eventualmente notificarla in broadcast agli altri clients collegati al gioco.
 
 #### Avvio del server <a name="start-server"></a>
+Prima di poter avviare il server è necessario compilare il codice sorgente e generare l'eseguibile, qualora la compilazione non fosse stata ancora effettuata si prega di eseguire la procedura descritta nella sezione [Compilazione del server.](#server-build)
+
 Per avviare il server con i parametri di default, eseguire il seguente comando:
 ```sh
 $ cd myFolder/LSO/server
@@ -108,11 +112,11 @@ Qualora si avesse la necessità di avviare il server su una porta diversa e/o vo
 $ cd myFolder/LSO/server
 $ ./server --port 1234 --log another/location/file.log
 ```
-In fase di avvio il server mostra un menù interattivo a sinistra e la matrice del campo minato con una sessione già avviata.
+In fase di avvio il server mostra un menù interattivo a sinistra e la matrice del campo minato con una sessione già avviata. Nella schermata del server, le mine sul campo minato sono visibili e marcate con una X di colore rosso.
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/server-main.jpg)
 
-Il server genera sin da subito una sessione di gioco dispiegando diverse bombe in posizioni casuali ad eccezione della prima e dell'ultima colonna le quali sono, rispettivamente, la colonna in cui vengono posizionati i giocatori e la colonna di arrivo dove il giocatore vince la partita.
+Il server genera sin da subito una sessione di gioco dispiegando diverse bombe in posizioni casuali ad eccezione della prima e dell'ultima colonna le quali sono, rispettivamente, la colonna in cui vengono posizionati inizialmente i giocatori e la colonna di arrivo dove il giocatore vince la partita.
 
 #### Avvia una nuova sessione di gioco <a name="start-new-session"></a>
 Per avviare una nuova sessione di gioco, digitare **1** e premere *INVIO*. 
@@ -141,8 +145,28 @@ Per tornare al menù principale, digitare **9** e premere *INVIO*.
 Per terminare il server, dal menù principale, digitare **9** e premere *INVIO*.
 
 ### Manuale d'uso del client <a name="user-guide-client"></a>
+Il programma client è il programma utilizzato dai giocatori, esso fornisce diverse funzionalità per registrarsi al sito, effettuare il login/logout e di giocare la partita.
 
 #### Avvio del client <a name="start-client"></a>
+Prima di poter avviare il client è necessario compilare il codice sorgente e generare l'eseguibile, qualora la compilazione non fosse stata ancora effettuata si prega di eseguire la procedura descritta nella sezione [Compilazione del client.](#client-build)
+
+Per avviare il client occorre specificare alcuni parametri di connessione sulla riga di comando:
+```sh
+$ cd myFolder/LSO/client
+$ ./client --host SERVER_MACHINE --port SERVER_PORT --log client.log
+```
+Dove i parametri **host** e **port** indicano, rispettivamente, il nome macchine (o indirizzo IP) del server e la porta TCP sulla quale il server è in ascolto.
+Il parametro **log** è opzionale, di default il log file viene scritto nel file **client.log** nella medesima cartella. Ovviamente è possibile specificare qualsiasi percorso assoluto e/o relativo in cui voler scrivere il file di log.
+
+*NOTA*: Se i parametri **host** e **port** sono errati (oppure il server è spento) allora il client termina con il seguente messaggio di errore:
+```html
+Unable to connect to the server: 'server:port'. Please check your parameters!
+```
+
+All'avvio del client viene mostrata la seguente schermata:
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-main.jpg)
+
 
 #### Registrarsi come nuovo utente <a name="register"></a>
 
