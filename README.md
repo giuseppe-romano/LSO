@@ -19,7 +19,8 @@
         1. [Avvio del client](#start-client)
         2. [Registrarsi come nuovo utente](#register)
         3. [Accedere al gioco](#login)
-        4. [Terminazione del client](#stop-client)
+        4. [Giocare una partita](#play-game)
+        5. [Terminazione del client](#stop-client)
 4. [Specifiche tecniche](#tech-specs)
 
 ## Introduzione <a name="introduction"></a>
@@ -168,7 +169,7 @@ All'avvio del client viene mostrata la seguente schermata:
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-main.jpg)
 
 #### Registrarsi come nuovo utente <a name="register"></a>
-Un utente, per accedere al gioco, deve registrarsi come giocatore. La fase di registrazione è molto semplice, è sufficiente fornire lo **username**, la **password**, il colore di gioco e il simbolo di gioco con cui l'utente verrà visualizzato sul campo minato.
+Un utente, per accedere al gioco, deve registrarsi come giocatore. La fase di registrazione è molto semplice, è sufficiente fornire il nome utente, la password, il colore di gioco e il simbolo di gioco con cui l'utente verrà visualizzato sul campo minato.
 
 Per effettuare la registrazione, quindi, digitare **1** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare alcune informazioni:
 
@@ -183,6 +184,7 @@ Digitare la propria password e premere *INVIO*.
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-register-color.jpg)
 
 Scegliere il colore con il quale essere visualizzato sul campo minato e premere *INVIO*.
+
 **ATTENZIONE:** I colori possibili sono:
 > * red 
 > * green 
@@ -205,8 +207,30 @@ Se invece la registrazione è fallita magari perchè l'utente risulta già regis
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-registration-failed.jpg)
 
 #### Accedere al gioco <a name="login"></a>
+Per accedere al gioco occorre essere registrati al sito, se non sei ancora registrato allora vai alla sezione [Registrarsi come nuovo utente.](#register)
+
+Per effettuare l'accesso, digitare **2** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare il nome utente e la password forniti in fase di registrazione:
+
+Digitare il nome utente e premere *INVIO*.
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-username.jpg)
+
+Digitare la password e premere *INVIO*.
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-password.jpg)
+
+Al termine, se la login ha avuto successo, il sistema mostra la schermata di gioco con il campo minato ed eventualmente gli altri giocatori connessi al gioco.
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-done.jpg)
+
+Si noti che le mine non sono visibili al giocatore ma sono soltanto visibili le posizioni degli altri giocatori.
+
+Inoltre, se la login fallisce, il sistema ritorna al menù principale con un messaggio di notifica indicando che la username e/o password sono errati.
+
+![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-failed.jpg)
+
+#### Giocare una partita <a name="play-game"></a>
 
 #### Terminazione del client <a name="stop-client"></a>
+Per terminare il client, dal menù principale, digitare **9** e premere *INVIO*.
 
 ## Specifiche tecniche <a name="tech-specs"></a>
 ```c
