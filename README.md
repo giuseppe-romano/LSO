@@ -22,6 +22,9 @@
         4. [Giocare una partita](#play-game)
         5. [Terminazione del client](#stop-client)
 4. [Specifiche tecniche](#tech-specs)
+    1. [Il modulo shared](#shared-module)
+    2. [Il modulo server](#server-module)
+    3. [Il modulo client](#client-module)
 
 ## Introduzione <a name="introduction"></a>
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
@@ -43,7 +46,7 @@ Il server dovrà supportare tutte le funzionalità descritte nella sezione relat
 ## Istallazione <a name="installation"></a>
 
 ### Prerequisiti di sistema <a name="system-requirements"></a>
-Il programma **Minefield Game** è un programma scritto completamente in linguaggio C su piattaforma Unix pertanto, per poter compilare il programma a partire dal codice sorgente, nonchè per mandare in esecuzione il programma stesso, si richiede di istallare alcuni tools e librerie di base.
+Il programma **Minefield Game** è un programma scritto completamente in linguaggio C su piattaforma Unix pertanto, per poter compilare il programma a partire dal codice sorgente, si richiede di istallare alcuni tools e librerie di base.
 
 ```sh
 $ sudo apt-get install build-essential
@@ -51,7 +54,7 @@ $ sudo apt-get install build-essential
 
 Il pacchetto **build-essential** contiene tutti gli strumenti e le librerie di base per compilare pacchetti. Esso generalmente include i compilatori GCC/g++, librerie ed altri strumenti.
 
-Inoltre occorre installare git client allo scopo di effettuare il cloning del repository sulla propria macchina locale. Per installare git eseguire il seguente comando:
+Inoltre occorre installare **git** client allo scopo di effettuare il cloning del repository sulla propria macchina locale. Per installare git eseguire il seguente comando:
 
 ```sh
 $ sudo apt install git-all
@@ -100,7 +103,7 @@ Il programma server è il programma principale del gioco, esso offre una serie d
 Il server è il detentore delle regole del gioco, ogni azione del client viene dapprima vagliata dal server per poi renderla effettiva ed eventualmente notificarla in broadcast agli altri clients collegati al gioco.
 
 #### Avvio del server <a name="start-server"></a>
-Prima di poter avviare il server è necessario compilare il codice sorgente e generare l'eseguibile, qualora la compilazione non fosse stata ancora effettuata si prega di eseguire la procedura descritta nella sezione [Compilazione del server.](#server-build)
+Prima di poter avviare il server è necessario compilare il codice sorgente e generare l'eseguibile, per compilare seguire i passi descritti nella sezione [Compilazione del server.](#server-build)
 
 Per avviare il server con i parametri di default, eseguire il seguente comando:
 ```sh
@@ -113,7 +116,7 @@ Qualora si avesse la necessità di avviare il server su una porta diversa e/o vo
 $ cd myFolder/LSO/server
 $ ./server --port 1234 --log another/location/file.log
 ```
-In fase di avvio il server mostra un menù interattivo a sinistra e la matrice del campo minato con una sessione già avviata. Nella schermata del server, le mine sul campo minato sono visibili e marcate con una X di colore rosso.
+In fase di avvio il server mostra un menù interattivo a sinistra e la matrice del campo minato con una sessione di gioco già avviata. Nella schermata del server, le mine sul campo minato sono visibili e marcate con una X di colore rosso.
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/server-main.jpg)
 
@@ -149,15 +152,15 @@ Per terminare il server, dal menù principale, digitare **9** e premere *INVIO*.
 Il programma client è il programma utilizzato dai giocatori, esso fornisce diverse funzionalità per registrarsi al sito, effettuare il login/logout e di giocare la partita.
 
 #### Avvio del client <a name="start-client"></a>
-Prima di poter avviare il client è necessario compilare il codice sorgente e generare l'eseguibile, qualora la compilazione non fosse stata ancora effettuata si prega di eseguire la procedura descritta nella sezione [Compilazione del client.](#client-build)
+Prima di poter avviare il client è necessario compilare il codice sorgente e generare l'eseguibile, per compilare seguire i passi descritti nella sezione [Compilazione del client.](#client-build)
 
 Per avviare il client occorre specificare alcuni parametri di connessione sulla riga di comando:
 ```sh
 $ cd myFolder/LSO/client
 $ ./client --host SERVER_MACHINE --port SERVER_PORT --log client.log
 ```
-Dove i parametri **host** e **port** indicano, rispettivamente, il nome macchine (o indirizzo IP) del server e la porta TCP sulla quale il server è in ascolto.
-Il parametro **log** è opzionale, di default il log file viene scritto nel file **client.log** nella medesima cartella. Ovviamente è possibile specificare qualsiasi percorso assoluto e/o relativo in cui voler scrivere il file di log.
+Dove i parametri **host** e **port** indicano, rispettivamente, il nome macchina (o indirizzo IP) del server e la porta TCP sulla quale il server è in ascolto.
+Il parametro **log** è opzionale, di default il logging viene effettuato nel file **client.log** nella medesima cartella. Ovviamente è possibile specificare qualsiasi percorso assoluto e/o relativo in cui voler scrivere il file di log.
 
 *NOTA*: Se i parametri **host** e **port** sono errati (oppure il server è spento) allora il client termina con il seguente messaggio di errore:
 ```html
@@ -267,3 +270,10 @@ Per terminare il client, dal menù principale, digitare **9** e premere *INVIO*.
 char* substr = malloc(4);
 strrncpy(substr, buff+10, 4);
 ```
+
+### Il modulo shared <a name="shared-module"></a>
+
+### Il modulo server <a name="server-module"></a>
+
+### Il modulo client <a name="client-module"></a>
+
