@@ -369,6 +369,118 @@ void printNotificationMessage(int notificationStatus, char *notificationMessage)
 ```
 
 #### La libreria serial <a name="shared-module-serial"></a>
+Questa libreria rappresenta il fondamento principale della comunicazione tra il server ed il client, essa implementa un vero e proprio protocollo di comunicazione e definisce tutte le regole di marshalling e unmarshalling da e verso le strutture dati utilizzate dal sistema.
+In questa libreria vengono definite tutte le strutture dati ed il modo in cui queste devono essere serializzate allo scopo di poter inviare i messaggi via rete alla controparte.
+
+Le strutture dati sono le seguenti:
+
+* > La struct Player è una lista linkata contenente le informazioni dei giocatori.
+```c
+typedef struct player {
+    char *username;
+    char *password;
+    char *symbol;
+    char *color;
+
+    struct player *next;
+} Player;
+```
+
+* > La struct Cell è una lista linkata contenente le informazioni dei giocatori riguardanti il posizionamento sulla matrice di gioco.
+```c
+typedef struct cell {
+    int x;
+    int y;
+    char *symbol;
+    char *color;
+    char *user;
+
+    struct cell *next;
+} Cell;
+```
+
+* > La struct Game è la struttura dati principale del gioco, essa infatti colleziona tutte le informazioni riguardanti la dimensione della matrice di gioco (rows e cols), il numero di bombe dispiegate su di essa ed infine la lista dei giocatori che stanno attualmente sfidando la sorte.
+```c
+typedef struct game {
+    int rows;
+    int cols;
+
+    Cell *bombCells;
+
+    Cell *playerCells;
+} Game;
+```
+
+* > La struct AuthenticationRequest modella una richiesta di autenticazione, essa viene usata sia per richieste di registrazione che per richieste di login/logout.
+```c
+typedef struct authenticationRequest {
+    char *username;
+    char *password;
+    char *symbol;
+    char *color;
+} AuthenticationRequest;
+```
+
+* > La struct AuthenticationResponse modella una risposta di autenticazione, essa viene usata sia per rispondere a richieste di registrazione sia per rispondere a richieste di login/logout.
+```c
+typedef struct authenticationResponse {
+    int status;
+    char *message;
+} AuthenticationResponse;
+```
+
+* > La struct MovePlayerRequest modella una richiesta di movimento (una tra le quattro direzioni) che il client invia al server.
+```c
+typedef struct movePlayerRequest {
+    Cell *player;
+    int direction;
+} MovePlayerRequest;
+```
+
+* > La struct MovePlayerResponse modella una risposta in conseguenza di una richiesta di movimento (una tra le quattro direzioni) che il client invia al server. Infatti i clients, per qualsiasi azione, inviano richieste al server ed è il server che dedice se concedere o meno tali richieste.
+```c
+typedef struct movePlayerResponse {
+    Cell *player;
+    int status;
+} MovePlayerResponse;
+```
+
+Oltre a definire le strutture dati, la libreria fornisce una serie di funzioni per serializzare e deserializzare
+
+```c
+char* serializeGame(Game *game);
+Game* deserializeGame(char *string);
+
+char* serializeAddedCell(Cell *cell);
+Cell* deserializeAddedCell(char *string);
+
+char* serializeRemovedCell(Cell *cell);
+Cell* deserializeRemovedCell(char *string);
+
+char* serializePlayer(Player *player);
+Player* deserializePlayer(char *string);
+
+char* serializeLoginRequest(char *username, char *password);
+AuthenticationRequest* deserializeLoginRequest(char *string);
+
+char* serializeRegisterRequest(char *username, char *password, char *color, char *symbol);
+AuthenticationRequest* deserializeRegisterRequest(char *string);
+
+char* serializeRegisterResponse(int status, char *message);
+AuthenticationResponse* deserializeRegisterResponse(char *string);
+
+char* serializeLoginResponse(int status, char *message);
+AuthenticationResponse* deserializeLoginResponse(char *string);
+
+char* serializeMovePlayerRequest(Cell *player, int direction);
+MovePlayerRequest* deserializeMovePlayerRequest(char *string);
+
+char* serializeMovePlayerResponse(Cell *player, int status);
+MovePlayerResponse* deserializeMovePlayerResponse(char *string);
+
+char* serializeLogoutRequest(char *username);
+AuthenticationRequest* deserializeLogoutRequest(char *string);
+```
 
 ### Il modulo server <a name="server-module"></a>
 
