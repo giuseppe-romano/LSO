@@ -26,6 +26,17 @@
         1. [La libreria logging](#shared-module-logging)
         2. [La libreria draw](#shared-module-draw)
         3. [La libreria serial](#shared-module-serial)
+           1. [Le funzioni di serializzazione e deserializzazione della struct Game](#shared-module-serial-game)
+           2. [Le funzioni di serializzazione e deserializzazione dell'azione di aggiunta al gioco di un giocatore](#shared-module-serial-add-cell)
+           3. [Le funzioni di serializzazione e deserializzazione dell'azione di rimozione dal gioco di un giocatore](#shared-module-serial-remove-cell)
+           4. [Le funzioni di serializzazione e deserializzazione della struct Player](#shared-module-serial-player)
+           5. [Le funzioni di serializzazione e deserializzazione della richiesta di registrazione](#shared-module-serial-register-req)
+           6. [Le funzioni di serializzazione e deserializzazione della richiesta di login](#shared-module-serial-login-req)
+           7. [Le funzioni di serializzazione e deserializzazione della risposta di registrazione](#shared-module-serial-register-resp)
+           8. [Le funzioni di serializzazione e deserializzazione della risposta di login](#shared-module-serial-login-resp)
+           9. [Le funzioni di serializzazione e deserializzazione della richiesta di logout](#shared-module-serial-logout-req)
+           10. [Le funzioni di serializzazione e deserializzazione della richiesta di movimento](#shared-module-serial-move-req)
+           11. [Le funzioni di serializzazione e deserializzazione della risposta di movimento](#shared-module-serial-move-resp)
     2. [Il modulo server](#server-module)
     3. [Il modulo client](#client-module)
 
@@ -447,7 +458,7 @@ typedef struct movePlayerResponse {
 
 Oltre a definire le strutture dati, la libreria fornisce una serie di funzioni per serializzare e deserializzare, rispettivamente, i messaggi da trasmettere ed i messaggi ricevuti.
 
-##### Le funzioni di serializzazione e deserializzazione della struct Game. 
+##### Le funzioni di serializzazione e deserializzazione della struct Game. <a name="shared-module-serial-game"></a>
 
 ```c
 char* serializeGame(Game *game);
@@ -460,11 +471,13 @@ La funzione **serializeGame** prende in input la struttura dati Game e serializz
 GAME<rows=20|cols=30|player={x=0,y=6,symbol=G,color=red,user=user1,}|player={x=12,y=16,symbol=H,color=blue,user=user2,}>
 ```
 
+*ATTENZIONE:* La serializzazione ignora la lista delle bombe poichè queste non devono essere nota al client.
+
 Nell'esempio di cui sopra, il gioco è formato da 20 righe, 30 colonne e vi sono 2 giocatori posizionati nelle rispettive coordinate.
 
 La funzione **deserializeGame** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Game contenente tutte le informazioni contenute nel formato seriale.
 
-##### Le funzioni di serializzazione e deserializzazione dell'azione di aggiunta al gioco di un giocatore. 
+##### Le funzioni di serializzazione e deserializzazione dell'azione di aggiunta al gioco di un giocatore. <a name="shared-module-serial-add-cell"></a>
 ```c
 char* serializeAddedCell(Cell *cell);
 Cell* deserializeAddedCell(char *string);
@@ -480,7 +493,7 @@ Nell'esempio di cui sopra, un nuovo giocatore **user1** è stato aggiunto al gio
 
 La funzione **deserializeAddedCell** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Cell contenente tutte le informazioni contenute nel formato seriale.
 
-##### Le funzioni di serializzazione e deserializzazione dell'azione di rimozione dal gioco di un giocatore. 
+##### Le funzioni di serializzazione e deserializzazione dell'azione di rimozione dal gioco di un giocatore. <a name="shared-module-serial-remove-cell"></a>
 ```c
 char* serializeRemovedCell(Cell *cell);
 Cell* deserializeRemovedCell(char *string);
@@ -497,7 +510,7 @@ Nell'esempio di cui sopra, un nuovo giocatore **user1** è stato rimosso dal gio
 La funzione **deserializeRemovedCell** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Cell contenente tutte le informazioni contenute nel formato seriale.
 
 
-##### Le funzioni di serializzazione e deserializzazione della struct Player. 
+##### Le funzioni di serializzazione e deserializzazione della struct Player. <a name="shared-module-serial-player"></a>
 ```c
 char* serializePlayer(Player *player);
 Player* deserializePlayer(char *string);
@@ -512,7 +525,7 @@ user=user1|password=pwd|symbol=S|color=blue
 La funzione **deserializePlayer** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Cell contenente tutte le informazioni contenute nel formato seriale.
 
 
-##### Le funzioni di serializzazione e deserializzazione della richiesta di registrazione. 
+##### Le funzioni di serializzazione e deserializzazione della richiesta di registrazione. <a name="shared-module-serial-register-req"></a>
 ```c
 char* serializeRegisterRequest(char *username, char *password, char *color, char *symbol);
 AuthenticationRequest* deserializeRegisterRequest(char *string);
@@ -526,7 +539,7 @@ REGISTER<user=user1|password=pwd|color=blue|symbol=S>
 
 La funzione **deserializeRegisterRequest** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationRequest contenente tutte le informazioni contenute nel formato seriale.
 
-##### Le funzioni di serializzazione e deserializzazione della richiesta di login. 
+##### Le funzioni di serializzazione e deserializzazione della richiesta di login. <a name="shared-module-serial-login-req"></a>
 
 ```c
 char* serializeLoginRequest(char *username, char *password);
@@ -542,7 +555,7 @@ LOGIN<user=user1|password=pwd>
 La funzione **deserializeLoginRequest** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationRequest contenente tutte le informazioni contenute nel formato seriale.
 
 
-##### Le funzioni di serializzazione e deserializzazione della risposta di registrazione. 
+##### Le funzioni di serializzazione e deserializzazione della risposta di registrazione. <a name="shared-module-serial-register-resp"></a>
 
 ```c
 char* serializeRegisterResponse(int status, char *message);
@@ -558,7 +571,7 @@ REGISTER_RESPONSE<status=1|message=This is a message>
 La funzione **deserializeRegisterResponse** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationResponse contenente tutte le informazioni contenute nel formato seriale.
 
 
-##### Le funzioni di serializzazione e deserializzazione della risposta di login. 
+##### Le funzioni di serializzazione e deserializzazione della risposta di login. <a name="shared-module-serial-login-resp"></a>
 
 ```c
 char* serializeLoginResponse(int status, char *message);
@@ -573,7 +586,7 @@ LOGIN_RESPONSE<status=1|message=This is a message>
 
 La funzione **deserializeLoginResponse** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationResponse contenente tutte le informazioni contenute nel formato seriale.
 
-##### Le funzioni di serializzazione e deserializzazione della richiesta di logout. 
+##### Le funzioni di serializzazione e deserializzazione della richiesta di logout. <a name="shared-module-serial-logout-req"></a>
 
 ```c
 char* serializeLogoutRequest(char *username);
@@ -590,7 +603,7 @@ La funzione **deserializeLogoutRequest** invece effettua l'operazione inversa ov
 
 
 
-##### Le funzioni di serializzazione e deserializzazione della richiesta di movimento (S, N, E, O). 
+##### Le funzioni di serializzazione e deserializzazione della richiesta di movimento (S, N, E, O). <a name="shared-module-serial-move-req"></a>
 
 ```c
 char* serializeMovePlayerRequest(Cell *player, int direction);
@@ -606,7 +619,7 @@ MOVE_PLAYER<player={x=0,y=6,symbol=S,color=red,user=user1}|direction=10>
 La funzione **deserializeMovePlayerRequest** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct MovePlayerRequest contenente tutte le informazioni contenute nel formato seriale.
 
 
-##### Le funzioni di serializzazione e deserializzazione della risposta di movimento (S, N, E, O). 
+##### Le funzioni di serializzazione e deserializzazione della risposta di movimento (S, N, E, O). <a name="shared-module-serial-move-resp"></a>
 
 ```c
 char* serializeMovePlayerResponse(Cell *player, int status);
