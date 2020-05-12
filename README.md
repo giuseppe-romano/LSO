@@ -37,8 +37,11 @@
            9. [Le funzioni di serializzazione e deserializzazione della richiesta di logout](#shared-module-serial-logout-req)
            10. [Le funzioni di serializzazione e deserializzazione della richiesta di movimento](#shared-module-serial-move-req)
            11. [Le funzioni di serializzazione e deserializzazione della risposta di movimento](#shared-module-serial-move-resp)
-    2. [Il modulo server](#server-module)
-    3. [Il modulo client](#client-module)
+    2. [Il programma server](#server-module)
+        1. [Il thread menuThread](#server-module-menu-thread)
+        2. [Il thread playerThread](#server-module-player-thread)
+
+    3. [Il programma client](#client-module)
 
 ## Introduzione <a name="introduction"></a>
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
@@ -635,8 +638,71 @@ MOVE_PLAYER_RESPONSE<player={x=0,y=6,symbol=S,color=red,user=user1}|status=1>
 La funzione **deserializeMovePlayerResponse** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct MovePlayerResponse contenente tutte le informazioni contenute nel formato seriale.
 
 
+### Il programma server <a name="server-module"></a>
+Il server è un programma multi-tasking ovvero è capace di processare diversi clients in maniera concorrente, in fase di avvio esso attiva sin da subito un thread (chiamato **menuThread**) il quale ha il compito di interagire con l'input utente e di attuare i comandi impartiti da menù. Si è reso necessario gestire il menù con un thread dedicato per far sì che l'utente possa in qualsiasi momento processare l'input utente e la scelta delle diverse voci di menù.
 
-### Il modulo server <a name="server-module"></a>
+Successivamente, viene caricato il memoria il database degli utenti registrati al sito, tale database risiede nel file **registered-players.db**. Infine si mette in ascolto su una specifica porta TCP in attesa di ricevere richieste di connessione da parte dei clients.
 
-### Il modulo client <a name="client-module"></a>
+Ogni volta che riceve una nuova richiesta di connessione crea un nuovo thread (chiamato **playerThread**) e passa a quest ultimo il socket aperto per quel specifico client. Il frammento di codice è il seguente:
+
+```c
+newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);
+
+infoMain("New client connected, creating a thread");
+
+pthread_t tid;
+//for each client request creates a thread
+if( pthread_create(&tid, NULL, playerThreadFunc, &newSocket) != 0 )
+{
+    errorMain("Failed to create thread\n");
+}
+addPlayerThread(tid);
+```
+
+#### Il thread menuThread <a name="server-module-menu-thread"></a>
+
+
+
+
+
+
+#### Il thread playerThread <a name="server-module-player-thread"></a>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Il programma client <a name="client-module"></a>
 
