@@ -445,42 +445,183 @@ typedef struct movePlayerResponse {
 } MovePlayerResponse;
 ```
 
-Oltre a definire le strutture dati, la libreria fornisce una serie di funzioni per serializzare e deserializzare
+Oltre a definire le strutture dati, la libreria fornisce una serie di funzioni per serializzare e deserializzare, rispettivamente, i messaggi da trasmettere ed i messaggi ricevuti.
+
+##### Le funzioni di serializzazione e deserializzazione della struct Game. 
 
 ```c
 char* serializeGame(Game *game);
 Game* deserializeGame(char *string);
+```
 
+La funzione **serializeGame** prende in input la struttura dati Game e serializza le informazioni nel seguente formato:
+
+```c
+GAME<rows=20|cols=30|player={x=0,y=6,symbol=G,color=red,user=user1,}|player={x=12,y=16,symbol=H,color=blue,user=user2,}>
+```
+
+Nell'esempio di cui sopra, il gioco è formato da 20 righe, 30 colonne e vi sono 2 giocatori posizionati nelle rispettive coordinate.
+
+La funzione **deserializeGame** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Game contenente tutte le informazioni contenute nel formato seriale.
+
+##### Le funzioni di serializzazione e deserializzazione dell'azione di aggiunta al gioco di un giocatore. 
+```c
 char* serializeAddedCell(Cell *cell);
 Cell* deserializeAddedCell(char *string);
+```
 
+La funzione **serializeAddedCell** prende in input la struttura dati Cell e serializza le informazioni nel seguente formato:
+
+```c
+ADDED_CELL<user=user1|x=0|y=23|symbol=S|color=blue>
+```
+
+Nell'esempio di cui sopra, un nuovo giocatore **user1** è stato aggiunto al gioco corrente.
+
+La funzione **deserializeAddedCell** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Cell contenente tutte le informazioni contenute nel formato seriale.
+
+##### Le funzioni di serializzazione e deserializzazione dell'azione di rimozione dal gioco di un giocatore. 
+```c
 char* serializeRemovedCell(Cell *cell);
 Cell* deserializeRemovedCell(char *string);
+```
 
+La funzione **serializeRemovedCell** prende in input la struttura dati Cell e serializza le informazioni nel seguente formato:
+
+```c
+REMOVED_CELL<user=user1|x=0|y=23|symbol=S|color=blue>
+```
+
+Nell'esempio di cui sopra, un nuovo giocatore **user1** è stato rimosso dal gioco corrente.
+
+La funzione **deserializeRemovedCell** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Cell contenente tutte le informazioni contenute nel formato seriale.
+
+
+##### Le funzioni di serializzazione e deserializzazione della struct Player. 
+```c
 char* serializePlayer(Player *player);
 Player* deserializePlayer(char *string);
+```
 
-char* serializeLoginRequest(char *username, char *password);
-AuthenticationRequest* deserializeLoginRequest(char *string);
+La funzione **serializePlayer** prende in input la struttura dati Player e serializza le informazioni nel seguente formato:
 
+```c
+user=user1|password=pwd|symbol=S|color=blue
+```
+
+La funzione **deserializePlayer** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Cell contenente tutte le informazioni contenute nel formato seriale.
+
+
+##### Le funzioni di serializzazione e deserializzazione della richiesta di registrazione. 
+```c
 char* serializeRegisterRequest(char *username, char *password, char *color, char *symbol);
 AuthenticationRequest* deserializeRegisterRequest(char *string);
+```
 
+La funzione **serializeRegisterRequest** prende in input il nome utente, la password, il colore e il simbolo; e serializza le informazioni nel seguente formato:
+
+```c
+REGISTER<user=user1|password=pwd|color=blue|symbol=S>
+```
+
+La funzione **deserializeRegisterRequest** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationRequest contenente tutte le informazioni contenute nel formato seriale.
+
+##### Le funzioni di serializzazione e deserializzazione della richiesta di login. 
+
+```c
+char* serializeLoginRequest(char *username, char *password);
+AuthenticationRequest* deserializeLoginRequest(char *string);
+```
+
+La funzione **serializeLoginRequest** prende in input il nome utente e la password e serializza le informazioni nel seguente formato:
+
+```c
+LOGIN<user=user1|password=pwd>
+```
+
+La funzione **deserializeLoginRequest** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationRequest contenente tutte le informazioni contenute nel formato seriale.
+
+
+##### Le funzioni di serializzazione e deserializzazione della risposta di registrazione. 
+
+```c
 char* serializeRegisterResponse(int status, char *message);
 AuthenticationResponse* deserializeRegisterResponse(char *string);
+```
 
+La funzione **serializeRegisterResponse** prende in input lo stato della richiesta e il messaggio e serializza le informazioni nel seguente formato:
+
+```c
+REGISTER_RESPONSE<status=1|message=This is a message>
+```
+
+La funzione **deserializeRegisterResponse** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationResponse contenente tutte le informazioni contenute nel formato seriale.
+
+
+##### Le funzioni di serializzazione e deserializzazione della risposta di login. 
+
+```c
 char* serializeLoginResponse(int status, char *message);
 AuthenticationResponse* deserializeLoginResponse(char *string);
+```
 
-char* serializeMovePlayerRequest(Cell *player, int direction);
-MovePlayerRequest* deserializeMovePlayerRequest(char *string);
+La funzione **serializeLoginResponse** prende in input lo stato della richiesta e il messaggio e serializza le informazioni nel seguente formato:
 
-char* serializeMovePlayerResponse(Cell *player, int status);
-MovePlayerResponse* deserializeMovePlayerResponse(char *string);
+```c
+LOGIN_RESPONSE<status=1|message=This is a message>
+```
 
+La funzione **deserializeLoginResponse** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationResponse contenente tutte le informazioni contenute nel formato seriale.
+
+##### Le funzioni di serializzazione e deserializzazione della richiesta di logout. 
+
+```c
 char* serializeLogoutRequest(char *username);
 AuthenticationRequest* deserializeLogoutRequest(char *string);
 ```
+
+La funzione **serializeLogoutRequest** prende in input il nome utente e serializza le informazioni nel seguente formato:
+
+```c
+LOGOUT<user=user1>
+```
+
+La funzione **deserializeLogoutRequest** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct AuthenticationRequest contenente tutte le informazioni contenute nel formato seriale.
+
+
+
+##### Le funzioni di serializzazione e deserializzazione della richiesta di movimento (S, N, E, O). 
+
+```c
+char* serializeMovePlayerRequest(Cell *player, int direction);
+MovePlayerRequest* deserializeMovePlayerRequest(char *string);
+```
+
+La funzione **serializeMovePlayerRequest** prende in input la struct Cell (il giocatore sul campo) e la direzione e serializza le informazioni nel seguente formato:
+
+```c
+MOVE_PLAYER<player={x=0,y=6,symbol=S,color=red,user=user1}|direction=10>
+```
+
+La funzione **deserializeMovePlayerRequest** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct MovePlayerRequest contenente tutte le informazioni contenute nel formato seriale.
+
+
+##### Le funzioni di serializzazione e deserializzazione della risposta di movimento (S, N, E, O). 
+
+```c
+char* serializeMovePlayerResponse(Cell *player, int status);
+MovePlayerResponse* deserializeMovePlayerResponse(char *string);
+```
+
+La funzione **serializeMovePlayerResponse** prende in input la struct Cell (il giocatore sul campo) e lo stato della richiesta evasa e serializza le informazioni nel seguente formato:
+
+```c
+MOVE_PLAYER_RESPONSE<player={x=0,y=6,symbol=S,color=red,user=user1}|status=1>
+```
+
+La funzione **deserializeMovePlayerResponse** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct MovePlayerResponse contenente tutte le informazioni contenute nel formato seriale.
+
+
 
 ### Il modulo server <a name="server-module"></a>
 
