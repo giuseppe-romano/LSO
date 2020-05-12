@@ -281,8 +281,92 @@ Il modulo **shared** è il modulo condiviso tra il server ed il client, esso con
 3. **serial**.h|c La libreria che implementa il protocollo di comunicazione tra server e client, essa implementa tutte le regole di serializzazione e deserializzazione dei messaggi scambiati sulla rete.
 
 #### La libreria logging <a name="shared-module-logging"></a>
+Questa libreria è scritta in maniera tale da mascherare tutte le operazioni di basso livello concernenti la scrittura del log in un apposito file. Essa utilizza un pattern di logging formato dal timestamp, il livello di verbosità, il contesto in cui l'operazione si è verificata ed il messaggio che descrive l'operazione. 
+Il pattern è il seguente:
+```c
+"[TIMESTAMP][LOG LEVEL] - [CATEGORY] - MESSAGE"
+
+esempi:
+"[12-12-2020 23:59:59][INFO] - [MAIN] - Server started!"
+"[12-12-2020 23:59:59][WARN] - [GAME] - User blew up!"
+```
+
+Il file header definisce le seguenti funzioni:
+
+* > La funzione di inizializzazione del file di log, il parametro **filename** è il percorso assoluto (o relativo) al file di logging. La funzione apre il file in modalità *append* allo scopo di preservare il log pre-esistente.
+```c
+void initLogFile(char* filename);
+```
+
+* > La funzione di logging di livello **info**
+```c
+void info(char* category, char* message);
+```
+
+* > La funzione di logging di livello **warn**
+```c
+void warn(char* category, char* message);
+```
+
+* > La funzione di logging di livello **error**
+```c
+void error(char* category, char* message);
+```
+
+Oltre alle funzioni sopracitate, la libreria mette a disposizione anche funzione che fungono da scorciatoia nel senso che sono relative ad una ben specifica categoria. Come di seguito riportate, vediamo le funzioni relative alle categorie **MAIN**, **SERIAL**, **PLAYER**, **PROTOCOL**, **GAME** e **MENU**.
+
+```c
+void infoMain(char* message);
+void warnMain(char* message);
+void errorMain(char* message);
+void infoSerial(char* message);
+void infoPlayer(char* message);
+void warnPlayer(char* message);
+void infoProtocol(char* message);
+void infoGame(char* message);
+void warnGame(char* message);
+void infoMenu(char* message);
+void infoDraw(char* message);
+```
+Questa funzioni scorciatoia sono largamente utilizzate in tutto il programma (sia server che client).
 
 #### La libreria draw <a name="shared-module-draw"></a>
+Questa libreria implementa tutte le operazioni inerenti la grafica del sistema. Dal punto di vista del layout grafico, il sistema è suddiviso in diverse sezioni e sono il titolo, il menù interattivo, i messaggi di notifica e la matrice del campo minato. La libreria fornisce una serie di funzioni atte a svolgere questo compito.
+
+* > La funzione di riposizionamento del cursore (input da tastiera ad una specifica coordinata)
+```c
+void setInteractiveCursorCoords(int x, int y);
+```
+
+* > La funzione che disegna il titolo sulla console del server
+```c
+void drawServerTitle();
+```
+
+* > La funzione che disegna il titolo sulla console del client
+```c
+void drawClientTitle();
+```
+
+* > La funzione che disegna la matrice del campo minato attingendo tutte le informazioni relative alla dimensione del campo, la posizione delle bombe e dei giocatori dalla struttura dati **Game**
+```c
+void drawMineField(Game *game);
+```
+
+* > La funzione che disegna le informazioni di una singolo giocatore.
+```c
+void drawPlayer(Player *player);
+```
+
+* > La funzione che disegna, in alto a destra del campo minato, il nome ed il simbolo del giocatore connesso al gioco.
+```c
+void drawConnectedPlayer(Cell *player);
+```
+
+* > La funzione che disegna il messaggio di notifica (in risposta ad un qualche evento)
+```c
+void printNotificationMessage(int notificationStatus, char *notificationMessage);
+```
 
 #### La libreria serial <a name="shared-module-serial"></a>
 
