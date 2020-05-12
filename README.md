@@ -26,21 +26,20 @@
         1. [La libreria logging](#shared-module-logging)
         2. [La libreria draw](#shared-module-draw)
         3. [La libreria serial](#shared-module-serial)
-           1. [Le funzioni di serializzazione e deserializzazione della struct Game](#shared-module-serial-game)
-           2. [Le funzioni di serializzazione e deserializzazione dell'azione di aggiunta al gioco di un giocatore](#shared-module-serial-add-cell)
-           3. [Le funzioni di serializzazione e deserializzazione dell'azione di rimozione dal gioco di un giocatore](#shared-module-serial-remove-cell)
-           4. [Le funzioni di serializzazione e deserializzazione della struct Player](#shared-module-serial-player)
-           5. [Le funzioni di serializzazione e deserializzazione della richiesta di registrazione](#shared-module-serial-register-req)
-           6. [Le funzioni di serializzazione e deserializzazione della richiesta di login](#shared-module-serial-login-req)
-           7. [Le funzioni di serializzazione e deserializzazione della risposta di registrazione](#shared-module-serial-register-resp)
-           8. [Le funzioni di serializzazione e deserializzazione della risposta di login](#shared-module-serial-login-resp)
-           9. [Le funzioni di serializzazione e deserializzazione della richiesta di logout](#shared-module-serial-logout-req)
-           10. [Le funzioni di serializzazione e deserializzazione della richiesta di movimento](#shared-module-serial-move-req)
-           11. [Le funzioni di serializzazione e deserializzazione della risposta di movimento](#shared-module-serial-move-resp)
+            1. [Le funzioni di serializzazione e deserializzazione della struct Game](#shared-module-serial-game)
+            2. [Le funzioni di serializzazione e deserializzazione dell'azione di aggiunta al gioco di un giocatore](#shared-module-serial-add-cell)
+            3. [Le funzioni di serializzazione e deserializzazione dell'azione di rimozione dal gioco di un giocatore](#shared-module-serial-remove-cell)
+            4. [Le funzioni di serializzazione e deserializzazione della struct Player](#shared-module-serial-player)
+            5. [Le funzioni di serializzazione e deserializzazione della richiesta di registrazione](#shared-module-serial-register-req)
+            6. [Le funzioni di serializzazione e deserializzazione della richiesta di login](#shared-module-serial-login-req)
+            7. [Le funzioni di serializzazione e deserializzazione della risposta di registrazione](#shared-module-serial-register-resp)
+            8. [Le funzioni di serializzazione e deserializzazione della risposta di login](#shared-module-serial-login-resp)
+            9. [Le funzioni di serializzazione e deserializzazione della richiesta di logout](#shared-module-serial-logout-req)
+            10. [Le funzioni di serializzazione e deserializzazione della richiesta di movimento](#shared-module-serial-move-req)
+            11. [Le funzioni di serializzazione e deserializzazione della risposta di movimento](#shared-module-serial-move-resp)
     2. [Il programma server](#server-module)
         1. [Il thread menuThread](#server-module-menu-thread)
         2. [Il thread playerThread](#server-module-player-thread)
-
     3. [Il programma client](#client-module)
 
 ## Introduzione <a name="introduction"></a>
@@ -639,11 +638,11 @@ La funzione **deserializeMovePlayerResponse** invece effettua l'operazione inver
 
 
 ### Il programma server <a name="server-module"></a>
-Il server è un programma multi-tasking ovvero è capace di processare diversi clients in maniera concorrente, in fase di avvio esso attiva sin da subito un thread (chiamato **menuThread**) il quale ha il compito di interagire con l'input utente e di attuare i comandi impartiti da menù. Si è reso necessario gestire il menù con un thread dedicato per far sì che l'utente possa in qualsiasi momento processare l'input utente e la scelta delle diverse voci di menù.
+Il server è un programma multi-tasking ovvero è capace di elaborare richieste di diversi clients in maniera concorrente, in fase di avvio esso attiva sin da subito un thread (chiamato **menuThread**) il quale ha il compito di interagire con l'input utente e di attuare i comandi impartiti da menù. Si è reso necessario gestire il menù con un thread dedicato per far sì che l'utente possa in qualsiasi momento processare l'input utente senza compromettere le altre attività concorrenti con i clients.
 
 Successivamente, viene caricato il memoria il database degli utenti registrati al sito, tale database risiede nel file **registered-players.db**. Infine si mette in ascolto su una specifica porta TCP in attesa di ricevere richieste di connessione da parte dei clients.
 
-Ogni volta che riceve una nuova richiesta di connessione crea un nuovo thread (chiamato **playerThread**) e passa a quest ultimo il socket aperto per quel specifico client. Il frammento di codice è il seguente:
+Ogni volta che riceve una nuova richiesta di connessione crea un nuovo thread (chiamato **playerThread**) e passa, a quest ultimo, il valore del socket aperto per quel specifico client. Il frammento di codice è il seguente:
 
 ```c
 newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);
@@ -660,10 +659,28 @@ addPlayerThread(tid);
 ```
 
 #### Il thread menuThread <a name="server-module-menu-thread"></a>
+E' il thread che gestisce la visualizzazione dei menù ed interagisce con l'input dell'utente, inoltre esso è responsabile anche degli aggiornamenti grafici sul campo minato (come ad esempio: lo spostamento di un giocatore).
+In fase di avvio, esegue le seguenti azioni:
 
+* > Genera una prima sessione di gioco e disegna la matrice del campo minato.
+* > Disegna il titolo del programma server.
+* > Mostra il menù principale.
 
+Di seguito è riportato il frammento di codice:
 
+```c
+Game *game = generateNewGame();
+drawMineField(game);
 
+drawServerTitle();
+showMainMenu();
+```
+
+La chiamata alla funzione **showMainMenu** è di tipo bloccante e non permette che il thread termini. Infatti il menù, essendo interattivo, attende continuamente l'input da utente per attuare i corrispondenti comandi.
+
+Il menù principale offre le seguenti voci.....
+
+spiegare i menù e cosa implica ogni azione...
 
 
 #### Il thread playerThread <a name="server-module-player-thread"></a>
