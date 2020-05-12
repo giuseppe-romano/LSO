@@ -23,6 +23,9 @@
         5. [Terminazione del client](#stop-client)
 4. [Specifiche tecniche](#tech-specs)
     1. [Il modulo shared](#shared-module)
+        1. [La libreria logging](#shared-module-logging)
+        2. [La libreria draw](#shared-module-draw)
+        3. [La libreria serial](#shared-module-serial)
     2. [Il modulo server](#server-module)
     3. [Il modulo client](#client-module)
 
@@ -266,12 +269,22 @@ The player 'G' (giuseppe) won. Game restarted!
 Per terminare il client, dal menù principale, digitare **9** e premere *INVIO*.
 
 ## Specifiche tecniche <a name="tech-specs"></a>
-```c
-char* substr = malloc(4);
-strrncpy(substr, buff+10, 4);
-```
+In questa sezione vengono descritte le caratteristiche tecniche del programma, con particolare dettaglio sul protocollo di comunicazione utilizzato tra il server e i clients. 
 
 ### Il modulo shared <a name="shared-module"></a>
+Il modulo **shared** è il modulo condiviso tra il server ed il client, esso contiene alcune librerie di utilità comuni atte a svolgere quei compiti supporto al core business dell'applicazione. Il modulo contiene tre librerie distinte e sono:
+
+1. **logging**.h|c La libreria che gestisce la scrittura del file di log, essa fornisce alcune funzioni per il logging con diversi livelli di verbosità.
+
+2. **draw**.h|c La libreria che gestisce la grafica del sistema, essa fornisce una serie di funzioni per disegnare l'header, il menù ed il contenuto principale del gioco ovvero la matrice del campo minato.
+
+3. **serial**.h|c La libreria che implementa il protocollo di comunicazione tra server e client, essa implementa tutte le regole di serializzazione e deserializzazione dei messaggi scambiati sulla rete.
+
+#### La libreria logging <a name="shared-module-logging"></a>
+
+#### La libreria draw <a name="shared-module-draw"></a>
+
+#### La libreria serial <a name="shared-module-serial"></a>
 
 ### Il modulo server <a name="server-module"></a>
 
