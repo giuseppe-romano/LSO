@@ -666,31 +666,128 @@ In fase di avvio, esegue le seguenti azioni:
 * > Disegna il titolo del programma server.
 * > Mostra il menù principale.
 
-Di seguito è riportato il frammento di codice:
+Di seguito è riportato il codice della funzione di avvio del thread.
 
 ```c
-Game *game = generateNewGame();
-drawMineField(game);
+void *menuThreadFunc(void *vargp)
+{
+    int serverSocket = *((int *)vargp);
+    pid_t pid = getpid();
 
-drawServerTitle();
-showMainMenu();
+    //Creates a new game when boots
+    Game *game = generateNewGame();
+    drawMineField(game);
+
+    drawServerTitle();
+    showMainMenu(); //Blocking call
+
+    infoMenu("Quitting Menu's thread...");
+    infoMenu("Shutting down server socket...");
+    shutdown(serverSocket, SHUT_RDWR); //Shutdown the server socket in order to no longer receive connection requests.
+
+    shutdownClientSockets(); //Shutdown all the client sockets
+
+    killPlayerThreads(); //Kills all the player threads
+
+    infoMenu("Killing server...");
+    kill(pid, SIGTERM); //Kill the main process using the process identifier.
+    exit(0);
+}
 ```
 
-La chiamata alla funzione **showMainMenu** è di tipo bloccante e non permette che il thread termini. Infatti il menù, essendo interattivo, attende continuamente l'input da utente per attuare i corrispondenti comandi.
+Si noti la chiamata alla funzione **showMainMenu** la quale è di tipo bloccante e non permette che il thread termini. Infatti il menù, essendo interattivo, è sempre in attesa di ricevere l'input dall'utente.
 
-Il menù principale offre le seguenti voci.....
+Il menù principale offre tre voci di menù e sono:
 
-spiegare i menù e cosa implica ogni azione...
+* > **1 - Start a new Game** Questa azione cancella la sessione di gioco corrente e ne rigenera una nuova, eventuali giocatori presenti in campo verranno riposizionati sulla prima colonna in maniera casuale. Inoltre la nuova sessione di gioco viene notificata in broadcasting a tutti i giocatori connessi. 
+
+* > **2 - List players** Questa azione indirizza l'utente nel sotto-menù di visualizzazione dei giocatori registrati e/o connessi.
+
+* > **9 - Exit** Questa azione semplicemente termina l'azione e tutti i clients connessi verranno notificati.
 
 
 #### Il thread playerThread <a name="server-module-player-thread"></a>
+E' il thread che gestisce la sessione del giocatore, non appena il server riceve una richiesta di connessione subito crea un thread dedicato per quello specifico client. 
+Infatti la chiamata:
+```c
+newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);
+```
 
+ritorna un nuovo socket TCP connesso al client remoto, ed il thread **menuThread** riceve ed invia i messaggi serializzati sulla rete verso quello specifico client.
 
+Di seguito è riportato il codice della funzione di avvio del thread.
 
+```c
+void *playerThreadFunc(void *vargp)
+{
+    int clientSocket = *((int *)vargp);
 
+    addClientSocket(clientSocket);
+    ...
 
+    int clientConnected = 1;
+    while(clientConnected)
+    {
+        memset(client_message, '\0', 2000);
+        if(recv(clientSocket, client_message, 2000, 0) <= 0)
+        {
+           warnPlayer("Connection closed. The client cut off!");
+           clientConnected = 0;
+        }
+        else
+        {
+            AuthenticationRequest *authenticationRequest = NULL;
+            MovePlayerRequest *movePlayerRequest = NULL;
+            char logMessage[2100];
 
+            sprintf(logMessage, "Complete message from client: %s", client_message);
+            infoPlayer(logMessage);
 
+            //The server message can contain multiple messages, so it will be splitted
+            char *buffer = strdup(client_message);
+            char *message;
+            while ((message = strsep(&buffer, "\n")) != NULL)
+            {
+                if(strlen(message) > 0)
+                {
+                    sprintf(logMessage, "Message from client: '%s'", message);
+                    infoPlayer(logMessage);
+                }
+
+                //The client sent a register request
+                if((authenticationRequest = deserializeRegisterRequest(message)) != NULL)
+                {
+                    .....
+                    //Send back a response
+                }
+                //The client sent a login request
+                else if((authenticationRequest = deserializeLoginRequest(message)) != NULL)
+                {
+                   .....
+                   //Send back a response
+                }
+                //The client sent a move request
+                else if((movePlayerRequest = deserializeMovePlayerRequest(message)) != NULL)
+                {
+                    .....
+                    //Send back a response
+                }
+                //The client sent a logout request
+                else if((authenticationRequest = deserializeLogoutRequest(message)) != NULL)
+                {
+                    .....
+                    //Send back a response
+                }
+            }
+        }
+    }
+    .....
+    .....
+}
+```
+
+Si noti che il ciclo while annidato gestice tutti i possibili messaggi inviati dal client, infatti il client può effettuare una richiesta di registrazione come nuovo giocatore, richiedere l'accesso al gioco (login), effettuare una mossa sul campo minato ed infine di uscire dal gioco.
+Si noti che i client fanno solo richieste di una determinata azione, ma è il server ad elaborare tale richiesta e rispondere con una risposta al client.
 
 
 
