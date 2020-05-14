@@ -42,6 +42,11 @@
         2. [Il thread playerThread](#server-module-player-thread)
     3. [Il programma client](#client-module)
         1. [Il thread menuThread](#client-module-menu-thread)
+    4. [Scenari e casi d'uso](#use-cases)
+        1. [Registrarsi come nuovo utente](#use-cases-register-client)
+        2. [Connettersi al gioco](#use-cases-login-client)
+        3. [Muoversi sul campo minato](#use-cases-move-player)
+        4. [Disconnettersi dal gioco](#use-cases-logout-client)
 
 ## Traccia del progetto <a name="introduction"></a>
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
@@ -902,4 +907,15 @@ Il menù principale offre tre voci di menù e sono:
 * > **2 - Login** Questa azione mostra il form di login.
 
 * > **9 - Exit** Questa azione semplicemente termina il programma.
+
+### Scenari e casi d'uso <a name="use-cases"></a>
+
+#### Registrarsi come nuovo utente <a name="use-cases-register-client"></a>
+
+#### Connettersi al gioco <a name="use-cases-login-client"></a>
+
+#### Muoversi sul campo minato <a name="use-cases-move-player"></a>
+
+#### Disconnettersi dal gioco <a name="use-cases-logout-client"></a>
+
 
