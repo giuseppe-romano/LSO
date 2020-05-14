@@ -3,7 +3,7 @@
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/minefield.jpg)
 
 ## Indice
-1. [Introduzione](#introduction)
+1. [Traccia del progetto](#introduction)
 2. [Istallazione](#installation)
     1. [Prerequisiti di sistema](#system-requirements)
     2. [Scaricare il codice sorgente](#source-code-download)
@@ -42,7 +42,7 @@
         2. [Il thread playerThread](#server-module-player-thread)
     3. [Il programma client](#client-module)
 
-## Introduzione <a name="introduction"></a>
+## Traccia del progetto <a name="introduction"></a>
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
 Il server posizionerà nella matrice mine in posizioni random. 
 
@@ -59,10 +59,13 @@ Non c'è un limite a priori al numero di utenti che si possono collegare con il 
 
 Il server dovrà supportare tutte le funzionalità descritte nella sezione relativa al client. All'avvio del server, sarà possibile specificare tramite riga di comando la porta TCP sulla quale mettersi in ascolto. Il server sarà di tipo concorrente, ovvero è in grado di servire più clients simultanemente. Durante il suo regolare funzionamento, il server effettuerà logging delle attività principali in un file apposito. Ad esempio, memorizzando data e ora di connessione dei client, il loro nome simbolico (se disponibile, altrimenti l'indirizzoIP), data e ora del raggiungimento della posizione finale.
 
+La traccia è disponibile al seguente indirizzo:
+<a href="http://wpage.unina.it/alberto.finzi/didattica/LSO/materiale/TracciaD-18.pdf">TracciaD-18.pdf</a>
+
 ## Istallazione <a name="installation"></a>
 
 ### Prerequisiti di sistema <a name="system-requirements"></a>
-Il programma **Minefield Game** è un programma scritto completamente in linguaggio C su piattaforma Unix pertanto, per poter compilare il programma a partire dal codice sorgente, si richiede di istallare alcuni tools e librerie di base.
+Il programma **Minefield Game** è un programma scritto completamente in linguaggio C su piattaforma Unix, pertanto, per poter compilare il programma a partire dal codice sorgente, si richiede di istallare alcuni tools e librerie di base.
 
 ```sh
 $ sudo apt-get install build-essential
@@ -90,10 +93,10 @@ $ cd myFolder
 $ git clone https://github.com/giuseppe-romano/LSO.git
 ```
 
-A termine, nella cartella *myFolder* dovresti trovare una cartella **LSO** nella quale vi sono tutti i sorgenti. I sorgenti sono suddivisi in tre sotto-cartelle:
-- **shared** contiene il codice condiviso tra il server ed il client; funzioni di logging, drawing etc etc
-- **server** contiene il codice del programma server
-- **client** contiene il codice del programma client
+A termine, nella cartella *myFolder* viene creata una cartella **LSO** nella quale vi sono tutti i sorgenti. I sorgenti sono suddivisi in tre sotto-cartelle:
+- **shared** contiene il codice condiviso tra il server ed il client; funzioni di logging, drawing etc etc.
+- **server** contiene il codice del programma server.
+- **client** contiene il codice del programma client.
 
 ###  Compilazione del server <a name="server-build"></a>
 Il codice sorgente del server risiede nella sotto-cartella **server**, per compilare quindi il server occorre eseguire i seguenti comandi:
@@ -112,14 +115,14 @@ $ make
 A termine, il make genera l'eseguibile **client** nella medesima cartella.
 
 ## Manuale d'uso <a name="user-guide"></a>
-In questa sezione vengono documentate tutte le funzionalità offerte dal gioco **MineField**, il gioco è suddiviso in due programmi distinti il server ed il client. Il manuale d'uso ha lo scopo di fornire indicazioni all'utente circa le funzionalità e gli scenari d'uso (principali ed alternativi/di errore).
+In questa sezione vengono documentate tutte le funzionalità offerte dal gioco **MineField**, il gioco è suddiviso in due programmi distinti il server ed il client. Il manuale d'uso ha lo scopo di fornire indicazioni all'utente circa le funzionalità e gli scenari d'uso che si possono intraprendere.
 
 ### Manuale d'uso del server <a name="user-guide-server"></a>
 Il programma server è il programma principale del gioco, esso offre una serie di servizi a tutti i client che vogliono connettersi e provare a sfidare la sorte giocando una partita sul campo minato. 
-Il server è il detentore delle regole del gioco, ogni azione del client viene dapprima vagliata dal server per poi renderla effettiva ed eventualmente notificarla in broadcast agli altri clients collegati al gioco.
+Il server è il detentore delle regole del gioco, ogni azione del client viene inviata sotto forma di richiesta e, se questi viene accettata dal server, viene poi resa effettiva ed eventualmente notificata in broadcast agli altri clients collegati al gioco.
 
 #### Avvio del server <a name="start-server"></a>
-Prima di poter avviare il server è necessario compilare il codice sorgente e generare l'eseguibile, per compilare seguire i passi descritti nella sezione [Compilazione del server.](#server-build)
+Prima di poter avviare il server è necessario compilare il codice sorgente e generare il programma eseguibile, per la compilazione seguire i passi descritti nella sezione [Compilazione del server.](#server-build)
 
 Per avviare il server con i parametri di default, eseguire il seguente comando:
 ```sh
@@ -127,12 +130,13 @@ $ cd myFolder/LSO/server
 $ ./server
 ```
 Di default il server si mette in ascolto sulla porta **8000** e logga tutte le operazioni nel file **server.log**. 
-Qualora si avesse la necessità di avviare il server su una porta diversa e/o voler scrivere il file log in un'altra locazione è possibile specificare questi parametri in fase di avvio, come ad esempio:
+Qualora si avesse la necessità di avviare il server su una porta diversa e/o voler scrivere il file di log in un'altra locazione è possibile specificare questi parametri in fase di avvio, come nel seguente esempio:
 ```sh
 $ cd myFolder/LSO/server
 $ ./server --port 1234 --log another/location/file.log
 ```
-In fase di avvio il server mostra un menù interattivo a sinistra e la matrice del campo minato con una sessione di gioco già avviata. Nella schermata del server, le mine sul campo minato sono visibili e marcate con una X di colore rosso.
+
+In fase di avvio il server mostra un menù interattivo a sinistra e la matrice del campo minato con una sessione di gioco già avviata. Nella schermata del server, e solo per il server, le mine sul campo minato sono visibili e marcate con una X di colore rosso.
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/server-main.jpg)
 
@@ -144,7 +148,7 @@ Per avviare una nuova sessione di gioco, digitare **1** e premere *INVIO*.
 Qualora vi fossero giocatori sul campo minato, questi verranno riposizionati sulla prima colonna in maniera casuale e potranno continuare a giocare nella nuova sessione di gioco.
 
 #### Visualizza la lista dei giocatori <a name="show-players-list"></a>
-Il server può in qualsiasi momento visualizzare la lista dei giocatori registrati e quelli che sono connessi alla sessione di gioco.
+Il server può in qualsiasi momento visualizzare la lista dei giocatori registrati e quelli che sono correntemente connessi alla sessione di gioco.
 Per visualizzare la lista dei giocatori, digitare **2** e premere *INVIO*.
 
 Il sistema mostra il seguente sotto menù :
@@ -168,7 +172,7 @@ Per terminare il server, dal menù principale, digitare **9** e premere *INVIO*.
 Il programma client è il programma utilizzato dai giocatori, esso fornisce diverse funzionalità per registrarsi al sito, effettuare il login/logout e di giocare la partita.
 
 #### Avvio del client <a name="start-client"></a>
-Prima di poter avviare il client è necessario compilare il codice sorgente e generare l'eseguibile, per compilare seguire i passi descritti nella sezione [Compilazione del client.](#client-build)
+Prima di poter avviare il client è necessario compilare il codice sorgente e generare il programma eseguibile, per la compilazione seguire i passi descritti nella sezione [Compilazione del client.](#client-build)
 
 Per avviare il client occorre specificare alcuni parametri di connessione sulla riga di comando:
 ```sh
@@ -215,16 +219,16 @@ Scegliere il colore con il quale essere visualizzato sul campo minato e premere 
 
 Digitare il proprio simbolo formato da un singolo carattere e premere *INVIO*.
 
-Al termine, il sistema ritorna al menù principale mostrando un mesaggio di notifica sullo stato della registrazione appena effettuata. Se la registrazione ha avuto successo allora viene mostrata la seguente schermata:
+Al termine, il sistema ritorna al menù principale mostrando un messaggio di notifica sullo stato della registrazione appena effettuata. Se la registrazione ha avuto successo allora viene mostrata la seguente schermata:
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-registration-done.jpg)
 
-Se invece la registrazione è fallita magari perchè l'utente risulta già registrato allora il sistema mostra la seguente schermata:
+Se invece la registrazione è fallita, magari perchè l'utente risulta già registrato, allora il sistema mostra la seguente schermata:
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-registration-failed.jpg)
 
 #### Accedere al gioco <a name="login"></a>
-Per accedere al gioco occorre essere registrati al sito, se non sei ancora registrato allora vai alla sezione [Registrarsi come nuovo utente.](#register)
+Per accedere al gioco occorre essere registrati al sito, per la registrazione si veda la sezione [Registrarsi come nuovo utente.](#register)
 
 Per effettuare l'accesso, dal menù principale digitare **2** e premere *INVIO*. Il sistema mostra una nuova schermata interattiva in cui viene chiesto di digitare il nome utente e la password forniti in fase di registrazione:
 
@@ -246,9 +250,9 @@ Inoltre, se la login fallisce, il sistema ritorna al menù principale con un mes
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-failed.jpg)
 
 #### Giocare una partita <a name="play-game"></a>
-Per giocare una partita occorre dapprima effettuare la login, se non si è già loggati si prega di seguire la procedura descritta nella sezione [Accedere al gioco.](#login)
+Per giocare una partita occorre dapprima effettuare l'accesso al gioco, per l'accesso si veda la sezione [Accedere al gioco.](#login)
 
-Una volta effettuata la login, il sistema mostra la schermata di gioco con il campo minato.
+Una volta effettuato l'accesso, il sistema mostra la schermata di gioco con il campo minato.
 
 ![](https://github.com/giuseppe-romano/LSO/raw/master/doc-images/client-login-done.jpg)
 
@@ -259,7 +263,7 @@ Dal menù di gioco è possibile scegliere una tra le quattro direzioni possibili
 > * Premere **3** e *INVIO* per spostarsi verso il basso &darr;
 > * Premere **4** e *INVIO* per spostarsi verso sinistra &larr;
 
-Ad ogni spostamento di un qualsiasi giocatore vengono notificati tutti i giocatori circa l'esito dello spostamento, infatti uno spostamento può determinare le seguenti condizioni:
+Ad ogni spostamento di un qualsiasi giocatore, tutti gli altri giocatori vengono notificati circa l'esito dello spostamento, infatti uno spostamento può determinare le seguenti condizioni:
 
 > * Il giocatore si sposta con successo senza toccare alcun ostacolo e/o bomba. In tal caso tutti i giocatori vengono notificati con il messaggio: 
 ```html
@@ -285,7 +289,7 @@ Per terminare il client, dal menù principale, digitare **9** e premere *INVIO*.
 In questa sezione vengono descritte le caratteristiche tecniche del programma, con particolare dettaglio sul protocollo di comunicazione utilizzato tra il server e i clients. 
 
 ### Il modulo shared <a name="shared-module"></a>
-Il modulo **shared** è il modulo condiviso tra il server ed il client, esso contiene alcune librerie di utilità comuni atte a svolgere quei compiti supporto al core business dell'applicazione. Il modulo contiene tre librerie distinte e sono:
+Il modulo **shared** è il modulo condiviso tra il server ed il client, esso contiene alcune librerie di utilità comuni atte a svolgere quei compiti di supporto al core business dell'applicazione. Il modulo contiene tre librerie distinte e sono:
 
 1. **logging**.h|c La libreria che gestisce la scrittura del file di log, essa fornisce alcune funzioni per il logging con diversi livelli di verbosità.
 
@@ -294,7 +298,7 @@ Il modulo **shared** è il modulo condiviso tra il server ed il client, esso con
 3. **serial**.h|c La libreria che implementa il protocollo di comunicazione tra server e client, essa implementa tutte le regole di serializzazione e deserializzazione dei messaggi scambiati sulla rete.
 
 #### La libreria logging <a name="shared-module-logging"></a>
-Questa libreria è scritta in maniera tale da mascherare tutte le operazioni di basso livello concernenti la scrittura del log in un apposito file. Essa utilizza un pattern di logging formato dal timestamp, il livello di verbosità, il contesto in cui l'operazione si è verificata ed il messaggio che descrive l'operazione. 
+Questa libreria è scritta in maniera tale da mascherare tutte le operazioni di basso livello concernenti la scrittura del log in un apposito file. Essa utilizza un pattern di logging formato dal timestamp, il livello di verbosità, il contesto in cui l'operazione si è verificata ed il messaggio che descrive l'operazione stessa. 
 Il pattern è il seguente:
 ```c
 "[TIMESTAMP][LOG LEVEL] - [CATEGORY] - MESSAGE"
@@ -306,7 +310,7 @@ esempi:
 
 Il file header definisce le seguenti funzioni:
 
-* > La funzione di inizializzazione del file di log, il parametro **filename** è il percorso assoluto (o relativo) al file di logging. La funzione apre il file in modalità *append* allo scopo di preservare il log pre-esistente.
+* > La funzione di inizializzazione del file di log, il parametro **filename** è il percorso assoluto (o relativo) al file di logging. La funzione apre il file in modalità *append* allo scopo di preservare eventuali logs pre-esistenti.
 ```c
 void initLogFile(char* filename);
 ```
@@ -326,7 +330,7 @@ void warn(char* category, char* message);
 void error(char* category, char* message);
 ```
 
-Oltre alle funzioni sopracitate, la libreria mette a disposizione anche funzione che fungono da scorciatoia nel senso che sono relative ad una ben specifica categoria. Come di seguito riportate, vediamo le funzioni relative alle categorie **MAIN**, **SERIAL**, **PLAYER**, **PROTOCOL**, **GAME** e **MENU**.
+Oltre alle funzioni sopracitate, la libreria mette a disposizione anche funzioni che fungono da scorciatoia nel senso che sono relative ad una ben specifica categoria. Come di seguito riportate, vediamo le funzioni relative alle categorie **MAIN**, **SERIAL**, **PLAYER**, **PROTOCOL**, **GAME** e **MENU**.
 
 ```c
 void infoMain(char* message);
@@ -383,7 +387,7 @@ void printNotificationMessage(int notificationStatus, char *notificationMessage)
 
 #### La libreria serial <a name="shared-module-serial"></a>
 Questa libreria rappresenta il fondamento principale della comunicazione tra il server ed il client, essa implementa un vero e proprio protocollo di comunicazione e definisce tutte le regole di marshalling e unmarshalling da e verso le strutture dati utilizzate dal sistema.
-In questa libreria vengono definite tutte le strutture dati ed il modo in cui queste devono essere serializzate allo scopo di poter inviare i messaggi via rete alla controparte.
+In questa libreria vengono definite tutte le strutture dati ed il modo in cui queste devono essere serializzate allo scopo di poter inviare le strutture dati come messaggi di testo via rete alla controparte.
 
 Le strutture dati sono le seguenti:
 
@@ -473,7 +477,7 @@ La funzione **serializeGame** prende in input la struttura dati Game e serializz
 GAME<rows=20|cols=30|player={x=0,y=6,symbol=G,color=red,user=user1,}|player={x=12,y=16,symbol=H,color=blue,user=user2,}>
 ```
 
-*ATTENZIONE:* La serializzazione ignora la lista delle bombe poichè queste non devono essere nota al client.
+*ATTENZIONE:* La serializzazione ignora la lista delle bombe poichè le loro posizioni non devono essere note al client.
 
 Nell'esempio di cui sopra, il gioco è formato da 20 righe, 30 colonne e vi sono 2 giocatori posizionati nelle rispettive coordinate.
 
@@ -507,7 +511,7 @@ La funzione **serializeRemovedCell** prende in input la struttura dati Cell e se
 REMOVED_CELL<user=user1|x=0|y=23|symbol=S|color=blue>
 ```
 
-Nell'esempio di cui sopra, un nuovo giocatore **user1** è stato rimosso dal gioco corrente.
+Nell'esempio di cui sopra, il giocatore **user1** è stato rimosso dal gioco corrente.
 
 La funzione **deserializeRemovedCell** invece effettua l'operazione inversa ovvero prende in input una stringa ed alloca una struct Cell contenente tutte le informazioni contenute nel formato seriale.
 
@@ -787,36 +791,9 @@ void *playerThreadFunc(void *vargp)
 ```
 
 Si noti che il ciclo while annidato gestice tutti i possibili messaggi inviati dal client, infatti il client può effettuare una richiesta di registrazione come nuovo giocatore, richiedere l'accesso al gioco (login), effettuare una mossa sul campo minato ed infine di uscire dal gioco.
-Si noti che i client fanno solo richieste di una determinata azione, ma è il server ad elaborare tale richiesta e rispondere con una risposta al client.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Inoltre, appena ricevuto un messaggio testuale dal client, questi viene deserializzato allo scopo di ottenere la corrispondente struttura dati con le informazioni relative a tale richiesta.
 
 
 ### Il programma client <a name="client-module"></a>
+Hello client
 
