@@ -41,6 +41,7 @@
         1. [Il thread menuThread](#server-module-menu-thread)
         2. [Il thread playerThread](#server-module-player-thread)
     3. [Il programma client](#client-module)
+        1. [Il thread menuThread](#client-module-menu-thread)
 
 ## Traccia del progetto <a name="introduction"></a>
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
@@ -60,7 +61,7 @@ Non c'è un limite a priori al numero di utenti che si possono collegare con il 
 Il server dovrà supportare tutte le funzionalità descritte nella sezione relativa al client. All'avvio del server, sarà possibile specificare tramite riga di comando la porta TCP sulla quale mettersi in ascolto. Il server sarà di tipo concorrente, ovvero è in grado di servire più clients simultanemente. Durante il suo regolare funzionamento, il server effettuerà logging delle attività principali in un file apposito. Ad esempio, memorizzando data e ora di connessione dei client, il loro nome simbolico (se disponibile, altrimenti l'indirizzoIP), data e ora del raggiungimento della posizione finale.
 
 La traccia è disponibile al seguente indirizzo:
-<a href="http://wpage.unina.it/alberto.finzi/didattica/LSO/materiale/TracciaD-18.pdf">TracciaD-18.pdf</a>
+<a href="http://wpage.unina.it/alberto.finzi/didattica/LSO/materiale/TracciaD-18.pdf" target=”_blank”>TracciaD-18.pdf</a>
 
 ## Istallazione <a name="installation"></a>
 
@@ -707,7 +708,7 @@ Il menù principale offre tre voci di menù e sono:
 
 * > **2 - List players** Questa azione indirizza l'utente nel sotto-menù di visualizzazione dei giocatori registrati e/o connessi.
 
-* > **9 - Exit** Questa azione semplicemente termina l'azione e tutti i clients connessi verranno notificati.
+* > **9 - Exit** Questa azione semplicemente termina il programma server notificanfo i clients connessi.
 
 
 #### Il thread playerThread <a name="server-module-player-thread"></a>
@@ -795,5 +796,110 @@ Inoltre, appena ricevuto un messaggio testuale dal client, questi viene deserial
 
 
 ### Il programma client <a name="client-module"></a>
-Hello client
+Il client è il programma che comunica con il server, esso viene utilizzato dal giocatore che connettersi al server e giocare la partita sul campo minato.
+Parimenti al server, in fase di avvio esso attiva sin da subito un thread (chiamato **menuThread**) il quale ha il compito di interagire con l'input utente e di attuare i comandi impartiti da menù. Si è reso necessario gestire il menù con un thread dedicato per far sì che l'utente possa in qualsiasi momento processare l'input utente.
+
+Di seguito il frammento di codice che crea il thread:
+```c
+//Creates a thread responsible for the menu console.
+pthread_create(&menu_thread_id, NULL, menuThreadFunc, NULL);
+```
+
+Dopo avere creato il thread **menuThread**, il programma main si mette in ascolto sul socket di comunicazione con il server, appena ricevuto il messaggio questi viene deserializzato e processato. 
+
+Di seguito il frammento di codice:
+```c
+int serverAlive = 1;
+while(serverAlive)
+{
+    memset(server_message, '\0', 2000);
+    //Read the message from the server into the buffer
+    if(recv(serverSocket, server_message, 2000, 0) <= 0)
+    {
+        warnMain("Connection closed. The server cut off!");
+        printNotificationMessage(-1, "Connection closed. The server cut off!\n");
+        serverAlive = 0;
+    }
+    else
+    {
+        AuthenticationResponse *authenticationResponse = NULL;
+        MovePlayerResponse *movePlayerResponse = NULL;
+        Game *game = NULL;
+        Cell *cell = NULL;
+
+        sprintf(logMessage, "Complete message from server: '%s'", server_message);
+        infoMain(logMessage);
+
+        //The server message can contain multiple messages, so it will be splitted
+        char *buffer = strdup(server_message);
+        char *message;
+        while ((message = strsep(&buffer, "\n")) != NULL)
+        {
+            if(strlen(message) > 0)
+            {
+                sprintf(logMessage, "Processing server message : '%s'", message);
+                infoMain(logMessage);
+            }
+
+            //The server sent a register response
+            if((authenticationResponse = deserializeRegisterResponse(message)) != NULL)
+            {
+                ....
+            }
+            //The server sent a login response
+            else if((authenticationResponse = deserializeLoginResponse(message)) != NULL)
+            {
+                ....
+            }
+            //The server sent a move player response
+            else if((movePlayerResponse = deserializeMovePlayerResponse(message)) != NULL)
+            {
+                ....
+            }
+            //The server sent a new game
+            else if((game = deserializeGame(message)) != NULL)
+            {
+                ....
+            }
+            //The server sent an added player
+            else if((cell = deserializeAddedCell(message)) != NULL)
+            {
+                ....
+            }
+            //The server sent a removed player
+            else if((cell = deserializeRemovedCell(message)) != NULL)
+            {
+                ....
+            }
+        }
+    }
+```
+
+#### Il thread menuThread <a name="client-module-menu-thread"></a>
+E' il thread che gestisce la visualizzazione dei menù ed interagisce con l'input dell'utente, inoltre esso è responsabile anche degli aggiornamenti grafici sul campo minato (come ad esempio: lo spostamento di un qualsiasi giocatore).
+In fase di avvio, esegue le seguenti azioni:
+
+* > Disegna il titolo del programma client.
+* > Mostra il menù principale.
+
+Di seguito è riportato il codice della funzione di avvio del thread.
+
+```c
+void *menuThreadFunc(void *vargp)
+{
+    drawClientTitle();
+    showMainMenu();
+    exit(1);
+}
+```
+
+Si noti la chiamata alla funzione **showMainMenu** la quale è di tipo bloccante e non permette che il thread termini. Infatti il menù, essendo interattivo, è sempre in attesa di ricevere l'input dall'utente.
+
+Il menù principale offre tre voci di menù e sono:
+
+* > **1 - Register** Questa azione mostra il form di registrazione come nuovo utente.
+
+* > **2 - Login** Questa azione mostra il form di login.
+
+* > **9 - Exit** Questa azione semplicemente termina il programma.
 
