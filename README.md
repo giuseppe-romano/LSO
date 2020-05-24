@@ -909,10 +909,151 @@ Il menù principale offre tre voci di menù e sono:
 * > **9 - Exit** Questa azione semplicemente termina il programma.
 
 ### Scenari e casi d'uso <a name="use-cases"></a>
+In questa sezione vengono descritti gli scenari d'uso del sistema con particolare attenzione sugli aspetti implementativi e di comunicazione tra il client ed il server.
 
 #### Registrarsi come nuovo utente <a name="use-cases-register-client"></a>
+##### Pre-requisiti
+* Il client è connesso al server.
+
+##### Scenario principale di successo
+1. L'utente attiva la funzione di registrazione
+2. Il client mostra il form interattivo di registrazione e chiede di inserire il nome utente.
+3. L'utente digita il suo nome utente (nickname).
+4. Il client chiede di inserire la password.
+5. L'utente digita la password.
+6. Il client chiede si inserire il colore.
+7. L'utente digita il colore. Uno tra i seguenti: red, green, yellow, blue, magenta, ciano, white
+8. Il client chiede di inserire il simbolo.
+9. L'utente digita il carattere simbolo.
+10. Il client invia la richiesta di registrazione al server.
+```c
+void sendRegisterRequest(char *username, char *password, char *color, char *symbol)
+{
+    char *message = serializeRegisterRequest(username, password, color, symbol);
+    logMessage(message);
+
+    write(serverSocket, message, strlen(message));
+    infoProtocol("Message sent!");
+    free(message);
+}
+```
+11. Il server deserializza la richiesta ed effettua la registrazione del nuovo utente. Infine invia al client la risposta contenente lo stato e la descrizione.
+```c
+if((authenticationRequest = deserializeRegisterRequest(message)) != NULL)
+{
+    sprintf(logMessage, "RegisterAction: %s", message);
+    infoPlayer(logMessage);
+
+    int status = registerPlayer(authenticationRequest);
+    char *resMessage = "Registration done!";
+    if(status == 1)
+    {
+        resMessage = "Registration failed. Username already exists!";
+    }
+    sendRegisterResponse(clientSocket, status, resMessage);
+
+    free(authenticationRequest);
+    authenticationRequest = NULL;
+}
+```
+
+12. Il client riceve il messaggio di risposta **Registration done!**
+
+##### Post-condizioni
+L'utente risulta registrato nel database dei giocatori.
+
+##### Scenario alternativo 1: Il nome utente risulta già utilizzato
+1. L'utente esegue gli stessi passi dello scenario principale di successo indicando però un nome utente già utilizzato.
+2. Il server elabora la richiesta e riscontra l'impossibilità di registrare l'utente.
+3. Il client riceve il messaggio di risposta **Registration failed. Username already exists!**
 
 #### Connettersi al gioco <a name="use-cases-login-client"></a>
+##### Pre-requisiti
+* Il client è connesso al server.
+* L'utente è già registrato presso il server.
+
+##### Scenario principale di successo
+1. L'utente attiva la funzione di login
+2. Il client mostra il form interattivo di login e chiede di inserire il nome utente.
+3. L'utente digita il suo nome utente (nickname).
+4. Il client chiede di inserire la password.
+5. L'utente digita la password.
+6. Il client invia la richiesta di login al server.
+```c
+void sendLoginRequest(char *username, char *password)
+{
+    char *message = serializeLoginRequest(username, password);
+    logMessage(message);
+
+    write(serverSocket, message, strlen(message));
+    infoProtocol("Message sent!");
+    free(message);
+}
+```
+7. Il server deserializza la richiesta ed effettua il logined invia al client la risposta contenente lo stato e la descrizione. Inoltre aggiunge il giocatore al gioco corrente in una posizione random sulla prima colonna e notifica a tutti gli altri giocatori la posizione del nuovo giocatore.
+```c
+if((authenticationRequest = deserializeLoginRequest(message)) != NULL)
+{
+    sprintf(logMessage, "LoginAction: %s", message);
+    infoPlayer(logMessage);
+
+    int status = loginPlayer(authenticationRequest);
+    char *resMessage = "Login succeeded!";
+    if(status == 1)
+    {
+        resMessage = "Login failed. Username and/or password incorrect!";
+    }
+    else if(status == 2)
+    {
+        resMessage = "Login failed. Another user logged in with same credentials!";
+    }
+    sprintf(logMessage, "Login: %s", resMessage);
+    infoPlayer(logMessage);
+
+    sendLoginResponse(clientSocket, status, resMessage);
+
+    //If login correct then the player joins the current game (if any)
+    if(status == 0)
+    {
+        Game *game = getCurrentGame();
+        if(game != NULL)
+        {
+            Player *connectedPlayer = getConnectedPlayerByUsername(authenticationRequest->username);
+
+            Cell *playerCell = generateRandomPlayerCell(connectedPlayer);
+
+            //Send first the game without the new player
+            sendGame(clientSocket, game);
+
+            //Then, add the player to the game
+            addPlayer(game, playerCell);
+
+            //And finally broadcasts to all connected players about the new player just joined
+            broadcastAddedPlayer(playerCell);
+
+            currentPlayerCell = playerCell;
+            currentConnectedPlayer = connectedPlayer;
+
+            drawMineField(game);
+            setCursorToOffset();
+        }
+    }
+    free(authenticationRequest);
+    authenticationRequest = NULL;
+}
+```
+##### Post-condizioni
+Il giocatore ha avuto accesso al campo di gioco e può giocare la partita.
+
+##### Scenario alternativo 1: Il nome utente e/o la password sono errati.
+1. L'utente esegue gli stessi passi dello scenario principale di successo indicando però il nome utente e/o la password errati.
+2. Il server elabora la richiesta e verifica l'errore.
+3. Il client riceve il messaggio di risposta **Login failed. Username and/or password incorrect!**
+
+##### Scenario alternativo 1: Le credenziali sono già in uso da altro client.
+1. L'utente esegue gli stessi passi dello scenario principale di successo indicando però le credenziali già in uso da altro client. Caso tipico di controllo di doppia autenticazione.
+2. Il server elabora la richiesta e verifica l'errore.
+3. Il client riceve il messaggio di risposta **Login failed. Another user logged in with same credentials!**
 
 #### Muoversi sul campo minato <a name="use-cases-move-player"></a>
 
