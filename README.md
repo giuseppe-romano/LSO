@@ -43,10 +43,10 @@
     3. [Il programma client](#client-module)
         1. [Il thread menuThread](#client-module-menu-thread)
     4. [Scenari e casi d'uso](#use-cases)
-        1. [Registrarsi come nuovo utente](#use-cases-register-client)
-        2. [Connettersi al gioco](#use-cases-login-client)
-        3. [Muoversi sul campo minato](#use-cases-move-player)
-        4. [Disconnettersi dal gioco](#use-cases-logout-client)
+        1. [Caso d'uso 1: Registrarsi come nuovo utente](#use-cases-register-client)
+        2. [Caso d'uso 2: Connettersi al gioco](#use-cases-login-client)
+        3. [Caso d'uso 3: Muoversi sul campo minato](#use-cases-move-player)
+        4. [Caso d'uso 4: Disconnettersi dal gioco](#use-cases-logout-client)
 
 ## Traccia del progetto <a name="introduction"></a>
 Il server manterrà una rappresentazione dell'ambiente in cui verranno posizionati delle mine. L'ambiente sia rappresentato da una matrice in cui gli utenti si potranno spostare di un passo alla volta nelle quattro direzioni: **S**, **N**, **E**, **O**. 
@@ -911,18 +911,18 @@ Il menù principale offre tre voci di menù e sono:
 ### Scenari e casi d'uso <a name="use-cases"></a>
 In questa sezione vengono descritti gli scenari d'uso del sistema con particolare attenzione sugli aspetti implementativi e di comunicazione tra il client ed il server.
 
-#### Registrarsi come nuovo utente <a name="use-cases-register-client"></a>
+#### Caso d'uso 1: Registrarsi come nuovo utente <a name="use-cases-register-client"></a>
 ##### Pre-requisiti
 * Il client è connesso al server.
 
 ##### Scenario principale di successo
-1. L'utente attiva la funzione di registrazione
+1. L'utente attiva la funzione di registrazione.
 2. Il client mostra il form interattivo di registrazione e chiede di inserire il nome utente.
 3. L'utente digita il suo nome utente (nickname).
 4. Il client chiede di inserire la password.
 5. L'utente digita la password.
 6. Il client chiede si inserire il colore.
-7. L'utente digita il colore. Uno tra i seguenti: red, green, yellow, blue, magenta, ciano, white
+7. L'utente digita il colore. Uno tra i seguenti: **red**, **green**, **yellow**, **blue**, **magenta**, **ciano**, **white**
 8. Il client chiede di inserire il simbolo.
 9. L'utente digita il carattere simbolo.
 10. Il client invia la richiesta di registrazione al server.
@@ -967,13 +967,13 @@ L'utente risulta registrato nel database dei giocatori.
 2. Il server elabora la richiesta e riscontra l'impossibilità di registrare l'utente.
 3. Il client riceve il messaggio di risposta **Registration failed. Username already exists!**
 
-#### Connettersi al gioco <a name="use-cases-login-client"></a>
+#### Caso d'uso 2: Connettersi al gioco <a name="use-cases-login-client"></a>
 ##### Pre-requisiti
 * Il client è connesso al server.
 * L'utente è già registrato presso il server.
 
 ##### Scenario principale di successo
-1. L'utente attiva la funzione di login
+1. L'utente attiva la funzione di login.
 2. Il client mostra il form interattivo di login e chiede di inserire il nome utente.
 3. L'utente digita il suo nome utente (nickname).
 4. Il client chiede di inserire la password.
@@ -1055,8 +1055,132 @@ Il giocatore ha avuto accesso al campo di gioco e può giocare la partita.
 2. Il server elabora la richiesta e verifica l'errore.
 3. Il client riceve il messaggio di risposta **Login failed. Another user logged in with same credentials!**
 
-#### Muoversi sul campo minato <a name="use-cases-move-player"></a>
+#### Caso d'uso 3: Muoversi sul campo minato <a name="use-cases-move-player"></a>
+##### Pre-requisiti
+* Il client è connesso al server.
+* L'utente è già registrato presso il server.
+* L'utente ha già effettuato il login.
 
-#### Disconnettersi dal gioco <a name="use-cases-logout-client"></a>
+##### Scenario principale di successo
+1. Il giocatore digita **1** (spostamento verso l'alto) oppure **2** (spostamento verso destra) oppure **3** (spostamento verso il basso) oppure **4** (spostamento verso sinistra)
+2. Il client invia la richiesta di spostamento del giocatore.
+```c
+void sendMovePlayerRequest(Cell *player, int direction)
+{
+    char *message = serializeMovePlayerRequest(player, direction);
+    logMessage(message);
 
+    write(serverSocket, message, strlen(message));
+    infoProtocol("Message sent!");
+    free(message);
+}
+```
+3. Il server elabora la richiesta ed effettua lo spostamento sul campo di gioco. Inoltre notifica a tutti gli altri giocatori circa l'avvenuto spostamento. Infine ridisegna la matrice del campo di gioco.
+```c
+else if((movePlayerRequest = deserializeMovePlayerRequest(message)) != NULL)
+{
+    char str[2100];
+    sprintf(str, "MovePlayerAction: %s", message);
+    infoPlayer(str);
 
+    Game *game = getCurrentGame();
+    int status = movePlayer(game, movePlayerRequest->player, movePlayerRequest->direction);
+    Cell *playerCell = getPlayerByUsername(game, movePlayerRequest->player->user);
+
+    if(status == ERR_PLAYER_HIT_BOMB)
+    {
+        //The player blew up, removing
+        removePlayer(game, playerCell);
+
+        //Move back to the first column to retry
+        playerCell = generateRandomPlayerCell(currentConnectedPlayer);
+        addPlayer(game, playerCell);
+
+    }
+
+    if(status != ERR_CELL_BUSY)
+    {
+        broadcastPlayerMoved(playerCell, status);
+    }
+
+    //If the user won the game then a new game gets generated and notified to all connected players
+    if(status == ERR_USER_WIN_GAME)
+    {
+        game = generateNewGame();
+        broadcastNewGame(game);
+    }
+
+    drawMineField(game);
+    setCursorToOffset();
+
+    free(movePlayerRequest);
+    movePlayerRequest = NULL;
+}
+```
+4. Ogni client connesso alla partita viene notificato con il messaggio: **The player 'nome' (simbolo) moved with success!**
+
+##### Post-condizioni
+Il giocatore ha effettuato lo spostamento sul campo di gioco.
+
+##### Scenario alternativo 1: Il giocatore colpisce una bomba.
+1. L'utente esegue gli stessi passi dello scenario principale di successo.
+2. Il server elabora la richiesta e verifica che in quella locazione vi è una bomba, quindi rimuove il giocatore dal gioco e lo ricolloca in maniera random sulla prima colonna e notifica a tutti i giocatori l'evento.
+3. Il client riceve il messaggio di risposta **The player 'nome' (simbolo) hit a bomb. He blew up!**
+
+##### Scenario alternativo 2: Il giocatore si sposta su una locazione già occupata da un altro giocatore.
+1. L'utente esegue gli stessi passi dello scenario principale di successo.
+2. Il server elabora la richiesta e verifica che in quella locazione vi è un altro giocatore, quindi annulla la richiesta ed il giocatore resta sempre nella medesima posizione.
+
+##### Scenario alternativo 3: Il giocatore vince la partita.
+1. L'utente esegue gli stessi passi dello scenario principale di successo.
+2. Il server elabora la richiesta ed effettua lo spostamento nella direzione indicata. Inoltre, con tale spostamento, il giocatore raggiunge una qualsiasi locazione dell'ultima colonna e quindi vince la partita.
+3. Il server notifica a tutti i giocatori che il giocatore **xxx** ha vinto la partita.
+4. Il server genera una nuova partita, posiziona in maniera random tutti i giocatori sulla prima colonna e notifica a questi la nuova partita.
+5. Il client riceve il messaggio di risposta **The player 'nome' (simbolo) won the game!**
+
+#### Caso d'uso 4: Disconnettersi dal gioco <a name="use-cases-logout-client"></a>
+##### Pre-requisiti
+* Il client è connesso al server.
+* L'utente è già registrato presso il server.
+* L'utente ha già effettuato il login.
+
+##### Scenario principale di successo
+1. Il giocatore attiva la funzione di logout.
+2. Il client invia la richiesta di logout.
+```c
+void sendLogoutRequest(char *username)
+{
+    char *message = serializeLogoutRequest(username);
+    logMessage(message);
+
+    write(serverSocket, message, strlen(message));
+    infoProtocol("Message sent!");
+    free(message);
+}
+```
+3. Il server elabora la richiesta, rimuove il giocatore dalla lista degli utenti connessi, rimuove il giocatore dal campo di gioco ed infine notifica a tutti gli altri giocatori circa l'uscita dal gioco del giocatore in questione. 
+```c
+else if((authenticationRequest = deserializeLogoutRequest(message)) != NULL)
+{
+    logoutPlayer(authenticationRequest);
+
+    Game *game = getCurrentGame();
+    //remove the player from the game
+    removePlayer(game, currentPlayerCell);
+
+    //And finally broadcasts to all connected players about the removed player
+    broadcastRemovedPlayer(currentPlayerCell);
+
+    drawMineField(game);
+    setCursorToOffset();
+
+    currentPlayerCell = NULL;
+    currentConnectedPlayer = NULL;
+
+    free(authenticationRequest);
+    authenticationRequest = NULL;
+}
+```
+
+##### Post-condizioni
+Il giocatore ha effettuato il logout ed è ritornato al menù principale.
