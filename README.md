@@ -66,7 +66,7 @@ Non c'è un limite a priori al numero di utenti che si possono collegare con il 
 Il server dovrà supportare tutte le funzionalità descritte nella sezione relativa al client. All'avvio del server, sarà possibile specificare tramite riga di comando la porta TCP sulla quale mettersi in ascolto. Il server sarà di tipo concorrente, ovvero è in grado di servire più clients simultanemente. Durante il suo regolare funzionamento, il server effettuerà logging delle attività principali in un file apposito. Ad esempio, memorizzando data e ora di connessione dei client, il loro nome simbolico (se disponibile, altrimenti l'indirizzoIP), data e ora del raggiungimento della posizione finale.
 
 La traccia è disponibile al seguente indirizzo:
-<a href="http://wpage.unina.it/alberto.finzi/didattica/LSO/materiale/TracciaD-18.pdf" target=”_blank”>TracciaD-18.pdf</a>
+<a href="http://wpage.unina.it/alberto.finzi/didattica/LSO/materiale/TracciaD-18.pdf" target="_blank">TracciaD-18.pdf</a>
 
 ## Istallazione <a name="installation"></a>
 
