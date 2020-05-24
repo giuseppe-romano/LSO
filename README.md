@@ -1136,7 +1136,7 @@ Il giocatore ha effettuato lo spostamento sul campo di gioco.
 2. Il server elabora la richiesta ed effettua lo spostamento nella direzione indicata. Inoltre, con tale spostamento, il giocatore raggiunge una qualsiasi locazione dell'ultima colonna e quindi vince la partita.
 3. Il server notifica a tutti i giocatori che il giocatore **xxx** ha vinto la partita.
 4. Il server genera una nuova partita, posiziona in maniera random tutti i giocatori sulla prima colonna e notifica a questi la nuova partita.
-5. Il client riceve il messaggio di risposta **The player 'nome' (simbolo) won the game!**
+5. Il client riceve il messaggio di risposta **The player 'nome' (simbolo) won! Game restarted!**
 
 #### Caso d'uso 4: Disconnettersi dal gioco <a name="use-cases-logout-client"></a>
 ##### Pre-requisiti
