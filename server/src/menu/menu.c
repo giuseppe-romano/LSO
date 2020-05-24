@@ -226,19 +226,17 @@ void *menuThreadFunc(void *vargp)
     drawMineField(game);
 
     drawServerTitle();
-    showMainMenu();
+    showMainMenu(); //Blocking call
 
     infoMenu("Quitting Menu's thread...");
     infoMenu("Shutting down server socket...");
     shutdown(serverSocket, SHUT_RDWR);
 
-
     shutdownClientSockets();
-
 
     killPlayerThreads();
 
     infoMenu("Killing server...");
     kill(pid, SIGTERM);
-    exit(1);
+    exit(0);
 }

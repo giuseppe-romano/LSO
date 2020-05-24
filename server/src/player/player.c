@@ -381,7 +381,6 @@ void logoutPlayer(AuthenticationRequest *authenticationRequest)
     pthread_mutex_unlock(&loginPlayerMutex);
 }
 
-pthread_mutex_t authenticationMutex = PTHREAD_MUTEX_INITIALIZER;
 void *playerThreadFunc(void *vargp)
 {
     int clientSocket = *((int *)vargp);

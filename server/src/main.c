@@ -74,12 +74,7 @@ int main(int argc, char *argv[ ])
         exit(EXIT_FAILURE);
     }
     int t = 1;
-    setsockopt(serverSocket, SOL_SOCKET,SO_REUSEADDR, &t, sizeof(int));
-
-    pid_t pid = getpid();
-    char logMessage2[200];
-        sprintf(logMessage2, "PID %d", pid);
-        infoMain(logMessage2);
+    setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &t, sizeof(int));
 
     //Creates a thread responsible for the menu console.
     pthread_t menu_thread_id;
@@ -112,8 +107,6 @@ int main(int argc, char *argv[ ])
     //Loads the list of registered players (stored into a dedicated file)
     loadRegisteredPlayers("registered-players.db");
 
-    pthread_t tid;
-
     while(1)
     {
         infoMain("Listening for client connections...");
@@ -122,8 +115,9 @@ int main(int argc, char *argv[ ])
         newSocket = accept(serverSocket, (struct sockaddr *) &serverStorage, &addr_size);
 
         infoMain("New client connected, creating a thread");
-        //for each client request creates a thread and assign the client request to it to process
-        //so the main thread can entertain next request
+
+        pthread_t tid;
+        //for each client request creates a thread
         if( pthread_create(&tid, NULL, playerThreadFunc, &newSocket) != 0 )
         {
             errorMain("Failed to create thread\n");

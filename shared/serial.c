@@ -251,6 +251,10 @@ Game* deserializeGame(char *string)
     return game;
 }
 
+/**
+ * This function serializes the Cell struct to a string using the | (pipe) delimiter.
+ * Example: ADDED_CELL<user=user1|x=12|y=23|symbol=S|color=blue>
+ */
 char* serializeAddedCell(Cell *cell)
 {
     infoSerial("Serializing added cell...");
@@ -318,6 +322,10 @@ Cell* deserializeAddedCell(char *string)
     return cell;
 }
 
+/**
+ * This function serializes the Cell struct to a string using the | (pipe) delimiter.
+ * Example: REMOVED_CELL<user=user1|x=12|y=23|symbol=S|color=blue>
+ */
 char* serializeRemovedCell(Cell *cell)
 {
     infoSerial("Serializing removed cell...");
@@ -384,6 +392,10 @@ Cell* deserializeRemovedCell(char *string)
     return cell;
 }
 
+/**
+ * This function serializes the Player struct to a string using the | (pipe) delimiter.
+ * Example: user=user1|password=pwd|symbol=S|color=blue
+ */
 char* serializePlayer(Player *player)
 {
     char logging[2000];
@@ -440,6 +452,10 @@ Player* deserializePlayer(char *string)
     return player;
 }
 
+/**
+ * This function serializes the Player struct to a string using the | (pipe) delimiter.
+ * Example: MOVE_PLAYER<player={x=0,y=6,symbol=G,color=red,user=peppe}|direction=10>
+ */
 char* serializeMovePlayerRequest(Cell *player, int direction)
 {
     char logging[2000];
@@ -503,6 +519,10 @@ MovePlayerRequest* deserializeMovePlayerRequest(char *string)
    return action;
 }
 
+/**
+ * This function serializes the username and password to a string using the | (pipe) delimiter.
+ * Example: LOGIN<user=user1|password=pwd>
+ */
 char* serializeLoginRequest(char *username, char *password)
 {
     char logging[2000];
@@ -561,6 +581,10 @@ AuthenticationRequest* deserializeLoginRequest(char *string)
     return action;
 }
 
+/**
+ * This function serializes the username to a string using the | (pipe) delimiter.
+ * Example: LOGOUT<user=user1>
+ */
 char* serializeLogoutRequest(char *username)
 {
     char logging[2000];
@@ -613,6 +637,10 @@ AuthenticationRequest* deserializeLogoutRequest(char *string)
     return action;
 }
 
+/**
+ * This function serializes the username and password to a string using the | (pipe) delimiter.
+ * Example: REGISTER<user=user1|password=pwd|color=blue|symbol=S>
+ */
 char* serializeRegisterRequest(char *username, char *password, char *color, char *symbol)
 {
     char logging[2000];
@@ -681,6 +709,10 @@ AuthenticationRequest* deserializeRegisterRequest(char *string)
     return action;
 }
 
+/**
+ * This function serializes the username and password to a string using the | (pipe) delimiter.
+ * Example: REGISTER_RESPONSE<status=1|message=This is a message>
+ */
 char* serializeRegisterResponse(int status, char *message)
 {
     char logging[2000];
@@ -740,6 +772,10 @@ AuthenticationResponse* deserializeRegisterResponse(char *string)
     return action;
 }
 
+/**
+ * This function serializes the status code and the message to a string using the | (pipe) delimiter.
+ * Example: LOGIN_RESPONSE<status=1|message=This is a message>
+ */
 char* serializeLoginResponse(int status, char *message)
 {
     char logging[2000];
@@ -799,6 +835,10 @@ AuthenticationResponse* deserializeLoginResponse(char *string)
     return action;
 }
 
+/**
+ * This function serializes the Cell struct and the status to a string using the | (pipe) delimiter.
+ * Example: MOVE_PLAYER_RESPONSE<player={x=0,y=6,symbol=G,color=red,user=peppe,}>
+ */
 char* serializeMovePlayerResponse(Cell *player, int status)
 {
     char logging[2000];
